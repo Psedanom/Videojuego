@@ -57,7 +57,9 @@ What should the gameplay be like? What is the goal of the game, and what kind of
 
 ### **Mindset**
 
-What kind of mindset do you want to provoke in the player? Do you want them to feel powerful, or weak? Adventurous, or nervous? Hurried, or calm? How do you intend to provoke those emotions?
+Nuestro objetivo es que el jugador se sienta inmerso en un mundo cyberpunk donde quiera cobrar venganza a las dos facciones de la mafia, poniendo al jugador en situaciones en donde la planeación a futuro y la suerte juegan un rol grande para la supervivencia del personaje, este tiene que tomar decisiones para realizar sacrificios o tomar grandes riesgos que pueden arruinar el run. 
+Queremos que los jugadores sientan adrenalina y nervios al pasar a cada cuarto por no saber qué es lo que los depara en el siguiente cuarto, podría ser desde la vida que necesitaban para sobrevivir o el enemigo más fuerte del juego.
+
 
 ## _Technical_
 
