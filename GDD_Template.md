@@ -52,8 +52,17 @@ El objetivo principal del jugador es el de completar “runs” para avanzar en 
 
 
 ### **Gameplay**
+El gameplay de Dead Draw se estructura alrededor de un loop de decisiones cuarto por
+cuarto. Cada cuarto presenta al jugador un conjunto limitado de cartas que representan
+amenazas, recursos y oportunidades. El jugador debe elegir qué carta resolver y en qué
+orden, considerando tanto el impacto inmediato como las consecuencias a futuro. Al limpiar
+un cuarto, el jugador avanza al siguiente, donde el mazo se expande progresivamente y las
+decisiones se vuelven más complejas. Este proceso se repite hasta que el jugador muere o
+derrota al jefe correspondiente al tipo de run elegido.
+Aunque el loop es consistente, cada run se siente diferente debido a la variación en los
+mazos, la distribución de cartas y las decisiones tomadas por el jugador, reforzando la
+naturaleza roguelite del juego.
 
-What should the gameplay be like? What is the goal of the game, and what kind of obstacles are in the way? What tactics should the player use to overcome them?
 
 ### **Mindset**
 
