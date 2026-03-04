@@ -1,0 +1,22 @@
+#canvas {
+    background-image: url("fondocanvas.png");
+    grid-area: main;
+    
+}
+body {
+    background-color: White;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: hidden;
+    display:grid;
+    grid-template-rows: 10vh 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "header"
+        "main";
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+}
