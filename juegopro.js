@@ -102,7 +102,7 @@ class Game{
     }
 
     initObjects(){
-        for (let i = 0; i < 48;i++){
+        for (let i = 0; i < 8;i++){
             let card = new cards(0, 200, 112.5, 150, 1, "normal",1,false,false,true);
             this.cards.push(card);
         }
