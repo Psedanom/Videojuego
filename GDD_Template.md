@@ -76,12 +76,11 @@ Queremos que los jugadores sientan adrenalina y nervios al pasar a cada cuarto p
 
 ### **Screens**
 
-1. Title Screen
-    1. Options
-2. Level Select
-3. Game
- 3.fights
-4. End Credits
+1. Menu
+    1. Opciones
+2. mapa
+3. nivelespeleas()
+4. tienda
 
 _(example)_
 
