@@ -80,8 +80,7 @@ Queremos que los jugadores sientan adrenalina y nervios al pasar a cada cuarto p
     1. Options
 2. Level Select
 3. Game
-    1. Inventory
-    2. Assessment / Next Level
+ 3.fights
 4. End Credits
 
 _(example)_
@@ -147,12 +146,10 @@ _(example)_
 
 ### **Abstract Classes / Components**
 
-1. BasePhysics
-    1. BasePlayer
-    2. BaseEnemy
-    3. BaseObject
-2. BaseObstacle
-3. BaseInteractable
+1.game
+2.Health
+3.cards
+4.cubitos
 
 _(example)_
 
