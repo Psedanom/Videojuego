@@ -95,6 +95,78 @@ Las cartas podrán tener mejoras que dependiendo de la situación  pueden benefi
 
 Asimismo, habrá comodines que solo podrán conseguirse durante las runs. Estos otorgarán al jugador power-ups más poderosos que los que las cartas pueden llegar a tener. Sin embargo, el jugador deberá decidir qué comodín elegir, ya que habrá casos en los que los comodines contrarresten ciertas cartas o incluso a otros comodines.
 
+Loop principal.
+En cada cuarto el jugador se enfrentará a cuatro cartas extraídas del mazo. Cada carta representará un tipo de interacción diferente dependiendo de su palo, como enemigos, armas, vida u otros efectos especiales.
+El jugador deberá decidir cómo interactuar con cada carta según su tipo. Por ejemplo, puede enfrentarse a un enemigo, equipar un arma, recuperar vida o activar un efecto especial.
+Después de que el jugador interactúe con una carta, esta podrá ser descartada o mantenerse temporalmente si su efecto continúa activo, como en el caso de armas equipadas o modificadores.
+Una vez que el jugador haya resuelto las interacciones con las cartas del cuarto, las cartas restantes se descartan y se roban cuatro nuevas cartas, generando el siguiente cuarto.
+Este proceso se repite hasta que el jugador pierda toda su vida o complete la run, terminando así la partida.
+
+Baraja.
+El juego conatara con una baraja de poker clasica, se usaran las 52 cartas naturales de un deck.
+
+cuartos.
+El jugador avanzará a través de distintos cuartos. En cada cuarto deberá interactuar con las cartas disponibles y, conforme vaya eliminando cartas de su baraja, podrá progresar al siguiente cuarto. En cada uno de estos cuartos se repetirá el loop principal del juego.
+
+Elección de cuarto.
+En algunos casos, al terminar de interactuar con las cuatro cartas de un cuarto, el jugador podrá elegir a qué tipo de cuarto avanzar.
+Dependiendo de la situación, el juego podrá presentar la opción de ir a una tienda, a un cuarto de evento, o en algunos casos mostrar ambas opciones para que el jugador decida cuál tomar.
+Esta elección permitirá al jugador decidir si prefiere buscar beneficios, obtener comodines o continuar enfrentando mayores riesgos durante la run.
+
+Tienda.
+Durante algunas runs el jugador podrá encontrar una tienda. En estos cuartos el jugador podrá obtener comodines u otros beneficios que le ayuden a continuar avanzando durante la partida.
+La tienda ofrecerá distintas opciones que el jugador podrá elegir dependiendo de sus recursos y de la situación actual de la run.
+
+Cuartos de evento.
+Además de los cuartos normales, el jugador podrá encontrarse con cuartos especiales de evento. En estos cuartos el jugador podrá obtener comodines de forma aleatoria.
+Sin embargo, estos eventos no siempre beneficiarán al jugador. Algunos podrán otorgar comodines útiles, mientras que otros podrán aumentar significativamente la dificultad de la run o aplicar efectos negativos al jugador.
+
+Cartas jugables.
+Cada palo o casa definirá el comportamiento de la carta.
+
+Rombos: Estas cartas son elegibles como “Armas”, usables para poder pelear con las cartas enemigas.
+
+Corazones: Con esta carta el jugador podrá curarse cierta cantidad de daño. (nota: las cartas de cura solo podrán ser usadas una vez por cuarto)
+
+Picas: Estas cartas representarán a los enemigos. El jugador deberá enfrentarlas utilizando un arma o recibiendo daño directo.
+
+Tréboles: Estas cartas otorgarán efectos especiales o modificadores que podrán beneficiar o afectar al jugador dependiendo de la situación.
+
+Valor de las cartas.
+El valor numérico de cada carta definirá la intensidad de su efecto. En el caso de enemigos, el número representará el daño que pueden causar. Para armas o curaciones, el número indicará la cantidad de daño que se puede infligir o la cantidad de vida que se puede recuperar.
+
+Sistema de combate.
+Cuando el jugador decida enfrentarse a una carta enemiga, deberá utilizar una carta de arma o recibir el daño correspondiente. Si el jugador cuenta con un arma equipada, el valor del arma se utilizará para enfrentar al enemigo. Dependiendo de los valores de ambas cartas, el jugador podrá derrotar al enemigo o recibir daño.
+
+Equipamiento de armas.
+El jugador solo podrá tener un arma equipada a la vez. Al elegir una nueva carta de arma, el jugador deberá decidir si mantener la actual o reemplazarla por la nueva. El arma equipada podrá utilizarse para enfrentar cartas enemigas.
+
+Eliminación de cartas del mazo.
+A lo largo de la run, ciertas cartas podrán ser eliminadas del mazo. Esto permitirá que el jugador modifique gradualmente su baraja, cambiando las probabilidades de las cartas que aparecerán en los siguientes cuartos.
+
+Condición de derrota.
+El jugador perderá la partida cuando su vida llegue a cero. Cuando esto ocurra, la run terminará y el jugador deberá comenzar nuevamente.
+
+Progresión de dificultad.
+Conforme el jugador avance a través de los cuartos, las cartas que aparezcan podrán volverse más peligrosas. Esto aumentará el riesgo de cada decisión y obligará al jugador a administrar mejor sus recursos.
+
+Cuartos especiales.
+Cada cierta cantidad de cuartos aparecerá un cuarto especial que funcionará como un encuentro de jefe. En estos cuartos las reglas normales del juego se verán modificadas mediante atributos especiales que afectarán la forma en la que el jugador interactúa con las cartas.
+Estos atributos podrán alterar el comportamiento de los enemigos, armas o cartas de curación. Por ejemplo, los enemigos podrán ignorar parte del daño de las armas o ciertas cartas podrán tener menor efectividad.
+Estos encuentros obligarán al jugador a adaptarse a nuevas condiciones y utilizar mejor sus recursos para poder avanzar al siguiente cuarto.
+
+Mejoras permanentes.
+Al finalizar una run, el jugador podrá obtener mejoras permanentes que se mantendrán para las siguientes partidas. Estas mejoras permitirán facilitar el progreso del jugador a lo largo del juego.
+Las mejoras podrán aumentar la vida máxima del jugador, mejorar la calidad del mazo inicial o modificar ciertas mecánicas para hacer algunos encuentros más manejables.
+De esta forma, cada run permitirá al jugador fortalecer progresivamente sus capacidades y aumentar sus probabilidades de avanzar a cuartos más difíciles en futuras partidas.
+
+Comodines.
+Durante una run el jugador podrá obtener comodines. Estos funcionarán como cartas especiales que se agregarán temporalmente al mazo durante esa partida.
+Los comodines otorgarán efectos más poderosos que las cartas normales, como aumentar significativamente el daño contra enemigos o modificar ciertas mecánicas del juego.
+Sin embargo, los comodines no siempre beneficiarán completamente al jugador. En algunos casos podrán tener efectos negativos que acompañen a su poder. Por ejemplo, un comodín puede permitir al jugador causar x3 de daño a los enemigos, pero a cambio el jugador recibirá x2 de daño cuando sea atacado.
+Esto obligará al jugador a decidir cuidadosamente si tomar o no un comodín durante la run.
+
+
 ## _Level Design_
 
 ---
