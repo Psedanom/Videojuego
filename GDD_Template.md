@@ -86,7 +86,7 @@ _(example)_
 
 ### **Controls**
 
-El jugador solo interactuara con el jeugo por medio de su mouse ya sea para agarrar las cartas, para agarrar los comodines, para decidir donde poner las cartas y para seleccionar su nivel.
+El jugador solo interactuara con el juego por medio de su mouse ya sea para seleccionar las cartas y los comodines, para decidir donde poner las cartas y para seleccionar su nivel.
 
 ### **Mechanics**
 
@@ -103,9 +103,9 @@ Una vez que el jugador haya resuelto las interacciones con las cartas del cuarto
 Este proceso se repite hasta que el jugador pierda toda su vida o complete la run, terminando así la partida.
 
 Baraja.
-El juego conatara con una baraja de poker clasica, se usaran las 52 cartas naturales de un deck.
+El juego contará con una baraja de poker clasica, se usaran las 52 cartas naturales de un deck.
 
-cuartos.
+Cuartos.
 El jugador avanzará a través de distintos cuartos. En cada cuarto deberá interactuar con las cartas disponibles y, conforme vaya eliminando cartas de su baraja, podrá progresar al siguiente cuarto. En cada uno de estos cuartos se repetirá el loop principal del juego.
 
 Elección de cuarto.
