@@ -1,5 +1,5 @@
 #canvas {
-    background-image: url("fondocanvas.png");
+    background-image: url("../DeadDraw/assets/canvas/fondocanvas.png");
     grid-area: main;
     
 }
