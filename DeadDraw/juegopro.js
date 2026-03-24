@@ -3,9 +3,29 @@
 const canvasWidth = 800;
 const canvasHeight = 700;
 
+let oldTime =0;
+
 let ctx;
 let game;
 let terminado = false;
+
+class tiempo{
+    constructor(){
+        this.tiempolim = 300 * 1000;
+        this.time = 0;
+    }
+    
+    contador(deltatime){
+        this.time = deltatime;
+        this.tiempolim -= this.time;
+    }
+    draw(ctx){
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText("Tiempo restante " + Math.floor(this.tiempolim/1000), canvasWidth - 250, 15);
+    }
+}
 class HealthBar{
     constructor(x, y, width, height, maxHealth){
         this.x = x;
@@ -106,6 +126,7 @@ class Game{
             let card = new cards(0, 200, 112.5, 150, 1, "normal",1,false,false,true);
             this.cards.push(card);
         }
+        this.contador = new tiempo();
         this.armas = new cubitos(100,470,120,170);
         this.usadas = new cubitos(650,400,120,170);
         this.playerh = new HealthBar(15,15,100,20,20);
@@ -150,7 +171,8 @@ class Game{
             }
         });
     }
-    update(){
+    update(deltaTime){
+
         if(this.ctab <= 1){
             for(let card of this.cards ){
                 if(!card.used && card.inboard){
@@ -164,6 +186,7 @@ class Game{
         for(let card of this.cards ){
             card.update();
         }
+        this.contador.contador(deltaTime);
     } 
     draw(ctx){
         this.armas.draw(ctx);
@@ -190,12 +213,16 @@ class Game{
          }
         this.tabvas = false;
         terminado = true;
+        this.contador.draw(ctx);
     }
 }
-function drawScene() {
+function drawScene(newTime) {
+    let deltaTime = newTime-oldTime;
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     game.draw(ctx);
-    game.update();
+    game.update(deltaTime);
+    
+    oldTime = newTime;
     requestAnimationFrame(drawScene);
 }
 
