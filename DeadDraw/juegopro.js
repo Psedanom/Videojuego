@@ -9,6 +9,23 @@ let ctx;
 let game;
 let terminado = false;
 
+function shuffle(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}
+
+
 class tiempo{
     constructor(){
         this.tiempolim = 300 * 1000;
@@ -49,7 +66,7 @@ class HealthBar{
                          this.height -2);
     }
 }
-class cubitos{
+class Botones{
     constructor(x,y,width,height){
         this.x = x
         this.y = y;
@@ -69,7 +86,7 @@ class cubitos{
 }
 
 class cards {
-    constructor(x, y, width, height, number, type,scale,used,inboard,inma) {
+    constructor(x, y, width, height, number, type,scale,used,inboard,enMazo) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -79,21 +96,45 @@ class cards {
         this.scale = scale;
         this.used = used;
         this.inboard = inboard;
-        this.inma = inma;
+        this.enMazo = enMazo;
     }
     draw(ctx) {
-        ctx.fillStyle = "red";
+        if(this.type == "diamantes"){
+             ctx.fillStyle = "orange";
             ctx.fillRect(this.x,
                          this.y,
                          this.width * this.scale,
                          this.height* this.scale);
+        }
+        if(this.type == "treboles"){
+             ctx.fillStyle = "green";
+            ctx.fillRect(this.x,
+                         this.y,
+                         this.width * this.scale,
+                         this.height* this.scale);
+        }
+        if(this.type == "espadas"){
+             ctx.fillStyle = "black";
+            ctx.fillRect(this.x,
+                         this.y,
+                         this.width * this.scale,
+                         this.height* this.scale);
+        }
+        if(this.type == "corazones"){
+             ctx.fillStyle = "red";
+            ctx.fillRect(this.x,
+                         this.y,
+                         this.width * this.scale,
+                         this.height* this.scale);
+        }
     }
     contains(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
+    /*
     defx(x){
         this.x = x;
-    }
+    }*/
     update(){
         if (this.isHovered) {
             this.scale = 1.2;
@@ -107,6 +148,7 @@ class cards {
         this.used = true;
         
     }
+
 }
 class Game{
     constructor(canvas) {
@@ -115,21 +157,34 @@ class Game{
         this.initObjects();
         this.canvas = canvas;
         this.clicked = false;
-        this.cnt = 0;
-        this.tabvas = false;
+        this.tablaVacia = false;
         this.ctab = 4;
-        this.cancar = 4;
+        this.cantidadCartasTablero = 4;
     }
 
     initObjects(){
-        for (let i = 0; i < 8;i++){
-            let card = new cards(0, 200, 112.5, 150, 1, "normal",1,false,false,true);
+        for (let i = 0; i < 10;i++){
+            let card = new cards(0, 200, 112.5, 150,10, "diamantes",1,false,false,true);
+            this.cards.push(card);
+        }
+        for (let i = 0; i < 10;i++){
+            let card = new cards(0, 200, 112.5, 150, Math.floor(Math.random() * (10 - 1) + 1), "treboles",1,false,false,true);
+            this.cards.push(card);
+        }
+        for (let i = 0; i < 10;i++){
+            let card = new cards(0, 200, 112.5, 150, Math.floor(Math.random() * (10 - 1) + 1), "espadas",1,false,false,true);
+            this.cards.push(card);
+        }
+        for (let i = 0; i < 10;i++){
+            let card = new cards(0, 200, 112.5, 150, Math.floor(Math.random() * (10 - 1) + 1), "corazones",1,false,false,true);
             this.cards.push(card);
         }
         this.contador = new tiempo();
-        this.armas = new cubitos(100,470,120,170);
-        this.usadas = new cubitos(650,400,120,170);
-        this.playerh = new HealthBar(15,15,100,20,20);
+        this.armas = new Botones(100,470,120,170);
+        this.usadas = new Botones(650,400,120,170);
+        this.playerHealth = new HealthBar(15,15,100,20,20);
+        shuffle(this.cards); 
+        
     }
     createEventListeners() {
         canvas.addEventListener('mousemove', (event) => {
@@ -177,8 +232,8 @@ class Game{
             for(let card of this.cards ){
                 if(!card.used && card.inboard){
                     card.x = 100;
-                    this.tabvas = true;
-                    terminado = false;
+                    this.tablaVacia = true;
+                     
                 }
             }
             this.ctab = 4;
@@ -191,27 +246,27 @@ class Game{
     draw(ctx){
         this.armas.draw(ctx);
         this.usadas.draw(ctx);
-        this.playerh.draw(ctx);
+        this.playerHealth.draw(ctx);
         this.num = 0;
-        let pos = 100;
-        if(this.tabvas && !terminado){
-            this.cancar += 3
-            pos = 262.5
-            this.tabvas = false
+        let posicion = 100;
+        if(this.tablaVacia && !terminado){
+            this.cantidadCartasTablero += 3
+            posicion = 262.5
+            this.tablaVacia = false
         }
         
         for(let card of this.cards){
-            if(this.num < this.cancar){
+            if(this.num < this.cantidadCartasTablero){
                 if(!card.used && !card.inboard){
-                    card.x = pos;
-                    pos += 162.5;
+                    card.x = posicion;
+                    posicion += 162.5;
                     card.inboard = true;
                 }
                 card.draw(ctx);
                 this.num+=1;
             }
          }
-        this.tabvas = false;
+        this.tablaVacia = false;
         terminado = true;
         this.contador.draw(ctx);
     }
