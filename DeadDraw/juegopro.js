@@ -279,6 +279,7 @@ class Game{
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
             for (let card of this.cartas) {
+                if(!card.used)
                 card.isHovered = card.contains(mouseX, mouseY);
             }
             this.armas.isHovered = this.armas.tocando(mouseX,mouseY);
@@ -294,8 +295,22 @@ class Game{
                 else if(this.armas.isHovered && this.clicked){
                     if(this.card_clicked.arma()){
                         if(this.hayArma){
+                            this.card_clicked.used = true;
+                            for(let i = 0; i=this.cartasArma.length; i++){
+                                for(let cartas of this.cartasArma){
+                                    cartas.click(this.xus,this.yus);
+                                }
+                                this.cartasArma.pop();
+                            }
+                            this.cartasArma.push(this.card_clicked);
+                            this.xar = this.armas.x;
+                            this.yar = this.armas.y;
+                            this.card_clicked.click(this.xar,this.yar);
                             this.clicked = false;
-                            this.card_clicked.used = false;
+                            this.card_clicked.inboard = false;
+                            this.ctab -=1;
+                            this.hayArma = true;
+                            this.card_arma.click(this.xus,this.yus);
                         }
                         else{
                             this.card_clicked.used = true;
@@ -306,27 +321,36 @@ class Game{
                             this.clicked = false;
                             this.card_clicked.inboard = false;
                             this.ctab -=1;
+                            this.card_arma = this.card_clicked;
                             this.hayArma = true;
                         }
+                        this.posicion = 20;
+                        this
                     }
                     else if(this.hayArma && this.card_clicked.enemie()){
-                        this.card_clicked.used = true;
-                        this.cartasArma.push(this.card_clicked);
-                        for(let cartasrma of this.cartasArma){
-                            if(cartasrma.arma()){
-                                this.numberArma = cartasrma.number;
+                        if(this.numeroAnterior>this.card_clicked.number || this.cartasArma.length < 2){
+                            this.card_clicked.used = true;
+                            this.cartasArma.push(this.card_clicked);
+                            for(let cartasrma of this.cartasArma){
+                                if(cartasrma.arma()){
+                                    this.numberArma = cartasrma.number;
+                                }
                             }
+                            this.playerHealth.health = this.card_clicked.actionWeapon(this.playerHealth.health,this.numberArma);
+                            this.xar = this.armas.x +this.posicion;
+                            this.yar = this.armas.y;
+                            this.card_clicked.click(this.xar,this.yar);
+                            this.clicked = false;
+                            this.card_clicked.inboard = false;
+                            this.ctab -=1;
                         }
-                        this.playerHealth.health = this.card_clicked.actionWeapon(this.playerHealth.health,this.numberArma);
-                        this.xar = this.armas.x;
-                        this.yar = this.armas.y;
-                        this.card_clicked.click(this.xar,this.yar);
-                        this.clicked = false;
-                        this.card_clicked.inboard = false;
-                        this.ctab -=1;
+                        else{
+                            this.clicked = false;
+                        }
+                        this.numeroAnterior = this.card_clicked.number;
+                        this.posicion += 20;
+                        this.card_clicked.draw(ctx);
                     }
-                    console.log(this.hayArma);
-
                     break;
                 }
                 else if(this.usadas.isHovered && this.clicked){
