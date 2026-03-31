@@ -28,8 +28,8 @@ function shuffle(array) {
 
 class tiempo{
     constructor(){
-        this.tiempolim = 300 * 1000;
-        this.time = 0;
+        this.tiempolim = 120 * 1000;
+        this.time = 0;     
     }
     
     contador(deltatime){
@@ -40,10 +40,10 @@ class tiempo{
             ctx.fillStyle = "white";
             ctx.font = "20px Arial";
             ctx.textAlign = "left";
-            ctx.fillText("Tiempo restante " + Math.floor(this.tiempolim/1000), canvasWidth - 250, 15);
+            ctx.fillText("Tiempo restante " + Math.floor(this.tiempolim/1000), canvasWidth - 200, 30);
     }
 }
-class HealthBar{
+class Player{
     constructor(x, y, width, height, maxHealth){
         this.x = x;
         this.y = y;
@@ -51,6 +51,7 @@ class HealthBar{
         this.height = height;
         this.maxHealth = maxHealth;
         this.health = maxHealth;
+        this.money = 0;
     }
     draw(ctx){
         ctx.fillStyle = "black";
@@ -68,6 +69,10 @@ class HealthBar{
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText(this.health, this.width -35, this.height +12);
+        ctx.fillStyle = "yellow";
+            ctx.font = "20px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(this.money, canvasWidth/2, this.height +12);
     }
 }
 class Botones{
@@ -185,6 +190,9 @@ class CardEnemie extends cards{
     enemie(){
         return true;
     }
+    esVida(){
+        return false;
+    }
 }
 class CardVida extends cards{
     draw(ctx) {
@@ -211,6 +219,9 @@ class CardVida extends cards{
     }
     arma(){
         return false;
+    }
+    esVida(){
+        return true;
     }
 }
 
@@ -247,6 +258,9 @@ class Game{
         this.cantidadCartasTablero = 4;
         this.cartasArma = [];
         this.hayArma = false;
+        this.gameover = false;
+        this.curacionUsada =false;
+        this.cartasUsadas = [];
     }
 
     initObjects(){
@@ -269,7 +283,7 @@ class Game{
         this.contador = new tiempo();
         this.armas = new Botones(100,470,120,170);
         this.usadas = new Botones(650,400,120,170);
-        this.playerHealth = new HealthBar(15,15,100,20,20);
+        this.playerHealth = new Player(15,15,100,20,20);
         shuffle(this.cartas); 
         
     }
@@ -299,6 +313,7 @@ class Game{
                             for(let i = 0; i=this.cartasArma.length; i++){
                                 for(let cartas of this.cartasArma){
                                     cartas.click(this.xus,this.yus);
+                                    this.cartasUsadas.push(cartas);
                                 }
                                 this.cartasArma.pop();
                             }
@@ -343,32 +358,68 @@ class Game{
                             this.clicked = false;
                             this.card_clicked.inboard = false;
                             this.ctab -=1;
+                            this.playerHealth.money += Math.floor(this.card_clicked.number /2);
+                            this.numeroAnterior = this.card_clicked.number;
+                            this.posicion += 20;
+                            const idx = this.cartas.indexOf(this.card_clicked);
                         }
                         else{
                             this.clicked = false;
                         }
-                        this.numeroAnterior = this.card_clicked.number;
-                        this.posicion += 20;
-                        this.card_clicked.draw(ctx);
                     }
                     break;
                 }
                 else if(this.usadas.isHovered && this.clicked){
-                    this.xus = this.usadas.x;
-                    this.yus = this.usadas.y;
-                    this.card_clicked.click(this.xus,this.yus);
-                    this.clicked = false;
-                    this.card_clicked.inboard = false;
-                    this.ctab -=1;
-                    this.playerHealth.health = this.card_clicked.actionUse(this.playerHealth.health);
-                    break;
+                    if(this.card_clicked.esVida()){
+                        if(this.curacionUsada){
+                            this.clicked = false;
+                        }
+                        else{
+                        this.curacionUsada = true;
+                        this.xus = this.usadas.x;
+                        this.yus = this.usadas.y;
+                        this.card_clicked.click(this.xus,this.yus);
+                        this.clicked = false;
+                        this.card_clicked.inboard = false;
+                        this.ctab -=1;
+                        this.playerHealth.health = this.card_clicked.actionUse(this.playerHealth.health);
+                        this.cartasUsadas.push(this.card_clicked);
+                        break;
+                        }
+                    }
+                    else{
+                        this.xus = this.usadas.x;
+                        this.yus = this.usadas.y;
+                        this.card_clicked.click(this.xus,this.yus);
+                        this.clicked = false;
+                        this.card_clicked.inboard = false;
+                        this.ctab -=1;
+                        this.playerHealth.health = this.card_clicked.actionUse(this.playerHealth.health);
+                        break;
+                    }
                 }
                     
             }
         });
+        window.addEventListener('keydown', (event) => {
+            if (event.key == ' ' && this.gameover    ){
+                this.gameover = false;
+                this.playerHealth.health = this.playerHealth.maxHealth;
+                this.cartas = [];
+                this.ctab = 4;
+                this.cartasArma = [];
+                this.cartasUsadas = [];
+                this.hayArma = false;
+                this.posicion = 0;
+                this.cantidadCartasTablero = 4;
+                this.initObjects();
+            }
+        });
     }
     update(deltaTime){
-
+        if(this.playerHealth.health <= 0 || this.contador.tiempolim <= 0){
+            this.gameover = true;
+        }
         if(this.ctab <= 1){
             for(let card of this.cartas ){
                 if(!card.used && card.inboard){
@@ -383,34 +434,52 @@ class Game{
             card.update();
         }
         this.contador.contador(deltaTime);
-
-        this.num = 0;
-        let posicion = 100;
-        if(this.tablaVacia && !terminado){
-            this.cantidadCartasTablero += 3
-            posicion = 262.5
-        }
-        
-        for(let card of this.cartas){
-            if(this.num < this.cantidadCartasTablero){
-                if(!card.used && !card.inboard){
-                    card.x = posicion;
-                    posicion += 162.5;
-                    card.inboard = true;
-                }
-                card.draw(ctx);
-                this.num+=1;
-            }
-         }
-        this.tablaVacia = false;
-        terminado = true;
     } 
     draw(ctx){
-        this.armas.draw(ctx);
-        this.usadas.draw(ctx);
-        this.playerHealth.draw(ctx);
-        
-        this.contador.draw(ctx);
+        if(!this.gameover){
+            this.armas.draw(ctx);
+            this.usadas.draw(ctx);
+            this.playerHealth.draw(ctx);
+            
+            this.contador.draw(ctx);
+
+            this.num = 0;
+            let posicion = 100;
+            if(this.tablaVacia && !terminado){
+                this.cantidadCartasTablero += 3
+                posicion = 262.5
+                this.curacionUsada = false;
+            }
+            
+            for(let card of this.cartas){
+                if(this.num < this.cantidadCartasTablero){
+                    if(!card.used && !card.inboard){
+                        card.x = posicion;
+                        posicion += 162.5;
+                        card.inboard = true;
+                    }
+                    card.draw(ctx);
+                    this.num+=1;
+                }
+            }
+            this.tablaVacia = false;
+            terminado = true;
+            for(let cartas of this.cartasArma){
+                cartas.draw(ctx);
+            }
+            for(let cartas of this.cartasUsadas){
+                cartas.draw(ctx);
+            }
+        }
+        else{
+            ctx.fillStyle = "red";
+            ctx.font = "60px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("GAME OVER", canvasWidth/2, canvasHeight/2);
+
+            ctx.font = "20px Arial";
+            ctx.fillText("Presiona espacio para volver a empezar", canvasWidth/2, canvasHeight/2 + 50);
+        }
     }
 }
 function drawScene(newTime) {
