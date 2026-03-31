@@ -243,6 +243,9 @@ class CardEspada extends cards{
     arma(){
         return true;
     }
+    esVida(){
+        return false;
+    }
 }
 
 class Game{
@@ -371,10 +374,9 @@ class Game{
                 }
                 else if(this.usadas.isHovered && this.clicked){
                     if(this.card_clicked.esVida()){
-                        if(this.curacionUsada){
-                            this.clicked = false;
+                        if(!this.curacionUsada){
+                            this.playerHealth.health = this.card_clicked.actionUse(this.playerHealth.health);
                         }
-                        else{
                         this.curacionUsada = true;
                         this.xus = this.usadas.x;
                         this.yus = this.usadas.y;
@@ -382,10 +384,8 @@ class Game{
                         this.clicked = false;
                         this.card_clicked.inboard = false;
                         this.ctab -=1;
-                        this.playerHealth.health = this.card_clicked.actionUse(this.playerHealth.health);
                         this.cartasUsadas.push(this.card_clicked);
                         break;
-                        }
                     }
                     else{
                         this.xus = this.usadas.x;
