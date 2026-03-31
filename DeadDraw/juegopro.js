@@ -255,12 +255,12 @@ class Game{
 
     initObjects(){
         
-        for (let i = 1; i <11;i++){                         // Escalabilidad de la dificultad un 10% cada nivel
-            let card = new CardEspada(0, 200, 112.5, 150,Math.round(i * this.dificultad * 10) / 10, "diamantes",1,false,false,true);
+        for (let i = 1; i <11;i++){                         
+            let card = new CardEspada(0, 200, 112.5, 150,i,  "diamantes",1,false,false,true);
             this.cartas.push(card);
         }
-        for (let i = 1; i <11;i++){                        // Escalabilidad de la dificultad un 10% vada nivel
-            let card = new CardEnemie(0, 200, 112.5, 150, Math.round(i * this.dificultad * 10) / 10, "treboles",1,false,false,true);
+        for (let i = 1; i <11;i++){                       
+            let card = new CardEnemie(0, 200, 112.5, 150, i , "treboles",1,false,false,true);
             this.cartas.push(card);
         }
         for (let i = 1; i <11;i++){
