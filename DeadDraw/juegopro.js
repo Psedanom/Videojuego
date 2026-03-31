@@ -9,6 +9,7 @@ let ctx;
 let game;
 let terminado = false;
 
+
 function shuffle(array) {
   let currentIndex = array.length;
 
@@ -24,6 +25,7 @@ function shuffle(array) {
       array[randomIndex], array[currentIndex]];
   }
 }
+
 
 
 class tiempo{
@@ -237,6 +239,8 @@ class CardEspada extends cards{
 class Game{
     constructor(canvas) {
         this.cartas = [];
+        
+        this.dificultad = 1.1 // multiplicador de dificultad de 10% por cada nivel
         this.createEventListeners();
         this.initObjects();
         this.canvas = canvas;
@@ -250,12 +254,13 @@ class Game{
     }
 
     initObjects(){
-        for (let i = 1; i <11;i++){
-            let card = new CardEspada(0, 200, 112.5, 150,i, "diamantes",1,false,false,true);
+        
+        for (let i = 1; i <11;i++){                         // Escalabilidad de la dificultad un 10% cada nivel
+            let card = new CardEspada(0, 200, 112.5, 150,Math.round(i * this.dificultad * 10) / 10, "diamantes",1,false,false,true);
             this.cartas.push(card);
         }
-        for (let i = 1; i <11;i++){
-            let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles",1,false,false,true);
+        for (let i = 1; i <11;i++){                        // Escalabilidad de la dificultad un 10% vada nivel
+            let card = new CardEnemie(0, 200, 112.5, 150, Math.round(i * this.dificultad * 10) / 10, "treboles",1,false,false,true);
             this.cartas.push(card);
         }
         for (let i = 1; i <11;i++){
@@ -274,6 +279,17 @@ class Game{
         
     }
     createEventListeners() {
+        //DEBUG: p nuevo nivel con victoria, P nuevo nivel con derrota
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'p') {
+                this.newLevel(true);
+                console.log("new level victory")
+            }
+            if (event.key === 'P') {
+                this.newLevel(false);
+                console.log("new level defeat")
+            }
+        });
         canvas.addEventListener('mousemove', (event) => {
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = event.clientX - rect.left;
@@ -380,7 +396,50 @@ class Game{
          }
         this.tablaVacia = false;
         terminado = true;
-    } 
+
+        // Verifica si el juego ha terminado
+        if (this.isGameOver()) {
+            console.log("Partida terminada");
+            let reason = this.gameOverReason();
+            switch(reason) {
+                case 1:
+                    console.log("Partida terminada con codigo: " + reason);
+                    console.log("Has perdido por quedarte sin salud.");
+                    this.newLevel(false);
+                    
+                    break;
+                case 2:
+                    console.log("Partida terminada con codigo: " + reason);
+                    console.log("Has perdido por quedarte sin tiempo.");
+                    this.newLevel(false);
+                    break;
+                case 3:
+                    console.log("Partida terminada con codigo: " + reason);
+                    console.log("Has ganado por usar todas las cartas.");
+                    this.newLevel(true);
+                    break;
+            }
+            
+
+
+        }
+    }
+    // El juego termina cuando el jugador se queda sin cartas
+    isGameOver() {
+        return (this.cartas.length > 0 && this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
+    }
+    gameOverReason() {
+        if (this.playerHealth.health <= 0) {
+            return 1; // El jugador perdió por quedarse sin salud
+        } 
+        else if (this.contador.tiempolim <= 0) {
+            return 2; // El jugador perdió por quedarse sin tiempo
+        }
+        else if (this.cartas.every(card => card.used)){
+            return 3; // El jugador ganó por usar todas las cartas
+        }
+    }
+
     draw(ctx){
         this.armas.draw(ctx);
         this.usadas.draw(ctx);
@@ -388,6 +447,43 @@ class Game{
         
         this.contador.draw(ctx);
     }
+
+    // Regenera el tablero con nuevas cartas y si se ha ganado entonces aumenta la dificultad
+    //  victory determina si el jugador gano o perdio, booleano
+    newLevel(victory){
+        if(victory){
+        this.dificultad *= 1.1; // Aumenta la dificultad en un 10% cada vez que se llama a newLevel
+        }
+
+        this.cartas = [];
+        this.cartasArma = [];
+        this.hayArma = false;
+        this.clicked = false;
+        this.ctab = 4;
+        this.cantidadCartasTablero = 4;
+        this.tablaVacia = false;
+    for (let i = 1; i <11;i++){                         // Escalabilidad de la dificultad un 10%
+            let card = new CardEspada(0, 200, 112.5, 150,Math.round(i * this.dificultad * 10) / 10, "diamantes",1,false,false,true);
+            this.cartas.push(card);
+        }
+        for (let i = 1; i <11;i++){                        // Escalabilidad de la dificultad un 10%
+            let card = new CardEnemie(0, 200, 112.5, 150, Math.round(i * this.dificultad * 10) / 10, "treboles",1,false,false,true);
+            this.cartas.push(card);
+        }
+        for (let i = 1; i <11;i++){
+            let card = new CardEnemie(0, 200, 112.5, 150, i, "espadas",1,false,false,true);
+            this.cartas.push(card);
+        }
+        for (let i = 1; i <11;i++){
+            let card = new CardVida(0, 200, 112.5, 150, i, "corazones",1,false,false,true);
+            this.cartas.push(card);
+        }
+        this.contador = new tiempo();
+        this.armas = new Botones(100,470,120,170);
+        this.usadas = new Botones(650,400,120,170);
+        this.playerHealth = new HealthBar(15,15,100,20,20);
+        shuffle(this.cartas); 
+}
 }
 function drawScene(newTime) {
     let deltaTime = newTime-oldTime;
