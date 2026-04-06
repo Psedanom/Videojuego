@@ -11,8 +11,8 @@ let terminado = false;
 const imgCorazon = new Image();
 imgCorazon.src = 'assets/corazon.png';
 
-const imgPicas = new Image();
-imgPicas.src = 'assets/picas.png';
+const imgRombos = new Image();
+imgRombos.src = 'assets/picas.png';
 
 class HealthBar{
     constructor(x, y, width, height, maxHealth){
@@ -72,7 +72,7 @@ class cards {
     }
     draw(ctx) {
         // esta funcion decide que imagen usar segun el tipo de la carta
-        let img = this.type === 'corazon' ? imgCorazon : imgPicas;
+        let img = this.type === 'corazon' ? imgCorazon : imgRombos;
         ctx.drawImage(img,
                       this.x,
                       this.y,

@@ -12,6 +12,14 @@ let ctx;
 let game;
 let terminado = false;
 
+const imgCorazon = new Image();
+imgCorazon.src = 'assets/corazon.png';
+
+const imgRombos = new Image();
+imgRombos.src = 'assets/rombos.png';
+
+const imgPicas = new Image();
+imgPicas.src = 'assets/picas.png';
 
 function shuffle(array) {
     let currentIndex = array.length;
@@ -33,7 +41,7 @@ function shuffle(array) {
 // Contador del juego
 class Tiempo {
 
-    constructor(tiempoSegundos = 100) {
+    constructor(tiempoSegundos = 10) {
         this.tiempolim = tiempoSegundos * 1000;
         this.time = 0;
     }
@@ -142,7 +150,7 @@ class Cards {
 class CardEnemie extends Cards {
     draw(ctx) {
         ctx.fillStyle = "black";
-        ctx.fillRect(this.x,
+        ctx.drawImage(imgPicas,this.x,
             this.y,
             this.width * this.scale,
             this.height * this.scale);
@@ -176,7 +184,7 @@ class CardEnemie extends Cards {
 class CardVida extends Cards {
     draw(ctx) {
         ctx.fillStyle = "red";
-        ctx.fillRect(this.x,
+        ctx.drawImage(imgCorazon,this.x,
             this.y,
             this.width * this.scale,
             this.height * this.scale);
@@ -206,12 +214,16 @@ class CardVida extends Cards {
 
 class CardEspada extends Cards {
     draw(ctx) {
+        let img = imgRombos;
+        console.log(img);
         if(this.habilidad != ""){
-            ctx.fillStyle = "purple";
-            ctx.fillRect(this.x,
+            //ctx.fillStyle = "purple";
+            ctx.drawImage(img,this.x,
                 this.y,
                 this.width * this.scale,
                 this.height * this.scale);
+
+
             ctx.fillStyle = "white";
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
@@ -221,8 +233,10 @@ class CardEspada extends Cards {
             
         }
         else{
-            ctx.fillStyle = "orange";
-            ctx.fillRect(this.x,
+            let img = imgRombos;
+            //ctx.fillStyle = "orange";
+            ctx.drawImage(img,
+                this.x,
                 this.y,
                 this.width * this.scale,
                 this.height * this.scale);
