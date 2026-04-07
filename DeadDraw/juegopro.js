@@ -11,6 +11,13 @@ let oldTime = 0;
 let ctx;
 let game;
 let terminado = false;
+let pantalla = 'seleccion_carta';
+
+/*
+Estados de variable pantalla:
+- 'juego': el juego principal, donde se muestran las cartas, el jugador, el tiempo, etc.
+- 'seleccion_carta': pantalla de selección de carta, donde el jugador puede elegir una carta para usar en el siguiente nivel.
+*/
 
 const imgCorazon = new Image();
 imgCorazon.src = 'assets/corazon.png';
@@ -37,6 +44,14 @@ function shuffle(array) {
     }
 }
 
+// Funcion para obtener un numero aleatorio inclusivo
+// Tomada de https://coreui.io/blog/how-to-generate-a-random-number-in-javascript/#:~:text=Remember,%20while%20JavaScript%27s%20random%20numbers,Yes,%20while%20Math.
+const getRandomIntegerInclusive = (min, max) => {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
 
 // Contador del juego
 class Tiempo {
@@ -215,7 +230,6 @@ class CardVida extends Cards {
 class CardEspada extends Cards {
     draw(ctx) {
         let img = imgRombos;
-        console.log(img);
         if(this.habilidad != ""){
             //ctx.fillStyle = "purple";
             ctx.drawImage(img,this.x,
@@ -275,6 +289,7 @@ class Game {
         this.gameover = false;
         this.curacionUsada = false;
         this.cartasUsadas = [];
+        this.seleccionando = false; // Variable para controlar si el jugador esta seleccionando cartas
     }
 
     initObjects() {
@@ -303,18 +318,18 @@ class Game {
 
     }
     createEventListeners() {
-        //DEBUG: p nuevo nivel con victoria, P nuevo nivel con derrota
-         document.addEventListener('keydown', (event) => {
-             if (event.key === 'p') {
-                 this.newLevel(true);
-                 console.log("new level victory")
-             }
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'p') {
+                this.newLevel(true);
+                console.log("new level victory")
+            }
+        });
+            
+            //DEBUG: p nuevo nivel con victoria, P nuevo nivel con derrota
         //     if (event.key === 'P') {
         //         this.newLevel(false);
         //         console.log("new level defeat")
         //     }
-        });
-
         window.addEventListener('keydown', (event) => {
             if (event.key == ' ' && this.gameover) {
                 switch (this.reason) {
@@ -337,14 +352,25 @@ class Game {
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
+            
+            if (pantalla === 'juego') {
             for (let card of this.cartas) {
                 if (!card.used)
                     card.isHovered = card.contains(mouseX, mouseY);
             }
             this.armas.isHovered = this.armas.tocando(mouseX, mouseY);
             this.usadas.isHovered = this.usadas.tocando(mouseX, mouseY);
+        }
+        else if (pantalla === 'seleccion_carta') {
+    if (this.arregloCartas) {
+        for (let card of this.arregloCartas) {
+            card.isHovered = card.contains(mouseX, mouseY);
+        }
+    }
+}
         });
         canvas.addEventListener('click', (event) => {
+            if (pantalla === 'juego') {
             for (let card of this.cartas) {
                 if (card.isHovered && !card.used) {
                     this.clicked = true;
@@ -494,10 +520,45 @@ class Game {
                 }
 
             }
+        }
+
+        // Si estamos eligiendo cartas, necesitamos detectar el click para seleccionar la carta elegida
+        else if (pantalla === 'seleccion_carta') {
+            for (let card of this.arregloCartas) {
+                if (card.isHovered) {
+                    console.log("[Seleccion] Antes de elegir carta, mazo:", this.cartas.length);
+                    this.cartas.push(card); // Agrega la carta seleccionada al mazo del jugador
+                    console.log("[Seleccion] Despues de agregar carta elegida, mazo:", this.cartas.length);
+
+                    // Agrega cartas negativas del side effect
+                    let cardIndex;
+                    if (card === this.cartaSeleccionada1) cardIndex = this.card1;
+                    else if (card === this.cartaSeleccionada2) cardIndex = this.card2;
+                    else cardIndex = this.card3;
+                    
+                    // Agrega las cartas negativas del side effect al mazo del jugador
+                    for (let sideCard of cardPool[cardIndex].sideEffects()) {
+                        this.cartas.push(sideCard);
+                    }
+                    console.log("[Seleccion] Despues de sideEffects, mazo:", this.cartas.length);
+
+                    shuffle(this.cartas); // Revuelve el mazo
+                    console.log("[Seleccion] Antes de newLevel(true), mazo:", this.cartas.length);
+                    this.newLevel(true); // Comienza un nuevo nivel
+                    console.log("[Seleccion] Despues de newLevel(true), mazo:", this.cartas.length);
+                    pantalla = 'juego'; // Cambia a la pantalla de juego
+                    break;
+
+        }
+    }
+}
         });
 
     }
     update(deltaTime) {
+
+        
+
         if (this.ctab <= 1) {
             for (let card of this.cartas) {
                 if (!card.used && card.inboard) {
@@ -512,13 +573,20 @@ class Game {
             card.update();
         }
 
+        // Si estamos eligiendo cartas, estas se necesitan actualizar para que se pueda detectar el hover y el click
+        if (pantalla === 'seleccion_carta' && this.arregloCartas) {
+            for (let card of this.arregloCartas) {
+                card.update(); 
+            }
+        }
+
         this.gameover = this.isGameOver();
 
         this.contador.contador(deltaTime);
 
        
     }
-    // El juego termina cuando el jugador se queda sin cartas
+    // El juego termina cuando el jugador se queda sin cartas, sin salud o sin tiempo
     isGameOver() {
         return (this.cartas.length > 0 && this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
     }
@@ -535,6 +603,7 @@ class Game {
     }
 
     draw(ctx) {
+        if (pantalla === 'juego') {
         //TERMINA EL JUEGO
         if (!this.gameover) {
             this.armas.draw(ctx);
@@ -660,6 +729,113 @@ class Game {
                     break;
             }
         }
+    }
+    else if (pantalla === 'seleccion_carta')
+    {
+            // Texto con color neon
+            ctx.textAlign = "center";
+            ctx.font = "30px Ethnocentric";
+            ctx.shadowColor = '#00bfff';
+            ctx.shadowBlur = 30;
+            ctx.strokeStyle = '#00bfff';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeText("SELECCIONA UNA CARTA", canvasWidth / 2, 40);
+            ctx.fillText("SELECCIONA UNA CARTA", canvasWidth / 2, 40);
+            this.arregloCartas = [this.cartaSeleccionada1, this.cartaSeleccionada2, this.cartaSeleccionada3];
+            
+            // Si no se ha seleccionado una carta, selecciona 3 cartas aleatorias del cardPool y las muestra en pantalla
+            if(!this.seleccionando)
+                {
+                
+                // Selecciona 3 cartas aleatorias del cardPool
+                this.card1 =getRandomIntegerInclusive(0, cardPool.length - 1);
+                this.card2 =getRandomIntegerInclusive(0, cardPool.length - 1);
+                this.card3 =getRandomIntegerInclusive(0, cardPool.length - 1);
+
+                // Crea las cartas seleccionadas a partir del cardPool
+                this.cartaSeleccionada1 = cardPool[this.card1].makeCard();
+                this.cartaSeleccionada2 = cardPool[this.card2].makeCard();
+                this.cartaSeleccionada3 = cardPool[this.card3].makeCard();
+
+                //Arreglo para guardar las cartas que se van a seleccionar
+                this.arregloCartas = [this.cartaSeleccionada1, this.cartaSeleccionada2, this.cartaSeleccionada3];
+                this.seleccionando = true;
+            }
+            // Apaga el glow para evitar que se vea en el dibujado de las cartas
+            ctx.shadowBlur = 0;
+
+            // Dibuja las cartas en la pantalla y cambia su posicion para que se vean ordenadas
+            this.cartaSeleccionada1.x = 150;
+            this.cartaSeleccionada1.y = 200;
+            this.cartaSeleccionada1.draw(ctx);
+
+            this.cartaSeleccionada2.x = 325;
+            this.cartaSeleccionada2.y = 200;
+            this.cartaSeleccionada2.draw(ctx);
+
+            this.cartaSeleccionada3.x = 500;
+            this.cartaSeleccionada3.y = 200;
+            this.cartaSeleccionada3.draw(ctx);
+
+
+            //Formato neon para texto
+                ctx.textAlign = "left";
+                ctx.font = "10px Ethnocentric";
+                
+                ctx.shadowBlur = 3;
+                
+                ctx.lineWidth = 1;
+                ctx.fillStyle = '#ffffff';
+
+                // Color Azul para el nombre
+                ctx.shadowColor = '#00bfff';
+                ctx.strokeStyle = '#00bfff';
+                // Nombres
+                ctx.strokeText(cardPool[this.card1].nombre, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 200);
+                ctx.fillText(cardPool[this.card1].nombre, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 200);
+
+                ctx.strokeText(cardPool[this.card2].nombre, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 200);
+                ctx.fillText(cardPool[this.card2].nombre, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 200);
+
+                ctx.strokeText(cardPool[this.card3].nombre, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 200);
+                ctx.fillText(cardPool[this.card3].nombre, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 200);
+
+                // Color Verde para la ventaja
+                ctx.shadowColor = '#15ff00';
+                ctx.strokeStyle = '#15ff00';
+                // Ventaja de la carta
+                ctx.strokeText(cardPool[this.card1].ventaja, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 220);
+                ctx.fillText(cardPool[this.card1].ventaja, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 220);
+                ctx.strokeText(cardPool[this.card2].ventaja, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 220);
+                ctx.fillText(cardPool[this.card2].ventaja, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 220);
+                ctx.strokeText(cardPool[this.card3].ventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 220);
+                ctx.fillText(cardPool[this.card3].ventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 220);
+
+                // Color Rojo para la desventaja
+                ctx.shadowColor = '#ff0040';
+                ctx.strokeStyle = '#ff0040';
+                // Desventaja de la carta
+                ctx.strokeText(cardPool[this.card1].desventaja, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 240);
+                ctx.fillText(cardPool[this.card1].desventaja, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 240);
+                ctx.strokeText(cardPool[this.card2].desventaja, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 240);
+                ctx.fillText(cardPool[this.card2].desventaja, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 240);
+                ctx.strokeText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
+                ctx.fillText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
+            
+                
+    
+
+            
+                
+                
+
+            
+            
+            
+
+
+    }
     }
 
     // Regenera el tablero con nuevas cartas y si se ha ganado entonces aumenta la dificultad
