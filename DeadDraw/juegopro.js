@@ -582,7 +582,9 @@ class Game {
 
         this.gameover = this.isGameOver();
 
+        if (!this.gameover && pantalla === 'juego') {
         this.contador.contador(deltaTime);
+        }
 
        
     }
