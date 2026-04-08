@@ -167,6 +167,7 @@ class Dialogue{
         }
         if (this.caracteresVisibles >= this.texto.length) {
             dialogueSound.pause();
+            dialogueSound.currentTime = 0; // Reinicia el sonido para la próxima vez que se reproduzca
             
         }
 
@@ -613,6 +614,7 @@ class Game {
             else if (pantalla === 'dialogo' && !this.dialogueDone) {
                 this.dialogueDone = !this.dialogueDone;     // Si el jugador hace click, se asume que ya leyó el diálogo y se puede empezar el juego
                      dialogueSound.pause(); // Detiene el sonido del diálogo en caso de que el jugador haga click antes de que termine el texto
+                     dialogueSound.currentTime = 0; // Reinicia el sonido para la próxima vez que se reproduzca 
                      pantalla = 'juego';
             }
 
@@ -640,7 +642,7 @@ class Game {
                     console.log("[Seleccion] Antes de newLevel(true), mazo:", this.cartas.length);
                     this.newLevel(true); // Comienza un nuevo nivel
                     console.log("[Seleccion] Despues de newLevel(true), mazo:", this.cartas.length);
-                    pantalla = 'juego'; // Cambia a la pantalla de juego
+                    pantalla = 'dialogo'; // Cambia a la pantalla de juego
                     break;
 
         }
