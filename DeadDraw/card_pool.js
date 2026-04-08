@@ -39,7 +39,7 @@ const cardPool = [
         desventaja: "+5 enemigos",
         makeCard() {
             return new CardEspada(0, 200, 112.5, 150, 15, "diamantes", 1, false, false, true, "")
-        },
+        },  
         sideEffects() {
             return [
                 new CardEnemie(0, 200, 112.5, 150, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, ""),

@@ -2,6 +2,9 @@
 
 
 
+        
+
+        
 
 const canvasWidth = 800;
 const canvasHeight = 700;
@@ -11,12 +14,14 @@ let oldTime = 0;
 let ctx;
 let game;
 let terminado = false;
-let pantalla = 'seleccion_carta';
+let pantalla = 'start';
 
 /*
 Estados de variable pantalla:
+- 'start': pantalla de inicio, donde se muestra el titulo y se espera a que el jugador presione espacio para empezar.
 - 'juego': el juego principal, donde se muestran las cartas, el jugador, el tiempo, etc.
 - 'seleccion_carta': pantalla de selección de carta, donde el jugador puede elegir una carta para usar en el siguiente nivel.
+- 'dialogo': pantalla de diálogo, donde se muestran los diálogos pre-juego antes de empezar el nivel
 */
 
 const imgCorazon = new Image();
@@ -27,6 +32,17 @@ imgRombos.src = 'assets/rombos.png';
 
 const imgPicas = new Image();
 imgPicas.src = 'assets/picas.png';
+
+const imgDialogue = new Image();
+imgDialogue.src = 'assets/dialogue_box.png';
+
+const imgMaton = new Image();
+imgMaton.src = 'assets/maton.png';
+
+
+// Sonido de scroll de texto para los diálogos
+const dialogueSound = document.createElement("audio");
+dialogueSound.src = "assets/sound/textscroll.wav";
 
 function shuffle(array) {
     let currentIndex = array.length;
@@ -56,7 +72,7 @@ const getRandomIntegerInclusive = (min, max) => {
 // Contador del juego
 class Tiempo {
 
-    constructor(tiempoSegundos = 10) {
+    constructor(tiempoSegundos = 100) {
         this.tiempolim = tiempoSegundos * 1000;
         this.time = 0;
     }
@@ -121,6 +137,62 @@ class Botones {
     tocando(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
+}
+
+class Dialogue{
+    constructor(texto,character = imgMaton){
+        this.x = canvasWidth/2-400;
+        this.y = canvasHeight-canvasHeight/4;
+        this.texto = texto;
+        this.caracteresVisibles = 0; // Cuántos caracteres se muestran actualmente
+        this.velocidad = 0.2; // Cuántos caracteres por frame
+        this.done = false; // Para saber si ya se mostró todo el texto
+        this.character = character; //Default es el maton
+        this.characterx = canvasWidth-400;
+        this.charactery = canvasHeight-420;
+
+        // Agrega el sonido de scroll de texto
+        this.soundDone = false; // Para asegurarnos de que el sonido solo se reproduzca una vez
+        
+    }
+    update(){
+        // Incrementa el contador de caracteres
+        this.caracteresVisibles += this.velocidad;
+        // Reproduce el sonido mientras el texto se está mostrando
+        if (!this.soundDone && this.caracteresVisibles < this.texto.length) {
+            dialogueSound.play();
+            this.soundDone = true;
+
+            
+        }
+        if (this.caracteresVisibles >= this.texto.length) {
+            dialogueSound.pause();
+            
+        }
+
+    }
+    draw(ctx){
+        ctx.drawImage(imgMaton, this.characterx, this.charactery,400,300);
+        ctx.drawImage(imgDialogue, this.x, this.y ,800,canvasHeight/4);
+        ctx.textAlign = "left";
+        ctx.font = "15px Ethnocentric";
+        ctx.fillStyle = "white";
+
+        // Corta el texto para mostrar solo hasta caracteresVisibles
+        let textoMostrado = this.texto.substring(0, Math.floor(this.caracteresVisibles));
+
+        // Que tantos pixeles van a haber entre cada linea de texto
+        let lineheight = 20;
+        // Metodo de dividir el texto basado de https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
+        // Permite el uso de \n para poder hacer linebreaks
+        let words = textoMostrado.split('\n');
+        for(let i = 0; i < words.length; i++){
+            ctx.fillText(words[i], this.x+226, this.y+80 + (i*lineheight));
+            
+        }
+    }
+
+
 }
 
 class Cards {
@@ -250,10 +322,10 @@ class CardEspada extends Cards {
             let img = imgRombos;
             //ctx.fillStyle = "orange";
             ctx.drawImage(img,
-                this.x,
-                this.y,
-                this.width * this.scale,
-                this.height * this.scale);
+            this.x,
+            this.y,
+            this.width * this.scale,
+            this.height * this.scale);
             ctx.fillStyle = "white";
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
@@ -290,6 +362,8 @@ class Game {
         this.curacionUsada = false;
         this.cartasUsadas = [];
         this.seleccionando = false; // Variable para controlar si el jugador esta seleccionando cartas
+        this.preDialogueGenerated = false;
+        this.dialogueDone = false;
     }
 
     initObjects() {
@@ -320,7 +394,10 @@ class Game {
     createEventListeners() {
         document.addEventListener('keydown', (event) => {
             if (event.key === 'p') {
-                this.newLevel(true);
+                //makes all cards used to test new level victory
+                for (let card of this.cartas) {
+                    card.used = true;
+                }
                 console.log("new level victory")
             }
         });
@@ -331,7 +408,11 @@ class Game {
         //         console.log("new level defeat")
         //     }
         window.addEventListener('keydown', (event) => {
-            if (event.key == ' ' && this.gameover) {
+
+            // Tecla espacio
+            if (event.key == ' ') {
+                // Si el juego termino, reinicia el juego basado en la razon de la terminacion
+                if (this.gameover){
                 switch (this.reason) {
                     case 1:
                         console.log("Reiniciando juego después de perder por salud");
@@ -343,10 +424,18 @@ class Game {
                         break;
                     case 3:
                         console.log("Reiniciando juego después de ganar por usar todas las cartas");
+                        pantalla = 'seleccion_carta';
                         this.newLevel(true);
                         break;
                 }
             }
+
+            
+
+            else if (pantalla === 'start') {
+                pantalla = 'dialogo';
+            }
+        }
         });
         canvas.addEventListener('mousemove', (event) => {
             const rect = this.canvas.getBoundingClientRect();
@@ -370,7 +459,7 @@ class Game {
 }
         });
         canvas.addEventListener('click', (event) => {
-            if (pantalla === 'juego') {
+            if (pantalla === 'juego') { 
             for (let card of this.cartas) {
                 if (card.isHovered && !card.used) {
                     this.clicked = true;
@@ -521,6 +610,11 @@ class Game {
 
             }
         }
+            else if (pantalla === 'dialogo' && !this.dialogueDone) {
+                this.dialogueDone = !this.dialogueDone;     // Si el jugador hace click, se asume que ya leyó el diálogo y se puede empezar el juego
+                     dialogueSound.pause(); // Detiene el sonido del diálogo en caso de que el jugador haga click antes de que termine el texto
+                     pantalla = 'juego';
+            }
 
         // Si estamos eligiendo cartas, necesitamos detectar el click para seleccionar la carta elegida
         else if (pantalla === 'seleccion_carta') {
@@ -580,8 +674,10 @@ class Game {
             }
         }
 
+        // Verifica si el juego ha terminado
         this.gameover = this.isGameOver();
 
+        // Solo se cuenta el tiempo si se esta jugando el nivel y se han terminado los dialogos pre-juego
         if (!this.gameover && pantalla === 'juego') {
         this.contador.contador(deltaTime);
         }
@@ -605,7 +701,39 @@ class Game {
     }
 
     draw(ctx) {
-        if (pantalla === 'juego') {
+        ctx.shadowBlur = 0; // Asegura que no haya glow en ningun lado innecesario
+        if (pantalla === 'start')
+        {
+            ctx.textAlign = "center";
+            ctx.font = "65px Ethnocentric";
+            // Neon blue glow
+            ctx.shadowColor = '#00bfff';
+            ctx.shadowBlur = 30;
+            ctx.strokeStyle = '#00bfff';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeText("DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
+            ctx.fillText("DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
+
+            ctx.font = "20px Ethnocentric";
+            ctx.shadowBlur = 18;
+            ctx.strokeText("Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
+            ctx.fillText("Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
+
+        }
+        else if (pantalla === 'dialogo') {
+                //Antes de jugar el nivel
+            if (!this.preDialogueGenerated) {
+            this.dialogue_pregame = new Dialogue(preGameDialogue[Math.floor(Math.random() * preGameDialogue.length)]);
+            this.preDialogueGenerated = true;
+        }
+        if (!this.dialogueDone) {
+            this.dialogue_pregame.update();
+            this.dialogue_pregame.draw(ctx); 
+        }
+    }
+    else if (pantalla === 'juego') {
+
         //TERMINA EL JUEGO
         if (!this.gameover) {
             this.armas.draw(ctx);
@@ -731,9 +859,13 @@ class Game {
                     break;
             }
         }
-    }
+    
+}
     else if (pantalla === 'seleccion_carta')
     {
+        
+
+
             // Texto con color neon
             ctx.textAlign = "center";
             ctx.font = "30px Ethnocentric";
@@ -838,6 +970,7 @@ class Game {
 
 
     }
+    
     }
 
     // Regenera el tablero con nuevas cartas y si se ha ganado entonces aumenta la dificultad
