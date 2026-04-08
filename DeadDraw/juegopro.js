@@ -41,7 +41,7 @@ function shuffle(array) {
 // Contador del juego
 class Tiempo {
 
-    constructor(tiempoSegundos = 10) {
+    constructor(tiempoSegundos = 11000) {
         this.tiempolim = tiempoSegundos * 1000;
         this.time = 0;
     }

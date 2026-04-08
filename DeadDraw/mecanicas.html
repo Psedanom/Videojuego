@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAD DRAW - Mecánicas</title>
+
+    <!-- tu estilo base -->
+    <link rel="stylesheet" href="style.css">
+    <!-- nuevo estilo para mecánicas -->
+    <link rel="stylesheet" href="mecanicas.css">
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="contenido">
+        <h1>MECHANICS</h1>
+
+        <div class="texto">
+
+            <p>
+                Las cartas podrán tener mejoras que dependiendo de la situación pueden beneficiar al jugador o no. Además, no solo las cartas de arma o de vida podrán mejorarse, sino que también las cartas de enemigos podrán modificarse para el beneficio del propio jugador.
+            </p>
+
+            <p>
+                Asimismo, habrá comodines que solo podrán conseguirse durante las runs. Estos otorgarán al jugador power-ups más poderosos que los que las cartas pueden llegar a tener. Sin embargo, el jugador deberá decidir qué comodín elegir.
+            </p>
+
+            <h2>Loop Principal</h2>
+            <p>
+                En cada cuarto el jugador se enfrentará a cuatro cartas extraídas del mazo...
+            </p>
+
+            <h2>Baraja</h2>
+            <p>Baraja clásica de 52 cartas.</p>
+
+            <h2>Cuartos</h2>
+            <p>Se repite el loop en cada cuarto.</p>
+
+            <h2>Elección de Cuarto</h2>
+            <p>El jugador podrá elegir entre tienda o eventos.</p>
+
+            <h2>Tienda</h2>
+            <p>Obtención de comodines y beneficios.</p>
+
+            <h2>Eventos</h2>
+            <p>Riesgo y recompensa.</p>
+
+            <h2>Cartas</h2>
+            <p>
+                ♦ Armas <br>
+                ♥ Curación <br>
+                ♠ Enemigos <br>
+                ♣ Efectos
+            </p>
+
+            <h2>Combate</h2>
+            <p>Uso de armas vs enemigos.</p>
+
+            <h2>Progresión</h2>
+            <p>Mejoras permanentes al terminar runs.</p>
+
+        </div>
+
+        <a href="index.html" class="volver">
+            <div class="btn">
+                <span>BACK</span>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const lettersArray = letters.split("");
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) drops[i] = 1;
+
+        function draw() {
+            ctx.fillStyle = "rgba(0,0,0,0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#e8002d";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 30);
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+
+</body>
+</html>
