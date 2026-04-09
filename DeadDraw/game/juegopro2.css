@@ -1,10 +1,10 @@
 #canvas {
-    background-image: url("assets/canvas/fondocanvas.png");
+    background-image: url("../assets/canvas/fondocanvas.png");
     grid-area: main;
     
 }
 body {
-    background-color: White;
+    background-color: transparent;
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
