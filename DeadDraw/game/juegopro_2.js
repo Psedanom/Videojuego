@@ -1,7 +1,23 @@
 "use strict";
 
-const canvasWidth = 800;
-const canvasHeight = 700;
+// defnir el ancho y alto del canvas
+const canvasWidth = 400;
+const canvasHeight = 550;
+
+const canvas2 = document.getElementById("canvas2");
+        const ctx2 = canvas2.getContext("2d");
+
+        canvas2.width = window.innerWidth;
+        canvas2.height = window.innerHeight;
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const lettersArray = letters.split("");
+
+        const fontSize = 16;
+        const columns = canvas2.width / fontSize;
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) drops[i] = 1;
 
 let oldTime = 0;
 
@@ -9,6 +25,8 @@ let ctx;
 let game;
 let terminado = false;
 
+
+//definimos los sprites de las cartas
 const imgCorazon = new Image();
 imgCorazon.src = 'assets/corazon.png';
 
@@ -18,6 +36,8 @@ imgRombos.src = 'assets/rombos.png';
 const imgPicas = new Image();
 imgPicas.src = 'assets/picas.png';
 
+//funcion para revolver arreglos
+// funcion sacad de https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle(array) {
     let currentIndex = array.length;
     while (currentIndex != 0) {
@@ -28,11 +48,13 @@ function shuffle(array) {
     }
 }
 
+//clase para el contador dentro del juego
 class Tiempo {
     constructor(tiempoSegundos = 10) {
         this.tiempolim = tiempoSegundos * 1000;
         this.time = 0;
     }
+    //metodo para iniciar el contador
     contador(deltatime) {
         this.time = deltatime;
         this.tiempolim -= this.time;
@@ -45,6 +67,7 @@ class Tiempo {
     }
 }
 
+//clase que contiene lo atrivutos del jugador
 class Player {
     constructor(x, y, width, height, maxHealth, startingMoney = 0) {
         this.x = x;
@@ -72,6 +95,7 @@ class Player {
     }
 }
 
+//clase de los botones
 class Botones {
     constructor(x, y, width, height) {
         this.x = x;
@@ -83,11 +107,11 @@ class Botones {
         ctx.fillStyle = "white";
         ctx.fillRect((this.x), (this.y), this.width, this.height);
     }
+    //metodo que devuelve si el mouse esta tocando el boton
     tocando(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
 }
-
 class Cards {
     constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad) {
         this.x = x;
@@ -98,11 +122,15 @@ class Cards {
         this.type = type;
         this.scale = scale;
         this.used = used;
+        //inboarad define si la carta esta en el tablero
         this.inboard = inboard;
+        //enmazo define di esta la carta en el array de cartas
         this.enMazo = enMazo;
+        // habilidad es la habilidad de la carta
         this.habilidad = habilidad;
     }
     draw(ctx) {}
+    //este metodo devuelve si se el mouse esta tocando la carta
     contains(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
@@ -124,7 +152,7 @@ class Cards {
 }
 
 class CardEnemie extends Cards {
-    // ✅ CAMBIADO: hover centrado con offsetX y offsetY
+    // CAMBIADO: hover centrado con offsetX y offsetY
     draw(ctx) {
         let offsetX = (this.width * this.scale - this.width) / 2;
         let offsetY = (this.height * this.scale - this.height) / 2;

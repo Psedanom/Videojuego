@@ -2,52 +2,46 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>DeadDraw</title>
+    <title></title>
     <script src="juegopro.js"></script>
     <script src="card_pool.js"></script> <!--Loot pool de las cartas -->
     <script src="dialogue_pool.js"></script> <!--Pool de diálogos -->
     <link rel="stylesheet" href="juegopro2.css">
 </head>
 <body>
-    <canvas id="canvas2"></canvas>
-    <div>
-        <h1>DeadDraw</h1>
-    </div>
+    <canvas id="canvas2"></canvas>  
     <canvas id='canvas'></canvas>
-    <div>
-        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse veniam reprehenderit voluptates consectetur illo minima deserunt quisquam, facilis ea fugit sequi, itaque quaerat totam, excepturi eius omnis veritatis dolor. Provident!</p>
-    </div>
     
     <script> main(); </script>
     
     <script>
-        const canvas = document.getElementById("canvas2");
-        const ctx = canvas.getContext("2d");
+        const canvas2 = document.getElementById("canvas2");
+        const ctx2 = canvas2.getContext("2d");
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas2.width = window.innerWidth;
+        canvas2.height = window.innerHeight;
 
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         const lettersArray = letters.split("");
 
         const fontSize = 16;
-        const columns = canvas.width / fontSize;
+        const columns = canvas2.width / fontSize;
 
         const drops = [];
         for (let i = 0; i < columns; i++) drops[i] = 1;
 
         function draw() {
-            ctx.fillStyle = "rgba(0,0,0,0.05)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx2.fillStyle = "rgba(0,0,0,0.05)";
+            ctx2.fillRect(0, 0, canvas2.width , canvas2.height);
 
-            ctx.fillStyle = "#e8002d";
-            ctx.font = fontSize + "px monospace";
+            ctx2.fillStyle = "#e8002d";
+            ctx2.font = fontSize + "px monospace";
 
             for (let i = 0; i < drops.length; i++) {
                 const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                ctx2.fillText(text, i * fontSize, drops[i] * fontSize);
 
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                if (drops[i] * fontSize > canvas2.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
                 drops[i]++;
@@ -56,10 +50,7 @@
 
         setInterval(draw, 30);
 
-        window.addEventListener("resize", () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+
     </script>
 </body>
 </html>
