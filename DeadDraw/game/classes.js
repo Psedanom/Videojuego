@@ -1,6 +1,7 @@
+
 //Countdown timer displayed during gameplay
 class Tiempo {
-    constructor(tiempoSegundos = 10) {
+    constructor(tiempoSegundos = 100) {
         this.tiempolim = tiempoSegundos * 1000; // Remaining time in milliseconds; converted from seconds
         this.time = 0;
     }
@@ -146,6 +147,9 @@ class Cards {
         ctx.font = "20px Arial";
         ctx.textAlign = "center";
         ctx.fillText(this.number, this.x + 90, this.y + 30);
+        ctx.font = "10px Arial";
+        ctx.fillText(this.habilidad,this.x + 50, this.y+100);
+        
     }
     contains(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
@@ -174,19 +178,17 @@ class Cards {
 
 class CardEnemie extends Cards {
     // Applies this enemy card's full damage directly to the player's health (no weapon reduction)
-    actionUse(health) {
-        health -= this.number;
-        return health;
+    actionUse(player) {
+        player.health -= this.number;    
     }
     // Applies this enemy card's damage reduced by the weapon card's value (num).
     // If the weapon is stronger than the enemy, no damage is taken.
-    actionWeapon(health, num) {
+    actionWeapon(player, num) {
         this.daño = this.number - num; // Net damage after weapon mitigation
         if (this.daño < 0) {
-            return health;
+            return player.health;
         }
-        health -= this.daño;
-        return health;
+        player.health -= this.daño;
     }
     arma() {
         return false;
@@ -201,16 +203,15 @@ class CardEnemie extends Cards {
 class CardVida extends Cards {
     // Restores health by this card's number, capping at maxHealth (20).
     // Has no effect if the player is already at full health.
-    actionUse(health) {
-        if (health < 20) {
-            if (health + this.number > 20) {
-                health = 20;
+    actionUse(player) {
+        if (player.health < 20) {
+            if (player.health + this.number > 20) {
+                player.health = 20;
             }
             else {
-                health += this.number;
+                player.health += this.number;
             }
         }
-        return health;
     }
     arma() {
         return false;
@@ -228,6 +229,9 @@ class CardEspada extends Cards {
         return true;
     }
     esVida() {
+        return false;
+    }
+    enemie(){
         return false;
     }
 }
