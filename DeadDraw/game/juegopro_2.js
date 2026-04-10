@@ -125,15 +125,21 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height) {
+    constructor(x, y, width, height,text = "") {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.text = text;
     }
     draw(ctx) {
+        
         ctx.fillStyle = "white";
         ctx.fillRect((this.x), (this.y), this.width, this.height);
+
+        neonText(20, '#fb45f2', this.text, this.x +100 , this.y +33);
+        
+
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
@@ -438,8 +444,9 @@ class Game {
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170);
-        this.usadas = new Botones(650, 400, 120, 170);
+        this.armas = new Botones(100, 470, 120, 170,"");
+        this.usadas = new Botones(650, 400, 120, 170,"");
+        this.pasarRonda = new Botones(600,100,240,50,"Skip round");
         this.playerHealth = new Player(15, 15, 100, 20, 20);
         shuffle(this.cartas);
 
@@ -725,7 +732,7 @@ class Game {
                 this.armas.draw(ctx);
                 this.usadas.draw(ctx);
                 this.playerHealth.draw(ctx);
-
+                this.pasarRonda.draw(ctx);
                 this.contador.draw(ctx);
 
                 this.num = 0;
