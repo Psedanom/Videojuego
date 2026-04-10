@@ -8,6 +8,16 @@
     position: fixed;
     z-index: 0;
 }
+canvas {
+    /* border with  red neon glow effect */
+        --colorBorder: #a83331;
+        border: 2px solid var(--colorBorder);
+        box-shadow: 0 0 10px var(--colorBorder), 0 0 20px var(--colorBorder), 0 0 30px var(--colorBorder), 0 0 40px var(--colorBorder);
+
+
+
+
+}
 body {
     
     width: 100vw;

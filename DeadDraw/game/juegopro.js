@@ -49,6 +49,7 @@ imgMaton.src = '../assets/maton.png';
 const dialogueSound = document.createElement("audio");
 dialogueSound.src = "../assets/sound/textscroll.wav";
 
+// funcion sacad de https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle(array) {
     let currentIndex = array.length;
 
@@ -74,14 +75,13 @@ const getRandomIntegerInclusive = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-// Contador del juego
+//clase para el contador dentro del juego
 class Tiempo {
-
     constructor(tiempoSegundos = 100) {
         this.tiempolim = tiempoSegundos * 1000;
         this.time = 0;
     }
-
+    //metodo para iniciar el contador
     contador(deltatime) {
         this.time = deltatime;
         this.tiempolim -= this.time;
@@ -93,6 +93,7 @@ class Tiempo {
         ctx.fillText("Tiempo restante " + Math.floor(this.tiempolim / 1000), canvasWidth - 200, 30);
     }
 }
+//clase que contiene lo atrivutos del jugador
 class Player {
     constructor(x, y, width, height, maxHealth, startingMoney = 0) {
         this.x = x;
@@ -101,20 +102,14 @@ class Player {
         this.height = height;
         this.maxHealth = maxHealth;
         this.health = maxHealth;
-        this.money = startingMoney; //Default 0, pero se puede pasar como parametro
+        this.money = startingMoney;
     }
     draw(ctx) {
         ctx.fillStyle = "black";
-        ctx.fillRect((this.x),
-            (this.y),
-            this.width,
-            this.height);
+        ctx.fillRect((this.x), (this.y), this.width, this.height);
         let healthli = (this.health / this.maxHealth) * this.width;
         ctx.fillStyle = "red";
-        ctx.fillRect((this.x),
-            (this.y + 1),
-            healthli,
-            this.height - 2);
+        ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
         ctx.textAlign = "center";
@@ -125,20 +120,19 @@ class Player {
         ctx.fillText(this.money, canvasWidth / 2, this.height + 12);
     }
 }
+//clase de los botones
 class Botones {
     constructor(x, y, width, height) {
-        this.x = x
+        this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
     }
     draw(ctx) {
         ctx.fillStyle = "white";
-        ctx.fillRect((this.x),
-            (this.y),
-            this.width,
-            this.height);
+        ctx.fillRect((this.x), (this.y), this.width, this.height);
     }
+    //metodo que devuelve si el mouse esta tocando el boton
     tocando(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
@@ -202,7 +196,7 @@ class Dialogue {
 }
 
 class Cards {
-    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad) {
+    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -214,8 +208,18 @@ class Cards {
         this.inboard = inboard;
         this.enMazo = enMazo;
         this.habilidad = habilidad;
+        this.img = img;
     }
     draw(ctx) {
+        ctx.fillStyle = "black";
+        ctx.drawImage(this.img, this.x,
+            this.y,
+            this.width * this.scale,
+            this.height * this.scale);
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(this.number, this.x + 90, this.y + 30);
     }
     contains(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
@@ -241,17 +245,7 @@ class Cards {
 }
 
 class CardEnemie extends Cards {
-    draw(ctx) {
-        ctx.fillStyle = "black";
-        ctx.drawImage(imgPicas, this.x,
-            this.y,
-            this.width * this.scale,
-            this.height * this.scale);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.number, this.x + 20, this.y + 20);
-    }
+    
     actionUse(health) {
         health -= this.number;
         return health;
@@ -275,17 +269,7 @@ class CardEnemie extends Cards {
     }
 }
 class CardVida extends Cards {
-    draw(ctx) {
-        ctx.fillStyle = "red";
-        ctx.drawImage(imgCorazon, this.x,
-            this.y,
-            this.width * this.scale,
-            this.height * this.scale);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.number, this.x + 20, this.y + 20);
-    }
+    
     actionUse(health) {
         if (health < 20) {
             if (health + this.number > 20) {
@@ -306,38 +290,6 @@ class CardVida extends Cards {
 }
 
 class CardEspada extends Cards {
-    draw(ctx) {
-        let img = imgRombos;
-        if (this.habilidad != "") {
-            //ctx.fillStyle = "purple";
-            ctx.drawImage(img, this.x,
-                this.y,
-                this.width * this.scale,
-                this.height * this.scale);
-
-
-            ctx.fillStyle = "white";
-            ctx.font = "20px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(this.number, this.x + 20, this.y + 20);
-            ctx.font = "10px Arial";
-            ctx.fillText(this.habilidad, this.x + 50, this.y + 100);
-
-        }
-        else {
-            let img = imgRombos;
-            //ctx.fillStyle = "orange";
-            ctx.drawImage(img,
-                this.x,
-                this.y,
-                this.width * this.scale,
-                this.height * this.scale);
-            ctx.fillStyle = "white";
-            ctx.font = "20px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(this.number, this.x + 20, this.y + 20);
-        }
-    }
     recallNum() {
         return this.number;
     }
@@ -375,19 +327,15 @@ class Game {
     initObjects() {
 
         for (let i = 1; i < 11; i++) {
-            let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "");
+            let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
+            this.cartas.push(card);
+        }
+        for (let i = 1; i < 21; i++) {
+            let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "",imgPicas);
             this.cartas.push(card);
         }
         for (let i = 1; i < 11; i++) {
-            let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "");
-            this.cartas.push(card);
-        }
-        for (let i = 1; i < 11; i++) {
-            let card = new CardEnemie(0, 200, 112.5, 150, i, "espadas", 1, false, false, true, "");
-            this.cartas.push(card);
-        }
-        for (let i = 1; i < 11; i++) {
-            let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "");
+            let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
@@ -408,11 +356,7 @@ class Game {
             }
         });
 
-        //DEBUG: p nuevo nivel con victoria, P nuevo nivel con derrota
-        //     if (event.key === 'P') {
-        //         this.newLevel(false);
-        //         console.log("new level defeat")
-        //     }
+
         window.addEventListener('keydown', (event) => {
 
             // Tecla espacio
@@ -422,10 +366,14 @@ class Game {
                     switch (this.reason) {
                         case 1:
                             console.log("Reiniciando juego después de perder por salud");
+                            
+                            pantalla = 'juego';
                             this.newLevel(false);
                             break;
                         case 2:
                             console.log("Reiniciando juego después de perder por tiempo");
+                            
+                            pantalla = 'juego';
                             this.newLevel(false);
                             break;
                         case 3:
@@ -479,9 +427,9 @@ class Game {
                         if (this.card_clicked.arma()) {
                             if (this.hayArma) {
                                 this.card_clicked.used = true;
-                                for (let i = 0; i = this.cartasArma.length; i++) {
+                                for (let i = -1; i <this.cartasArma.length; i++) {
                                     for (let cartas of this.cartasArma) {
-                                        cartas.click(this.xus, this.yus);
+                                        cartas.click(this.xus, this.yus);  
                                         this.cartasUsadas.push(cartas);
                                     }
                                     this.cartasArma.pop();
@@ -494,7 +442,7 @@ class Game {
                                 this.card_clicked.inboard = false;
                                 this.ctab -= 1;
                                 this.hayArma = true;
-                                this.card_arma.click(this.xus, this.yus);
+                                //this.card_arma.click(this.xus, this.yus);
                                 if (this.card_clicked.habilidad == "enemieslos") {
                                     for (let card of this.cartas) {
                                         if (card.enemie && card.inboard) {
@@ -778,8 +726,8 @@ class Game {
                 for (let cartas of this.cartasArma) {
                     cartas.draw(ctx);
                 }
-                for (let cartas of this.cartasUsadas) {
-                    cartas.draw(ctx);
+                for(let i = 0;i<this.cartasUsadas.length;i++){
+                    this.cartasUsadas[i].draw(ctx);
                 }
             }
             else {
@@ -1006,22 +954,18 @@ class Game {
         this.tablaVacia = false;
         this.gameover = false;
 
-        if (!victory && this.dificultad == 1.1) { // Si el jugador perdió no aumenta la dificultad
+        if (!victory ) { // Si el jugador perdió no aumenta la dificultad
             this.cartas = [];
             for (let i = 1; i < 11; i++) {
-                let card = new CardEspada(0, 200, 112.5, 150, Math.round(i * 10) / 10, "diamantes", 1, false, false, true, "");
+                let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
                 this.cartas.push(card);
             }
-            for (let i = 1; i < 11; i++) {                        // Escalabilidad de la dificultad un 10%
-                let card = new CardEnemie(0, 200, 112.5, 150, Math.round(i * 10) / 10, "treboles", 1, false, false, true, "");
-                this.cartas.push(card);
-            }
-            for (let i = 1; i < 11; i++) {
-                let card = new CardEnemie(0, 200, 112.5, 150, i, "espadas", 1, false, false, true, "");
+            for (let i = 1; i < 21; i++) {
+                let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "",imgPicas);
                 this.cartas.push(card);
             }
             for (let i = 1; i < 11; i++) {
-                let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "");
+                let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "",imgCorazon);
                 this.cartas.push(card);
             }
         }
