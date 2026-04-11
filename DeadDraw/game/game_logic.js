@@ -11,16 +11,11 @@ the game state, player interactions, win/loss conditions, and screen transitions
 "use strict";
 
 
-
-
-
-
 // Canvas dimensions in pixels
 const canvasWidth = 800;
 const canvasHeight = 700;
 
 let oldTime = 0;
-
 
 let ctx;
 
@@ -63,6 +58,7 @@ class Game {
         this.preDialogueGenerated = false; // Guards against regenerating the pre-level dialogue object every frame
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
     }
+
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
         // "enemieslos" reduce all enemies currently on the board by 1
@@ -111,7 +107,8 @@ class Game {
                 }
             }
     }
-     // Marks an enemy card as used, moves it to the discard pile, and decrements the board turn counter
+
+    // Marks an enemy card as used, moves it to the discard pile, and decrements the board turn counter
     discardEnemy(card){
         card.used = true;
         this.cartasUsadas.push(card);
@@ -120,27 +117,31 @@ class Game {
         card.inboard = false;
         this.ctab -= 1;
     }
+
     // Places the selected card into the weapon slot array and flags the weapon slot as occupied
     insertCardsIntoArmasArray(){
         this.hayArma = true;
         this.card_clicked.used = true;
         this.cartasArma.push(this.card_clicked);
     }
+
     // moves the selected card to the weapon slot at the given horizontal (pos),
-    // then marks it as played and decrements the board turn counter    
-    moverCartasArma(card_clicked,pos){
+    // then marks it as played and decrements the board turn counter
+    moverCartasArma(card_clicked, pos){
         this.xar = this.armas.x + pos;
         this.yar = this.armas.y;
         card_clicked.click(this.xar, this.yar);
         this.clicked = false;
         card_clicked.inboard = false;
-        this.ctab -= 1; 
+        this.ctab -= 1;
     }
+
     // Caches the discard pile's current position for reuse across discard operations
     giveUsadasPosition(){
         this.xus = this.usadas.x;
         this.yus = this.usadas.y;
     }
+
     // Moves the selected card to the discard pile and decrements the board turn counter
     moveCartasUsadas(){
         this.giveUsadasPosition();
@@ -150,29 +151,30 @@ class Game {
         this.ctab -= 1;
         this.cartasUsadas.push(this.card_clicked);
     }
-    //cheks wether there is an armas inside the array, then depending moves the card or cards to the corresponding position
+
+    // checks whether there is an armas inside the array, then depending moves the card or cards to the corresponding position
     cardIntroductionInArmas(){
         if (this.hayArma) {
             this.giveUsadasPosition();
-            for (let cartas of this.cartasArma) { 
+            for (let cartas of this.cartasArma) {
                 cartas.click(this.xus, this.yus);
                 this.cartasUsadas.push(cartas);
             }
             this.cartasArma = [];
-            this.insertCardsIntoArmasArray()
-            this.moverCartasArma(this.card_clicked,0);
+            this.insertCardsIntoArmasArray();
+            this.moverCartasArma(this.card_clicked, 0);
             this.poolAbilities();
-            
         }
-        else if(!this.hayArma){ 
+        else if(!this.hayArma){
             this.insertCardsIntoArmasArray();
             console.log(this.cartasArma);
-            this.moverCartasArma(this.card_clicked,0)
+            this.moverCartasArma(this.card_clicked, 0);
             this.card_arma = this.card_clicked;
             this.poolAbilities();
         }
     }
-    //Checks what type of card is beeing used
+
+    // Checks what type of card is being used
     checkingCardTypeUsed(){
         if (this.card_clicked.esVida()) {
             // Only one heal card may be played per board turn; curacionUsada blocks further heals
@@ -186,14 +188,15 @@ class Game {
         else if(this.card_clicked.enemie()){
             // Non-heal card played directly to discard: apply its effect and send it to the pile
             this.moveCartasUsadas();
-            this.card_clicked.actionUse(this.playerHealth);   
+            this.card_clicked.actionUse(this.playerHealth);
         }
         else{
             this.moveCartasUsadas();
         }
     }
-    //checks wether the player can play a card enemie in the weapon place or not
-    //also if the player can play the enemie card this function is in charge of making the interaction correct like reducind the players health
+
+    // checks whether the player can play a card enemie in the weapon place or not
+    // also if the player can play the enemie card this function is in charge of making the interaction correct like reducing the players health
     cardEnemiaCardWeaponInteraction(){
         if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
             this.card_clicked.used = true;
@@ -207,7 +210,7 @@ class Game {
             this.card_clicked.actionWeapon(this.playerHealth, this.numberArma);
             // xar / yar: target coordinates where the card snaps to inside the weapon slot zone.
             // posicion offsets each successive card slightly to the right so they don't stack perfectly.
-            this.moverCartasArma(this.card_clicked,this.posicion);
+            this.moverCartasArma(this.card_clicked, this.posicion);
             this.playerHealth.money += Math.floor(this.card_clicked.number / 2);
             // Store this enemy's number so the next enemy played must be strictly lower
             this.numeroAnterior = this.card_clicked.number;
@@ -217,7 +220,9 @@ class Game {
             this.clicked = false;
         }
     }
-//For every card in the deck checks if this card is being clicked and returns whatever the card has to do
+
+    // FIX: For every card in the deck checks if this card is being clicked and returns whatever the card has to do.
+    // armas/usadas checks are now OUTSIDE the cards loop so they always trigger correctly
     cardsClickedIntercations(){
         for (let card of this.cartas) {
             if (card.isHovered && !card.used) {
@@ -225,23 +230,22 @@ class Game {
                 this.card_clicked = card;
                 break;
             }
-            else if (this.armas.isHovered && this.clicked) {
-                if (this.card_clicked.arma()) {
-                    this.cardIntroductionInArmas();
-                    this.posicion = 20;
-                }
-                // A weapon card is already in the slot and the player is playing an enemy card against it.
-                // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
-                // OR be the first enemy played against this weapon (cartasArma.length < 2).
-                else if (this.hayArma && this.card_clicked.enemie()) {
-                    this.cardEnemiaCardWeaponInteraction();
-                }
-                break;
-            }
-            else if (this.usadas.isHovered && this.clicked) {
-                this.checkingCardTypeUsed();
-            }
+        }
 
+        if (this.armas.isHovered && this.clicked) {
+            if (this.card_clicked.arma()) {
+                this.cardIntroductionInArmas();
+                this.posicion = 20;
+            }
+            // A weapon card is already in the slot and the player is playing an enemy card against it.
+            // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
+            // OR be the first enemy played against this weapon (cartasArma.length < 2).
+            else if (this.hayArma && this.card_clicked.enemie()) {
+                this.cardEnemiaCardWeaponInteraction();
+            }
+        }
+        else if (this.usadas.isHovered && this.clicked) {
+            this.checkingCardTypeUsed();
         }
     }
 
@@ -269,30 +273,30 @@ class Game {
             }
         }
     }
-    initObjects() {
 
+    initObjects() {
         for (let i = 1; i < 11; i++) {
-            let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
+            let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "", imgRombos);
             this.cartas.push(card);
         }
         for(let i = 1; i < 3; i++){
             for (let i = 1; i < 10; i++) {
-                let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "",imgPicas);
+                let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "", imgPicas);
                 this.cartas.push(card);
             }
         }
         for (let i = 1; i < 11; i++) {
-            let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "",imgCorazon);
+            let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "", imgCorazon);
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170,"");
-        this.usadas = new Botones(650, 400, 120, 170,"");
-        this.pasarRonda = new Botones(600,100,240,50,"Skip round");
+        this.armas = new Botones(100, 470, 120, 170, "");
+        this.usadas = new Botones(650, 400, 120, 170, "");
+        this.pasarRonda = new Botones(600, 100, 240, 50, "Skip round");
         this.playerHealth = new Player(15, 15, 100, 20, 20);
         shuffle(this.cartas);
-
     }
+
     createEventListeners() {
         document.addEventListener('keydown', (event) => {
             if (event.key === 'p') {
@@ -304,22 +308,18 @@ class Game {
             }
         });
 
-
         window.addEventListener('keydown', (event) => {
-
             if (event.key == ' ') {
                 // If the round has ended, decide what to do next based on how it ended
                 if (this.gameover) {
                     switch (this.reason) {
                         case 1:
                             console.log("Restarting game after losing due to health");
-                            
                             pantalla = 'juego';
                             this.newLevel(false);
                             break;
                         case 2:
                             console.log("Restarting game after losing due to time");
-                            
                             pantalla = 'juego';
                             this.newLevel(false);
                             break;
@@ -333,18 +333,20 @@ class Game {
                             break;
                     }
                 }
-
-
-
                 else if (pantalla === 'start') {
                     pantalla = 'dialogo';
                 }
             }
         });
+
         canvas.addEventListener('mousemove', (event) => {
             const rect = this.canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rect.left;
-            const mouseY = event.clientY - rect.top;
+            // FIX: aplicar factor de escala para que la deteccion de hover/click funcione
+            // correctamente aunque el canvas este estirado visualmente por CSS
+            const scaleX = canvasWidth / rect.width;
+            const scaleY = canvasHeight / rect.height;
+            const mouseX = (event.clientX - rect.left) * scaleX;
+            const mouseY = (event.clientY - rect.top) * scaleY;
 
             if (pantalla === 'juego') {
                 for (let card of this.cartas) {
@@ -362,6 +364,7 @@ class Game {
                 }
             }
         });
+
         canvas.addEventListener('click', (event) => {
             if (pantalla === 'juego') {
                 this.cardsClickedIntercations();
@@ -403,16 +406,13 @@ class Game {
                         this.dialogue_pregame = false;
                         pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
                         break;
-
                     }
                 }
             }
         });
-
     }
+
     update(deltaTime) {
-
-
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -444,14 +444,14 @@ class Game {
         if (!this.gameover && pantalla === 'juego') {
             this.contador.contador(deltaTime);
         }
-
-
     }
+
     // The round ends when: every card in the deck has been played (victory),
     // the player's health drops to 0 or below (loss), or the timer runs out (loss)
     isGameOver() {
         return (this.cartas.length > 0 && this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
     }
+
     gameOverReason() {
         if (this.playerHealth.health <= 0) {
             return 1; // Player ran out of health
@@ -467,13 +467,9 @@ class Game {
     draw(ctx) {
         ctx.shadowBlur = 0; // Reset glow to zero to prevent it from leaking into subsequent draw calls
         if (pantalla === 'start') {
-            
             // Neon blue glow
             neonText(65, '#00bfff', "DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
-           
-
             neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
-            
         }
         else if (pantalla === 'dialogo') {
             //Antes de jugar el nivel
@@ -501,8 +497,8 @@ class Game {
                 // tablaVacia is true at the start of a new board turn; expand the visible card count by 3
                 // and shift the starting position right so the layout stays balanced
                 if (this.tablaVacia && !terminado) {
-                    this.cantidadCartasTablero += 3
-                    posicion = 262.5
+                    this.cantidadCartasTablero += 3;
+                    posicion = 262.5;
                     this.curacionUsada = false; // Allow healing again at the start of each new board turn
                 }
 
@@ -535,49 +531,32 @@ class Game {
                     case 1:
                         console.log("Round ended with code: " + this.reason);
                         console.log("You lost by running out of health.");
-
                         neonText(65, '#ff0040', "GAME OVER", canvasWidth / 2, canvasHeight / 2 - 20);
-                        
                         neonText(40, '#ff0040', "Te quedaste sin vida", canvasWidth / 2, canvasHeight / 2 + 30);
-                        
                         neonText(20, '#ff0040', "Presiona espacio para volver a empezar", canvasWidth / 2, canvasHeight / 2 + 70);
-                        
-                        
-
                         break;
                     case 2:
                         console.log("Round ended with code: " + this.reason);
                         console.log("You lost by running out of time.");
-
                         neonText(65, '#ff0040', "GAME OVER", canvasWidth / 2, canvasHeight / 2 - 20);
-                        
                         neonText(40, '#ff0040', "Te quedaste sin tiempo", canvasWidth / 2, canvasHeight / 2 + 30);
-                        
                         neonText(20, '#ff0040', "Presiona espacio para volver a empezar", canvasWidth / 2, canvasHeight / 2 + 70);
-                        
-
                         break;
                     case 3:
                         console.log("Round ended with code: " + this.reason);
                         console.log("You won by using all cards.");
                         neonText(65, '#ffd700', "LEVEL PASSED", canvasWidth / 2, canvasHeight / 2 - 20);
-                        
                         neonText(35, '#ffd700', "Derrotaste a los enemigos", canvasWidth / 2, canvasHeight / 2 + 30);
-                        
                         neonText(20, '#ffd700', "Presiona espacio para continuar", canvasWidth / 2, canvasHeight / 2 + 70);
-                        
                         break;
                 }
             }
-
         }
         else if (pantalla === 'seleccion_carta') {
 
-
-
             // Neon text style for the screen title
             neonText(30, '#00bfff', "SELECCIONA UNA CARTA", canvasWidth / 2, 40);
-        
+
             this.arregloCartas = [this.cartaSeleccionada1, this.cartaSeleccionada2, this.cartaSeleccionada3];
 
             // Only pick new random cards once per visit to this screen.
@@ -614,14 +593,10 @@ class Game {
             this.cartaSeleccionada3.y = 200;
             this.cartaSeleccionada3.draw(ctx);
 
-
-            //Neon style for card info labels
-            
+            // Neon style for card info labels
             ctx.textAlign = "left";
             ctx.font = "10px Ethnocentric";
-
             ctx.shadowBlur = 3;
-
             ctx.lineWidth = 1;
             ctx.fillStyle = '#ffffff';
 
@@ -631,12 +606,11 @@ class Game {
             // Names
             ctx.strokeText(cardPool[this.card1].nombre, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 200);
             ctx.fillText(cardPool[this.card1].nombre, this.cartaSeleccionada1.x, this.cartaSeleccionada1.y + 200);
-
             ctx.strokeText(cardPool[this.card2].nombre, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 200);
             ctx.fillText(cardPool[this.card2].nombre, this.cartaSeleccionada2.x, this.cartaSeleccionada2.y + 200);
-
             ctx.strokeText(cardPool[this.card3].nombre, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 200);
             ctx.fillText(cardPool[this.card3].nombre, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 200);
+
             // Green for the card advantage
             ctx.shadowColor = '#15ff00';
             ctx.strokeStyle = '#15ff00';
@@ -659,7 +633,6 @@ class Game {
             ctx.strokeText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
             ctx.fillText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
         }
-
     }
 
     // Resets the board for a new round. If the player won, scales up card numbers and assigns
@@ -691,17 +664,17 @@ class Game {
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
             this.cartas = [];
             for (let i = 1; i < 11; i++) {
-                let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
+                let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "", imgRombos);
                 this.cartas.push(card);
             }
             for(let i = 1; i < 3; i++){
                 for (let i = 1; i < 10; i++) {
-                    let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "",imgPicas);
+                    let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "", imgPicas);
                     this.cartas.push(card);
                 }
             }
             for (let i = 1; i < 11; i++) {
-                let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "",imgCorazon);
+                let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "", imgCorazon);
                 this.cartas.push(card);
             }
         }
@@ -735,31 +708,24 @@ function drawScene(newTime) {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     game.draw(ctx);
     game.update(deltaTime);
-
     oldTime = newTime;
     requestAnimationFrame(drawScene);
 }
 
 function main() {
-
     const canvas = document.getElementById('canvas');
-    
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    
     ctx = canvas.getContext('2d');
 
-    // Load the custom font before starting the loop so the first frame renders correctly.    const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
-     const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
+    // Load the custom font before starting the loop so the first frame renders correctly.
+    const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
     ethnocentric.load().then(function (loadedFont) {
         document.fonts.add(loadedFont);
         // Create the game object
         game = new Game(canvas);
         drawScene(0);
+        // FIX: se eliminaron las dos lineas duplicadas que estaban fuera del .then()
+        // que causaban que se crearan dos instancias del juego corriendo al mismo tiempo
     });
-    // Create the game object
-    game = new Game(canvas);
-
-    drawScene(0);
 }
-

@@ -2,11 +2,8 @@
 Emiliano Alighieri Targiano
 Jonathan Uriel Anzures García
 Pablo Sedano Morlett
-
 This file contains the main HTML formatting for the game, including styles for the canvas and overall layout.
-
 */
-
 #canvas {
     background-image: url("../assets/canvas/fondocanvas.png");
     grid-area: main;
@@ -14,35 +11,34 @@ This file contains the main HTML formatting for the game, including styles for t
     --colorBorder: #a83331;
     border: 2px solid var(--colorBorder);
     box-shadow: 0 0 10px var(--colorBorder), 0 0 20px var(--colorBorder), 0 0 30px var(--colorBorder), 0 0 40px var(--colorBorder);
-
-    max-height: calc(90vh - 16px);
-    width: auto;
-    
+    /* FIX: width responsive que se adapta a cualquier pantalla manteniendo proporciones.
+       El canvas se estira visualmente con CSS pero mantiene sus coordenadas internas de 800x700.
+       El mousemove en game_logic.js aplica scaleX/scaleY para compensar el estiramiento
+       y que los clicks sigan funcionando correctamente en cualquier resolucion. */
+    width: min(800px, 90vw);
+    height: auto;
+    aspect-ratio: 800 / 700;
 }
 #canvas2 {
-    
     position: fixed;
     z-index: 0;
 }
-canvas {
-   
+#canvas {
+    width: min(800px, 90vw);
+    height: auto;
+    aspect-ratio: 800 / 700;
+    max-height: 90vh;
+    max-width: calc(90vh * 800 / 700); /* limita el ancho proporcional a la altura */
 }
 
 
 body {
-    
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
     margin: 0;
     overflow: hidden;
-    display:grid;
-    grid-template-rows: 10vh 1fr;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-        "header"
-        "main";
+    display: flex;          /* cambia grid por flex */
     justify-content: center;
     align-items: center;
-    justify-items: center;
 }
