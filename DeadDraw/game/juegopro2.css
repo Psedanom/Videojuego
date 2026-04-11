@@ -1,0 +1,39 @@
+#canvas {
+    background-image: url("../assets/canvas/fondocanvas.png");
+    grid-area: main;
+    z-index: 1;
+    --colorBorder: #a83331;
+    border: 2px solid var(--colorBorder);
+    box-shadow: 0 0 10px var(--colorBorder), 0 0 20px var(--colorBorder), 0 0 30px var(--colorBorder), 0 0 40px var(--colorBorder);
+
+    max-height: calc(90vh - 16px);
+    width: auto;
+    
+}
+#canvas2 {
+    
+    position: fixed;
+    z-index: 0;
+}
+canvas {
+   
+}
+
+
+body {
+    
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: hidden;
+    display:grid;
+    grid-template-rows: 10vh 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "header"
+        "main";
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+}
