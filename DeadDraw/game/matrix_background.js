@@ -1,20 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-    <script src="juegopro_2.js"></script>
-    <script src="card_pool.js"></script> <!--Loot pool de las cartas -->
-    <script src="dialogue_pool.js"></script> <!--Pool de diálogos -->
-    <link rel="stylesheet" href="juegopro2.css">
-</head>
-<body>
-    <canvas id="canvas2"></canvas>  
-    <canvas id='canvas'></canvas>
-    
-    <script> main(); </script>
-    
-    <script>
+function matrixBackground() {
+        
         const canvas2 = document.getElementById("canvas2");
         const ctx2 = canvas2.getContext("2d");
 
@@ -49,8 +34,4 @@
         }
 
         setInterval(draw, 30);
-
-
-    </script>
-</body>
-</html>
+    }

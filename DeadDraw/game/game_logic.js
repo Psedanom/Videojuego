@@ -30,294 +30,7 @@ Possible values for `pantalla`:
 - 'dialogo'        : pre-level dialogue screen; displays an NPC line before the round begins.
 */
 
-const imgCorazon = new Image();
-imgCorazon.src = '../assets/corazon.png';
 
-const imgRombos = new Image();
-imgRombos.src = '../assets/rombos.png';
-
-const imgPicas = new Image();
-imgPicas.src = '../assets/picas.png';
-
-const imgDialogue = new Image();
-imgDialogue.src = '../assets/dialogue_box.png';
-
-const imgMaton = new Image();
-imgMaton.src = '../assets/maton.png';
-
-
-// Looping audio element played while dialogue text is scrolling onto screen
-const dialogueSound = document.createElement("audio");
-dialogueSound.src = "../assets/sound/textscroll.wav";
-
-// In-place Fisher-Yates shuffle taken from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-function shuffle(array) {
-    let currentIndex = array.length;
-
-    // While there remain elements to shuffle...
-    while (currentIndex != 0) {
-
-        // Pick a remaining element...
-        let randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
-    }
-}
-
-// Returns a random integer in [min, max] (both endpoints inclusive).
-// Taken from https://coreui.io/blog/how-to-generate-a-random-number-in-javascript/#:~:text=Remember,%20while%20JavaScript%27s%20random%20numbers,Yes,%20while%20Math.
-const getRandomIntegerInclusive = (min, max) => {
-    min = Math.ceil(min)
-    max = Math.floor(max)
-
-    return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-//Countdown timer displayed during gameplay
-class Tiempo {
-    constructor(tiempoSegundos = 100) {
-        this.tiempolim = tiempoSegundos * 1000; // Remaining time in milliseconds; converted from seconds
-        this.time = 0;
-    }
-    // Subtracts the elapsed time since the last frame from the remaining limit
-    contador(deltatime) {
-        this.time = deltatime;
-        this.tiempolim -= this.time;
-    }
-    draw(ctx) {
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText("Tiempo restante " + Math.floor(this.tiempolim / 1000), canvasWidth - 200, 30);
-    }
-}
-//Holds and renders all player stats: health bar, current health, and money
-class Player {
-    constructor(x, y, width, height, maxHealth, startingMoney = 0) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.maxHealth = maxHealth;
-        this.health = maxHealth;
-        this.money = startingMoney;
-    }
-    draw(ctx) {
-        ctx.fillStyle = "black";
-        ctx.fillRect((this.x), (this.y), this.width, this.height);
-        // healthli is the pixel width of the filled portion of the health bar,
-        // proportional to (current health / max health)
-        let healthli = (this.health / this.maxHealth) * this.width;
-        ctx.fillStyle = "red";
-        ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.health, this.width - 35, this.height + 12);
-        ctx.fillStyle = "yellow";
-        ctx.font = "20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.money, canvasWidth / 2, this.height + 12);
-    }
-}
-//Clickable rectangular button, used for the weapon slot and the discard pile
-class Botones {
-    constructor(x, y, width, height,text = "") {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.text = text;
-    }
-    draw(ctx) {
-        
-        ctx.fillStyle = "white";
-        ctx.fillRect((this.x), (this.y), this.width, this.height);
-
-        neonText(20, '#fb45f2', this.text, this.x +100 , this.y +33);
-        
-
-    }
-    // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
-    tocando(mx, my) {
-        return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
-    }
-}
-
-class Dialogue {
-    constructor(texto, character = imgMaton) {
-        this.x = canvasWidth / 2 - 400;
-        this.y = canvasHeight - canvasHeight / 4;
-        this.texto = texto;
-        this.caracteresVisibles = 0; // How many characters are currently visible (grows each frame)
-        this.velocidad = 0.2; // Characters revealed per frame (fractional to slow the scroll)
-        this.done = false; // True once the full text has been revealed
-        this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
-        this.characterx = canvasWidth - 400;
-        this.charactery = canvasHeight - 420;
-
-        // Prevents the scroll sound from being re-triggered every frame while text is scrolling
-        this.soundDone = false; // True after the sound has been started for this dialogue instance
-
-    }
-    update() {
-        // Advance the visible character counter by the scroll speed
-        this.caracteresVisibles += this.velocidad;
-        // Start the scroll sound on the first frame that text begins appearing,
-        // then set soundDone so it isn't triggered again for this dialogue
-        if (!this.soundDone && this.caracteresVisibles < this.texto.length) {
-            dialogueSound.play();
-            this.soundDone = true;
-
-
-        }
-        if (this.caracteresVisibles >= this.texto.length) {
-            dialogueSound.pause();
-            dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
-
-        }
-
-    }
-    draw(ctx) {
-        ctx.drawImage(imgMaton, this.characterx, this.charactery, 400, 300);
-        ctx.drawImage(imgDialogue, this.x, this.y, 800, canvasHeight / 4);
-        ctx.textAlign = "left";
-        ctx.font = "15px Ethnocentric";
-        ctx.fillStyle = "white";
-
-        // Slice the full string down to however many characters have been revealed so far
-        let textoMostrado = this.texto.substring(0, Math.floor(this.caracteresVisibles));
-
-        // Vertical spacing in pixels between each wrapped line
-        let lineheight = 20;
-        // Split on '\n' to support manual line breaks in dialogue strings.
-        // Technique sourced from https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
-        let words = textoMostrado.split('\n');
-        for (let i = 0; i < words.length; i++) {
-            ctx.fillText(words[i], this.x + 226, this.y + 80 + (i * lineheight));
-
-        }
-    }
-
-
-}
-
-class Cards {
-    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.number = number;  // The face value of the card (damage dealt, health restored)
-        this.type = type;      // Suit string "diamantes", "treboles", or "corazones"
-        this.scale = scale;    // Render scale multiplier, set to 1.2 on hover for a growth effect
-        this.used = used;      // True once the card has been played and removed from the board
-        this.inboard = inboard; // True while the card is currently visible on the game board
-        this.enMazo = enMazo;  // True while the card is still in the deck, waiting to be drawn
-        this.habilidad = habilidad; // Special ability string (e.g. "enemieslos", "killhealth"). Empty string means no ability.
-        this.img = img;        // The suit image asset drawn on the card face
-    }
-    draw(ctx) {
-        ctx.fillStyle = "black";
-        ctx.drawImage(this.img, this.x,
-            this.y,
-            this.width * this.scale,
-            this.height * this.scale);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.number, this.x + 90, this.y + 30);
-        ctx.font = "10px Arial";
-        ctx.fillText(this.habilidad,this.x + 50, this.y+100);
-        
-    }
-    contains(mx, my) {
-        return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
-    }
-
-    // Repositions the card to (x, y) without changing any other state 
-    // used when forcing a card to a specific slot (weapon zone, discard pile)
-    defx(x) {
-        this.x = x;
-    }
-    update() {
-        if (this.isHovered) {
-            this.scale = 1.2;
-        } else {
-            this.scale = 1;
-        }
-    }
-    click(x, y) {
-        this.x = x;
-        this.y = y;
-        this.used = true;
-
-    }
-
-}
-
-class CardEnemie extends Cards {
-    // Applies this enemy card's full damage directly to the player's health (no weapon reduction)
-    actionUse(player) {
-        player.health -= this.number;    
-    }
-    // Applies this enemy card's damage reduced by the weapon card's value (num).
-    // If the weapon is stronger than the enemy, no damage is taken.
-    actionWeapon(player, num) {
-        this.daño = this.number - num; // Net damage after weapon mitigation
-        if (this.daño < 0) {
-            return player.health;
-        }
-        player.health -= this.daño;
-    }
-    arma() {
-        return false;
-    }
-    enemie() {
-        return true;
-    }
-    esVida() {
-        return false;
-    }
-}
-class CardVida extends Cards {
-    // Restores health by this card's number, capping at maxHealth (20).
-    // Has no effect if the player is already at full health.
-    actionUse(player) {
-        if (player.health < 20) {
-            if (player.health + this.number > 20) {
-                player.health = 20;
-            }
-            else {
-                player.health += this.number;
-            }
-        }
-    }
-    arma() {
-        return false;
-    }
-    esVida() {
-        return true;
-    }
-}
-
-class CardEspada extends Cards {
-    recallNum() {
-        return this.number;
-    }
-    arma() {
-        return true;
-    }
-    esVida() {
-        return false;
-    }
-    enemie(){
-        return false;
-    }
-}
 
 class Game {
     constructor(canvas) {
@@ -427,6 +140,125 @@ class Game {
         this.ctab -= 1;
         this.cartasUsadas.push(this.card_clicked);
     }
+    //cheks wether there is an armas inside the array, then depending moves the card or cards to the corresponding position
+    cardIntroductionInArmas(){
+        if (this.hayArma) {
+            this.giveUsadasPosition();
+            for (let cartas of this.cartasArma) { 
+                cartas.click(this.xus, this.yus);
+                this.cartasUsadas.push(cartas);
+            }
+            this.cartasArma = [];
+            this.insertCardsIntoArmasArray()
+            this.moverCartasArma(this.card_clicked,0);
+            this.poolAbilities();
+            
+        }
+        else if(!this.hayArma){ 
+            this.insertCardsIntoArmasArray();
+            console.log(this.cartasArma);
+            this.moverCartasArma(this.card_clicked,0)
+            this.card_arma = this.card_clicked;
+            this.poolAbilities();
+        }
+    }
+    //Checks what type of card is beeing used
+    checkingCardTypeUsed(){
+        if (this.card_clicked.esVida()) {
+            // Only one heal card may be played per board turn; curacionUsada blocks further heals
+            if (!this.curacionUsada) {
+               this.card_clicked.actionUse(this.playerHealth);
+            }
+            this.curacionUsada = true;
+            // xus / yus: target coordinates where the card snaps to inside the discard pile zone
+            this.moveCartasUsadas();
+        }
+        else if(this.card_clicked.enemie()){
+            // Non-heal card played directly to discard: apply its effect and send it to the pile
+            this.moveCartasUsadas();
+            this.card_clicked.actionUse(this.playerHealth);   
+        }
+        else{
+            this.moveCartasUsadas();
+        }
+    }
+    //checks wether the player can play a card enemie in the weapon place or not
+    //also if the player can play the enemie card this function is in charge of making the interaction correct like reducind the players health
+    cardEnemiaCardWeaponInteraction(){
+        if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
+            this.card_clicked.used = true;
+            this.cartasArma.push(this.card_clicked);
+            // Find the weapon card inside cartasArma to read its damage value
+            for (let cartasrma of this.cartasArma) { //CHECAR
+                if (cartasrma.arma()) {
+                    this.numberArma = cartasrma.number; // Weapon's attack value used to reduce incoming enemy damage
+                }
+            }
+            this.card_clicked.actionWeapon(this.playerHealth, this.numberArma);
+            // xar / yar: target coordinates where the card snaps to inside the weapon slot zone.
+            // posicion offsets each successive card slightly to the right so they don't stack perfectly.
+            this.moverCartasArma(this.card_clicked,this.posicion);
+            this.playerHealth.money += Math.floor(this.card_clicked.number / 2);
+            // Store this enemy's number so the next enemy played must be strictly lower
+            this.numeroAnterior = this.card_clicked.number;
+            this.posicion += 20; // Shift the next card slightly right within the weapon slot
+        }
+        else {
+            this.clicked = false;
+        }
+    }
+//For every card in the deck checks if this card is being clicked and returns whatever the card has to do
+    cardsClickedIntercations(){
+        for (let card of this.cartas) {
+            if (card.isHovered && !card.used) {
+                this.clicked = true;
+                this.card_clicked = card;
+                break;
+            }
+            else if (this.armas.isHovered && this.clicked) {
+                if (this.card_clicked.arma()) {
+                    this.cardIntroductionInArmas();
+                    this.posicion = 20;
+                }
+                // A weapon card is already in the slot and the player is playing an enemy card against it.
+                // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
+                // OR be the first enemy played against this weapon (cartasArma.length < 2).
+                else if (this.hayArma && this.card_clicked.enemie()) {
+                    this.cardEnemiaCardWeaponInteraction();
+                }
+                break;
+            }
+            else if (this.usadas.isHovered && this.clicked) {
+                this.checkingCardTypeUsed();
+            }
+
+        }
+    }
+
+    abilityObtention(card){
+        this.probabilidadhabilidad = getRandomIntegerInclusive(0,10);
+        if (this.probabilidadhabilidad <= 9) { // to debug weapons abilities flip >= into a <=
+            this.habilidadProb = getRandomIntegerInclusive(0,10);
+            if (card.arma()) {
+                // habilidadProb 0-4  (50%): reduce all board enemies by 1
+                if (this.habilidadProb >= 0 && this.habilidadProb <= 4) {
+                    card.habilidad = "enemieslos";
+                }
+                // habilidadProb 5-7  (30%): heal the player for half the weapon's value
+                else if (this.habilidadProb >= 5 && this.habilidadProb <= 7) {
+                    card.habilidad = "killhealth";
+                }
+                // habilidadProb 8-9  (20%): automatically discard one enemy from the board
+                else if (this.habilidadProb >= 8 && this.habilidadProb <= 9) {
+                    card.habilidad = "passEnemie";
+                }
+                // habilidadProb > 9  (unreachable with current 0-10 range; dead branch)
+                else {
+                    card.habilidad = "healthpassEnemie";
+                }
+            }
+        }
+    }
     initObjects() {
 
         for (let i = 1; i < 11; i++) {
@@ -522,88 +354,7 @@ class Game {
         });
         canvas.addEventListener('click', (event) => {
             if (pantalla === 'juego') {
-                for (let card of this.cartas) {
-                    if (card.isHovered && !card.used) {
-                        this.clicked = true;
-                        this.card_clicked = card;
-                        break;
-                    }
-                    else if (this.armas.isHovered && this.clicked) {
-                        if (this.card_clicked.arma()) {
-                            if (this.hayArma) {
-                                this.giveUsadasPosition();
-                                for (let cartas of this.cartasArma) { 
-                                    cartas.click(this.xus, this.yus);
-                                    this.cartasUsadas.push(cartas);
-                                }
-                                this.cartasArma = [];
-                                this.insertCardsIntoArmasArray()
-                                this.moverCartasArma(this.card_clicked,0);
-                                this.poolAbilities();
-                                
-                            }
-
-                            else if(!this.hayArma){ 
-                                this.insertCardsIntoArmasArray();
-                                console.log(this.cartasArma);
-                                this.moverCartasArma(this.card_clicked,0)
-                                this.card_arma = this.card_clicked;
-                                this.poolAbilities();
-                            }
-                            this.posicion = 20;
-                        }
-                        // A weapon card is already in the slot and the player is playing an enemy card against it.
-                        // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
-                        // OR be the first enemy played against this weapon (cartasArma.length < 2).
-                        else if (this.hayArma && this.card_clicked.enemie()) {
-                            if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
-                                this.card_clicked.used = true;
-                                this.cartasArma.push(this.card_clicked);
-                                // Find the weapon card inside cartasArma to read its damage value
-                                for (let cartasrma of this.cartasArma) { //CHECAR
-                                    if (cartasrma.arma()) {
-                                        this.numberArma = cartasrma.number; // Weapon's attack value used to reduce incoming enemy damage
-                                    }
-                                }
-                                this.card_clicked.actionWeapon(this.playerHealth, this.numberArma);
-                                // xar / yar: target coordinates where the card snaps to inside the weapon slot zone.
-                                // posicion offsets each successive card slightly to the right so they don't stack perfectly.
-                                this.moverCartasArma(this.card_clicked,this.posicion);
-                                this.playerHealth.money += Math.floor(this.card_clicked.number / 2);
-                                // Store this enemy's number so the next enemy played must be strictly lower
-                                this.numeroAnterior = this.card_clicked.number;
-                                this.posicion += 20; // Shift the next card slightly right within the weapon slot
-                            }
-                            else {
-                                this.clicked = false;
-                            }
-                        }
-                        break;
-                    }
-                    else if (this.usadas.isHovered && this.clicked) {
-                        if (this.card_clicked.esVida()) {
-                            // Only one heal card may be played per board turn; curacionUsada blocks further heals
-                            if (!this.curacionUsada) {
-                               this.card_clicked.actionUse(this.playerHealth);
-                            }
-                            this.curacionUsada = true;
-                            // xus / yus: target coordinates where the card snaps to inside the discard pile zone
-                            this.moveCartasUsadas();
-                            break;
-                        }
-                        else if(this.card_clicked.enemie()){
-                            // Non-heal card played directly to discard: apply its effect and send it to the pile
-                            this.moveCartasUsadas();
-                            this.card_clicked.actionUse(this.playerHealth);
-                            break;
-                        }
-                        else{
-                            this.moveCartasUsadas();
-                            break;
-                        }
-                    }
-
-                }
+                this.cardsClickedIntercations();
             }
             else if (pantalla === 'dialogo' && !this.dialogueDone) {
                 this.dialogueDone = !this.dialogueDone;     // Any click skips the rest of the dialogue and jumps straight to gameplay
@@ -876,7 +627,6 @@ class Game {
 
             ctx.strokeText(cardPool[this.card3].nombre, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 200);
             ctx.fillText(cardPool[this.card3].nombre, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 200);
-
             // Green for the card advantage
             ctx.shadowColor = '#15ff00';
             ctx.strokeStyle = '#15ff00';
@@ -956,28 +706,7 @@ class Game {
             // probabilidadhabilidad is a 0-10 roll that acts as an ability-trigger gate
             // habilidadProb is a second 0-10 roll that selects which specific ability is assigned.
             for (let card of this.cartas) {
-                this.probabilidadhabilidad = getRandomIntegerInclusive(0,1);
-                if (this.probabilidadhabilidad >= 9) { // to debug weapons abilities flip >= into a <=
-                    this.habilidadProb = getRandomIntegerInclusive(0,1);
-                    if (card.arma()) {
-                        // habilidadProb 0-4  (50%): reduce all board enemies by 1
-                        if (this.habilidadProb >= 0 && this.habilidadProb <= 4) {
-                            card.habilidad = "enemieslos";
-                        }
-                        // habilidadProb 5-7  (30%): heal the player for half the weapon's value
-                        else if (this.habilidadProb >= 5 && this.habilidadProb <= 7) {
-                            card.habilidad = "killhealth";
-                        }
-                        // habilidadProb 8-9  (20%): automatically discard one enemy from the board
-                        else if (this.habilidadProb >= 8 && this.habilidadProb <= 9) {
-                            card.habilidad = "passEnemie";
-                        }
-                        // habilidadProb > 9  (unreachable with current 0-10 range; dead branch)
-                        else {
-                            card.habilidad = "healthpassEnemie";
-                        }
-                    }
-                }
+                this.abilityObtention(card);
             }
         }
         this.contador = new Tiempo();
@@ -1024,18 +753,3 @@ function main() {
     drawScene(0);
 }
 
-function neonText(size, color, text, x, y,line=2,blur=30, align="center",) {
-    // Texto con color neon
-            ctx.textAlign = align;
-            ctx.font = `${size}px Ethnocentric`;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = blur;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = line;
-            ctx.fillStyle = '#ffffff';
-            ctx.strokeText(text, x, y);
-            ctx.fillText(text, x, y);
-            ctx.shadowBlur = 0;
-            
-
-}

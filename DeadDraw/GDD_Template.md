@@ -40,13 +40,11 @@
     3. [Music Needed](#music-needed)
 8. [Schedule](#schedule)
 
-## _Game Design_
-
----
+## **_Game Design_**
 
 ### **Summary**
 
-DeadDraw es un roguelite de cartas de un solo jugador con una estética cyberpunk oscura, inspirado en el diseño del juego de cartas Scoundrel y presentado con una interfaz moderna inspirada en la de Balatro. El jugador encarna a un mercenario silencioso que se ve dentro del mundo criminal en una ciudad dominada por dos facciones.Tras haber perdido algo de mucho valor a manos de los mafiosos, el protagonista deberá abrirse paso a través de una serie de cuartos controlados por distintos enemigos, tomando decisiones que constantemente pondrán a prueba sus habilidades de supervivencia y de estrategia. La narrativa se comunica principalmente por medio de ambientación visual, es decir se evita los diálogos directos, reforzando así, el tono crudo y decadente del mundo en el que vive nuestro protagonista.
+DeadDraw es un roguelite de cartas de un solo jugador con una estética cyberpunk oscura, inspirado en el diseño del juego de cartas Scoundrel y presentado con una interfaz moderna inspirada en la de Balatro. El jugador encarna a un mercenario silencioso que se ve dentro del mundo criminal en una ciudad dominada por la mafia.Tras haber perdido algo de mucho valor a manos de los mafiosos, el protagonista deberá abrirse paso a través de una serie de cuartos controlados por distintos enemigos, tomando decisiones que constantemente pondrán a prueba sus habilidades de supervivencia y de estrategia. La narrativa se comunica principalmente por medio de ambientación visual, es decir se evita los diálogos directos, reforzando así, el tono crudo y decadente del mundo en el que vive nuestro protagonista.
 
 El objetivo principal del jugador es el de completar “runs” para avanzar en la historia y derrotar a jefes de cada facción. Sin embargo, una vez alcanzado este punto, el juego permite continuar el run de manera indefinida hasta que el jugador sea derrotado, de esta manera se fomenta la búsqueda de puntajes altos y aumentando la rejugabilidad.
 
