@@ -1,4 +1,11 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
 
+This file contains the dialogue that the player will encounter
+
+*/
 
 const preGameDialogue = [                     // LIMITE DE CARACTERES EN DONDE EMPIEZA el //
     'No podrás encontrar al jefe sin antes\nenfrentarte a nosotros.',

@@ -1,3 +1,11 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the sources for the images and audios used in the game
+
+*/
 
 const imgCorazon = new Image();
 imgCorazon.src = '../assets/corazon.png';

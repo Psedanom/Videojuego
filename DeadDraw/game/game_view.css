@@ -1,3 +1,12 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the main HTML formatting for the game, including styles for the canvas and overall layout.
+
+*/
+
 #canvas {
     background-image: url("../assets/canvas/fondocanvas.png");
     grid-area: main;

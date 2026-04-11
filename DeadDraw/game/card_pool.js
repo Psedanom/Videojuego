@@ -1,3 +1,32 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the special card loot that the player can get after defeating the whole deck
+
+template:
+
+{
+        nombre: "Card name",
+        ventaja: "Card's advantage",
+        desventaja: "Card's disadvantage",
+        makeCard() {
+            return new <Type of card or cards>
+        },
+
+        sideEffects() {
+
+            return [
+                new 
+                <Type of card or cards>
+            ]
+        }
+    }
+
+
+
+*/ 
 
 
 const cardPool = [

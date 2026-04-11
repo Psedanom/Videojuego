@@ -1,3 +1,12 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the background matrix effect on the main html file
+
+*/
+
 // Utility function to draw neon-styled text with a colored glow.
 function neonText(size, color, text, x, y, line = 2, blur = 30, align = "center",) {
     // Texto con color neon

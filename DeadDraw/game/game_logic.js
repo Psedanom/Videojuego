@@ -1,3 +1,13 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the game logic, including the main Game class that manages
+the game state, player interactions, win/loss conditions, and screen transitions.
+*/
+
+
 "use strict";
 
 
