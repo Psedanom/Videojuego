@@ -1,3 +1,12 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the background matrix effect on the main html file
+
+*/
+
 function matrixBackground() {
         
         const canvas2 = document.getElementById("canvas2");

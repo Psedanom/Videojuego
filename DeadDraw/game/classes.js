@@ -1,4 +1,11 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
 
+This file contains the class definitions needed for the game.
+
+*/
 //Countdown timer displayed during gameplay
 class Tiempo {
     constructor(tiempoSegundos = 100) {

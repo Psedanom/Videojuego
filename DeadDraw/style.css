@@ -1,3 +1,14 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains formatting for several screens
+
+*/
+
+
+
 /* esta funcion carga la fuente del titulo, descarga el .ttf de dafont y ponlo en la misma carpeta */
 @font-face {
     font-family: 'Ethnocentric';
