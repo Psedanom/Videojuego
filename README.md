@@ -1,15 +1,15 @@
 Instrucciones para correr DeadDraw>
-Se tiene que correr el archivo game_view.html que esta dentro de la carpeta dwaddraw y dentro de la carpeta game
+Se tiene que correr el archivo game_view.html que esta dentro de la carpeta Deaddraw y dentro de la carpeta game
 se puede correr con live server o desde los archivo abriendolo desde el navegador
  
 ¿En qué escena comienza el prototipo?
 Comienza con una pantalla de inicio (como un menu)
-Seguiria un dialogo que le da un poco de xontexto narrativo al personaje
+Seguiria un dialogo que le da un poco de contexto narrativo al personaje
 Por ultimo empezaria el juego principal
 
 ¿cuáles son los controles del juego?
 "Espacio" para continuar en las pantallas de perdido,ganado y al inicio en el menu
-"click izquierdo"para poder clickear las cartas y los botones, tambien para saltar los dialogos 
+"click izquierdo" para poder clickear las cartas y los botones, tambien para saltar los dialogos 
 "p" para ganar la ronda (este control es para debugging)
 Ademas la forma de jugar el juego esta en el archivo mecanicas.html
 
