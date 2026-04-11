@@ -1,5 +1,5 @@
 Instrucciones para correr DeadDraw>
-Se tiene que correr el archivo juegopro2.html 
+Se tiene que correr el archivo game_view.html 
 se puede correr con live server o desde los archivo abriendolo desde el navegador
  
 ¿En qué escena comienza el prototipo?
