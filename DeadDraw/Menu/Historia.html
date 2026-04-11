@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HISTORIA</title>
+
+
+
+    <link rel="stylesheet" href="../style.css">
+    
+    <link rel="stylesheet" href="Historia.css">
+
+</head>
+<body>
+
+    <!-- lienzo para el efecto matrix de caracteres cayendo -->
+    <canvas id="canvas"></canvas>
+
+    <!-- contenedor principal de la página -->
+    <div class="contenido">
+
+        <!-- título de la sección -->
+        <h2 class="titulo-seccion">HISTORIA</h2>
+        <div class="linea"></div>
+
+        <!-- aquí irá el contenido cuando estés listo -->
+        <div class="texto">
+
+        </div>
+
+        <!-- botón para volver al menú principal -->
+        <a href="../index.html" class="Menu">
+        <div class="btn">
+            <span>Menu</span>
+        </div>
+        </a>
+
+    </div>
+
+    <script>
+        // agarra el elemento canvas del HTML por su id
+        const canvas = document.getElementById("canvas");
+
+        // obtiene el contexto 2D para poder dibujar
+        const ctx = canvas.getContext("2d");
+
+        // ajusta el canvas para cubrir toda la ventana
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // alfabeto cirílico para el efecto matrix
+        const letters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
+        const lettersArray = letters.split("");
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        // todas las columnas empiezan en la fila 1
+        const drops = [];
+        for (let i = 0; i < columns; i++) { drops[i] = 1; }
+
+        function draw() {
+            // estela semitransparente para que los caracteres se desvanezcan
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // caracteres en rojo, consistente con la paleta del juego
+            ctx.fillStyle = "#e8002d";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // reinicia la gota aleatoriamente cuando llega al fondo
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) { drops[i] = 0; }
+                drops[i]++;
+            }
+        }
+
+        // ~33 fps
+        setInterval(draw, 30);
+
+        // ajusta el canvas si se redimensiona la ventana
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+
+</body>
+</html>

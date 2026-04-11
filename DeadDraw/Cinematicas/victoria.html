@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VICTORIA</title>
+
+    <!-- conecta el archivo de estilos externo (style.css) -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+
+        /* fija el canvas al fondo de toda la pantalla, detrás de todo el contenido */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0; /* queda debajo de .contenido (z-index: 1) */
+        }
+
+        /* agrupa el título y textos, los apila en columna y los centra */
+        .contenido {
+            position: relative;
+            z-index: 1;            /* se muestra encima del canvas */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;             /* espacio uniforme entre cada hijo */
+            text-align: center;
+        }
+
+        /* título principal: fuente personalizada, brillo azul neón, aparece animado */
+        .titulo-victoria {
+            font-family: 'Ethnocentric', monospace;
+            font-size: 90px;
+            color: white;
+            text-shadow: 0 0 20px #00e5ff, 0 0 60px #00e5ff; /* doble halo azul */
+            opacity: 0;                                        /* empieza invisible */
+            animation: subir 1s ease-out 0.5s forwards;       /* aparece 0.5s después de cargar */
+        }
+
+        /* subtítulo: más pequeño, azul, aparece 0.7s después que el título */
+        .subtitulo {
+            font-family: 'Ethnocentric', monospace;
+            font-size: 18px;
+            color: #00e5ff;
+            letter-spacing: 6px;
+            opacity: 0;
+            animation: subir 1s ease-out 1.2s forwards; /* delay mayor que el título */
+        }
+
+        /* texto de instrucción: aparece al final y parpadea indefinidamente */
+        .click-texto {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #888;           /* gris apagado para no competir con el título */
+            letter-spacing: 4px;
+            opacity: 0;
+            /* dos animaciones combinadas: primero aparece, luego parpadea para siempre */
+            animation: subir 1s ease-out 2s forwards, parpadear 1.5s ease-in-out 2s infinite;
+            cursor: pointer;
+        }
+
+        /* animación de entrada: los elementos suben desde abajo mientras aparecen */
+        @keyframes subir {
+            0%   { opacity: 0; transform: translateY(20px); } /* abajo e invisible */
+            100% { opacity: 1; transform: translateY(0); }    /* posición normal y visible */
+        }
+
+        /* animación de parpadeo: alterna entre visible y casi invisible */
+        @keyframes parpadear {
+            0%, 100% { opacity: 1; }   /* visible en los extremos del ciclo */
+            50%       { opacity: 0.2; } /* casi invisible en el punto medio */
+        }
+
+        /* capa de destello azul que cubre toda la pantalla al cargar la página */
+        .flash {
+            position: fixed;
+            inset: 0;              /* equivale a top/right/bottom/left: 0 a la vez */
+            background: #00e5ff;
+            z-index: 99;           /* encima de todo, incluyendo el contenido */
+            animation: flash 0.8s ease-out forwards;
+            pointer-events: none;  /* no bloquea los clicks del usuario */
+        }
+
+        /* animación del flash: desaparece rápidamente desde semitransparente a invisible */
+        @keyframes flash {
+            0%   { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        /* línea decorativa horizontal debajo del título, aparece entre título y subtítulo */
+        .linea {
+            width: 80px;
+            height: 3px;
+            background: #00e5ff;
+            box-shadow: 0 0 10px #00e5ff; /* brillo azul que combina con el título */
+            opacity: 0;
+            animation: subir 1s ease-out 1s forwards; /* aparece entre título (0.5s) y subtítulo (1.2s) */
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- capa del destello azul, se muestra al entrar y desaparece sola -->
+    <div class="flash"></div>
+
+    <!-- lienzo para el efecto matrix de caracteres cayendo -->
+    <canvas id="canvas"></canvas>
+
+    <!-- contenedor principal: al hacer click navega a la siguiente pantalla -->
+    <div class="contenido" onclick="window.location.href='juegopro2.html'">
+        <h1 class="titulo-victoria">VICTORIA</h1>
+        <div class="linea"></div>                          <!-- separador decorativo -->
+        <p class="subtitulo">EL SISTEMA HA SIDO DERROTADO</p>
+        <p class="click-texto">[ CLICK PARA CONTINUAR ]</p>
+    </div>
+
+    <script>
+
+        // agarra el elemento canvas del HTML por su id
+        const canvas = document.getElementById("canvas");
+
+        // obtiene el contexto 2D, necesario para poder dibujar dentro del canvas
+        const ctx = canvas.getContext("2d");
+
+        // ajusta el canvas para que cubra exactamente toda la ventana del navegador
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // string con el alfabeto cirílico (ruso) que se usará como caracteres del efecto
+        const letters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
+
+        // convierte el string en array para poder elegir caracteres individuales al azar
+        const lettersArray = letters.split("");
+
+        // tamaño de cada carácter en píxeles (define también el ancho de cada columna)
+        const fontSize = 16;
+
+        // calcula cuántas columnas caben en el ancho total de la pantalla
+        const columns = canvas.width / fontSize;
+
+        // array que guarda la posición Y (fila) actual de cada gota/columna
+        const drops = [];
+        for (let i = 0; i < columns; i++) { drops[i] = 1; } // todas empiezan en la fila 1
+
+        // dibuja un frame del efecto matrix y actualiza las posiciones
+        function draw() {
+
+            // pinta un rectángulo negro semitransparente sobre todo el canvas
+            // esto crea la estela: los caracteres anteriores se van desvaneciendo poco a poco
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // define el color y tamaño de los caracteres que se van a dibujar
+            ctx.fillStyle = "#00e5ff"; // azul neón, consistente con la paleta de la pantalla
+            ctx.font = fontSize + "px monospace";
+
+            // recorre cada columna y dibuja un carácter aleatorio en su posición actual
+            for (let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // cuando la gota llega al fondo, tiene un 2.5% de probabilidad de reiniciarse
+                // esto hace que las columnas no se reseteen todas al mismo tiempo
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) { drops[i] = 0; }
+
+                // baja la gota una fila hacia abajo
+                drops[i]++;
+            }
+        }
+
+        // llama a draw() cada 30ms (~33 fps), generando la animación continua
+        setInterval(draw, 30);
+
+        // si el usuario cambia el tamaño de la ventana, ajusta el canvas para que siga llenando

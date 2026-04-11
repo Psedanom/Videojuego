@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
 Emiliano Alighieri Targiano
 Jonathan Uriel Anzures García
@@ -10,87 +11,91 @@ This file contains formatting for several screens
 
 
 /* esta funcion carga la fuente del titulo, descarga el .ttf de dafont y ponlo en la misma carpeta */
+=======
+/* carga la fuente del titulo, descarga el .ttf de dafont y ponlo en la misma carpeta */
+>>>>>>> c4c9010 (Organizacion en carpetas,comentado del codigod)
 @font-face {
     font-family: 'Ethnocentric';
-    src: url('ethnocentric.otf') format('opentype');
+    src: url('./assets/fonts/Ethnocentric-Regular.otf') format('opentype');
 }
 
-/* esta funcion quita los margenes por defecto */
+/* quita los margenes y padding por defecto del navegador, y hace que el tamaño incluya el borde */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* esta funcion centra todo el contenido en la pantalla */
+/* centra todo el contenido vertical y horizontalmente, fondo casi negro, espacio entre hijos */
 body {
     background-color: #080808;
-    min-height: 100vh;
+    min-height: 100vh;        /* ocupa al menos toda la altura de la pantalla */
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 44px;
+    flex-direction: column;   /* apila los hijos en columna (uno debajo del otro) */
+    align-items: center;      /* centra horizontalmente */
+    justify-content: center;  /* centra verticalmente */
+    gap: 44px;                /* espacio entre elementos hijos */
 }
 
-/* esta funcion le da estilo al titulo */
+/* estilo del titulo principal: fuente personalizada, tamaño grande, brillo rojo tipo neón */
 h1 {
     font-family: 'Ethnocentric', monospace;
     font-size: 80px;
-    letter-spacing: 8px;
+    letter-spacing: 8px;                        /* separa las letras para mayor impacto */
     color: white;
-    text-shadow: 0 0 20px #ff0033, 0 0 60px #ff0033;
+    text-shadow: 0 0 20px #ff0033,              /* primer halo rojo cercano */
+                 0 0 60px #ff0033;              /* segundo halo más difuso y amplio */
 }
 
-
-/* esta funcion hace que el link no se expanda mas de lo necesario */
+/* evita que el link ocupe todo el ancho y centra el botón dentro de él */
 a {
-    text-decoration: none;
+    text-decoration: none;   /* quita el subrayado típico de los links */
     display: flex;
-    justify-content: center;
+    justify-content: center; /* centra el botón horizontalmente dentro del link */
 }
 
-/* esta funcion le da forma y color al boton */
+/* forma, color y comportamiento base del botón */
 .btn {
     width: 200px;
     height: 70px;
-    background: #111;
-    border: 3px solid #e8002d;
-    cursor: pointer;
-    transition: 0.3s;
+    background: #111;             /* fondo oscuro en reposo */
+    border: 3px solid #e8002d;    /* borde rojo que define la silueta */
+    cursor: pointer;              /* cambia el cursor a mano al pasar por encima */
+    transition: 0.3s;             /* suaviza todos los cambios visuales del hover */
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: center;          /* centra el texto verticalmente */
+    justify-content: center;      /* centra el texto horizontalmente */
 }
 
-/* esta funcion se encarga de que el boton resalte cuando se pasa el mouse por encima de el */
+/* efecto hover: el botón se llena de rojo, crece un poco y emite brillo */
 .btn:hover {
-    background: #e8002d;
-    transform: scale(1.05);
-    box-shadow: 0 0 30px #e8002d;
+    background: #e8002d;           /* fondo rojo al hacer hover */
+    transform: scale(1.05);        /* agranda el botón un 5% */
+    box-shadow: 0 0 30px #e8002d;  /* halo rojo exterior tipo neón */
 }
 
-/* esta funcion le da estilo al texto del boton */
+/* estilo del texto dentro del botón: misma fuente del título pero más pequeña */
 .btn span {
     font-family: 'Ethnocentric', monospace;
     font-size: 20px;
-    letter-spacing: 8px;
+    letter-spacing: 8px;  /* espaciado amplio para mantener la estética del diseño */
     color: white;
 }
 
+/* contenedor del contenido principal, se apila en columna y queda por encima del canvas */
 .contenido {
-    position: relative;
-    z-index: 1;
+    position: relative;    /* necesario para que z-index funcione */
+    z-index: 1;            /* se muestra por encima del canvas (z-index: 0) */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 44px;
+    gap: 44px;             /* mismo espaciado que el body para consistencia visual */
 }
 
-/* esta funcion pone el canvas detras de todo */
+/* fija el canvas al fondo de la pantalla, detrás de todo el contenido */
 canvas {
-    position: fixed;
+    position: fixed;  /* no se mueve al hacer scroll */
     top: 0;
     left: 0;
-    z-index: 0;
+    z-index: 0;       /* queda debajo del .contenido (z-index: 1) */
 }
