@@ -1,5 +1,5 @@
 Instrucciones para correr DeadDraw>
-Se tiene que correr el archivo game_view.html 
+Se tiene que correr el archivo game_view.html que esta dentro de la carpeta dwaddraw y dentro de la carpeta game
 se puede correr con live server o desde los archivo abriendolo desde el navegador
  
 ¿En qué escena comienza el prototipo?
