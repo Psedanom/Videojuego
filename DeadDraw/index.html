@@ -1,10 +1,15 @@
-<!--
+
+<!-- 
+
 Emiliano Alighieri Targiano
 Jonathan Uriel Anzures García
 Pablo Sedano Morlett
 
- This File contains the main menu of the game, with a matrix effect in the background and buttons to navigate to the mechanics and story pages.
+This file contains the the index for the game, main menu with matrix background effect
+
 -->
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -12,130 +17,93 @@ Pablo Sedano Morlett
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DEAD DRAW</title>
-
-    <!-- conecta el archivo de estilos externo (style.css) -->
     <link rel="stylesheet" href="style.css">
-
     <style>
-        /* fija el canvas al fondo de la pantalla, detrás de todo el contenido */
         canvas {
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 0; /* queda debajo de .contenido que tiene z-index mayor */
+            z-index: 0;
         }
     </style>
 </head>
 <body>
 
-    <!-- lienzo para el efecto matrix de caracteres cayendo -->
     <canvas id="canvas"></canvas>
+<div class="contenido">
+    <h1>
+        <span class="letra">D</span>
+        <span class="letra">E</span>
+        <span class="letra">A</span>
+        <span class="letra">D</span>
+        <span class="espacio"> </span>
+        <span class="letra">D</span>
+        <span class="letra">R</span>
+        <span class="letra">A</span>
+        <span class="letra">W</span>
+    </h1>
 
-    <!-- contenedor principal: agrupa el título y los botones de navegación -->
-    <div class="contenido">
-        <h1>
-            <!-- cada letra del título es un span individual
-                 esto permite animarlas o estilizarlas por separado desde CSS -->
-            <span class="letra">D</span>
-            <span class="letra">E</span>
-            <span class="letra">A</span>
-            <span class="letra">D</span>
-            <span class="espacio"> </span> <!-- espacio entre palabras -->
-            <span class="letra">D</span>
-            <span class="letra">R</span>
-            <span class="letra">A</span>
-            <span class="letra">W</span>
-        </h1>
+    <a href="../DeadDraw/game/game_view.html">
+        <div class="btn">
+            <span>PLAY</span>
+        </div>
+    </a>
 
-        <!-- botón que lleva al juego principal -->
-        <a href="./game/game_view.html">
-            <div class="btn">
-                <span>PLAY</span>
-            </div>
-        </a>
+    <a href="mecanicas.html">
+        <div class="btn">
+            <span>MECANICAS</span>
+        </div>
+    </a>
 
-       <!-- botón que lleva a la página de mecánicas -->
-       <a href="./Menu/mecanicas.html">
-            <div class="btn">
-                <span>MECANICAS</span>
-            </div>
-       </a>
-
-        <!-- botón que lleva a la página de Historia -->
-        <a href="./Menu/Historia.html">
-            <div class="btn">
-                <span>HISTORIA</span>
-            </div>
-        </a>
-    </div>
+    <a href="../DeadDraw/Menu/Historia.html">
+        <div class="btn">
+            <span>HISTORIA</span>
+        </div>
+    </a>
+</div>
 
     <script>
-
-        // agarra el elemento canvas del HTML por su id
         const canvas = document.getElementById("canvas");
-
-        // obtiene el contexto 2D, necesario para dibujar dentro del canvas
         const ctx = canvas.getContext("2d");
 
-        // ajusta el canvas para que cubra exactamente toda la ventana
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // string con el alfabeto cirílico (ruso) usado como caracteres del efecto
         const letters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
-
-        // convierte el string en array para elegir caracteres individuales al azar
         const lettersArray = letters.split("");
 
-        // tamaño de cada carácter en píxeles (también define el ancho de cada columna)
         const fontSize = 16;
-
-        // calcula cuántas columnas caben en el ancho total de la pantalla
         const columns = canvas.width / fontSize;
 
-        // array que guarda la posición Y (fila) actual de cada columna
         const drops = [];
         for (let i = 0; i < columns; i++) {
-            drops[i] = 1; // todas las columnas empiezan en la fila 1
+            drops[i] = 1;
         }
 
-        // dibuja un frame del efecto matrix y actualiza las posiciones
         function draw() {
-
-            // rectángulo negro semitransparente que cubre todo el canvas
-            // la baja opacidad (0.05) crea la estela: los caracteres se desvanecen gradualmente
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // color rojo para los caracteres, consistente con la paleta del juego
             ctx.fillStyle = "#e8002d";
             ctx.font = fontSize + "px monospace";
 
-            // recorre cada columna y dibuja un carácter aleatorio en su posición actual
             for (let i = 0; i < drops.length; i++) {
                 const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-                // cuando la gota llega al fondo, tiene 2.5% de probabilidad de reiniciarse
-                // el valor aleatorio evita que todas las columnas se reseteen a la vez
                 if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
-
-                // baja la gota una fila hacia abajo en cada frame
                 drops[i]++;
             }
         }
 
-        // ejecuta draw() cada 30ms (~33 fps), generando la animación continua
         setInterval(draw, 30);
 
-        // si el usuario redimensiona la ventana, el canvas se ajusta para seguir llenando la pantalla
         window.addEventListener("resize", () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
-
     </script>
 
 </body>
