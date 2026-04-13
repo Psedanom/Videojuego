@@ -15,8 +15,9 @@ This file contains the main HTML formatting for the game, including styles for t
     border: 2px solid var(--colorBorder);
     box-shadow: 0 0 10px var(--colorBorder), 0 0 20px var(--colorBorder), 0 0 30px var(--colorBorder), 0 0 40px var(--colorBorder);
 
-    max-height: calc(90vh - 16px);
-    width: auto;
+        /* No esta funcionando, todavia se necesita arreglar que no toque el fondo */
+        /* max-height: calc(90vh - 16px);
+        width: auto; */
     
 }
 #canvas2 {
