@@ -3,47 +3,43 @@ Emiliano Alighieri Targiano
 Jonathan Uriel Anzures García
 Pablo Sedano Morlett
 
-This file contains the main HTML formatting for the game, including styles for the canvas and overall layout.
-
+Main layout + responsive canvas fix
 */
 
 #canvas {
     background-image: url("../assets/canvas/fondocanvas.png");
-    grid-area: main;
     z-index: 1;
+
     --colorBorder: #a83331;
     border: 2px solid var(--colorBorder);
-    box-shadow: 0 0 10px var(--colorBorder), 0 0 20px var(--colorBorder), 0 0 30px var(--colorBorder), 0 0 40px var(--colorBorder);
+    box-shadow: 0 0 10px var(--colorBorder),
+                0 0 20px var(--colorBorder),
+                0 0 30px var(--colorBorder),
+                0 0 40px var(--colorBorder);
 
-        /* No esta funcionando, todavia se necesita arreglar que no toque el fondo */
-        /* max-height: calc(90vh - 16px);
-        width: auto; */
-    
+
+    width: min(800px, 90vw);
+    height: auto;
+    aspect-ratio: 800 / 700;
+
+    max-height: 90vh;
+    max-width: calc(90vh * 800 / 700);
 }
+
 #canvas2 {
-    
     position: fixed;
     z-index: 0;
 }
-canvas {
-   
-}
-
 
 body {
-    
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
     margin: 0;
     overflow: hidden;
-    display:grid;
-    grid-template-rows: 10vh 1fr;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-        "header"
-        "main";
+
+    
+    display: flex;
     justify-content: center;
     align-items: center;
-    justify-items: center;
 }

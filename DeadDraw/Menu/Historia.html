@@ -1,0 +1,160 @@
+<!--
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This File contains the story of the game, with a matrix effect in the background and a fade-in animation for the content.
+
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HISTORIA</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="Historia.css">
+
+</head>
+<body>
+
+    <!-- lienzo para el efecto matrix de caracteres cayendo -->
+    <canvas id="canvas"></canvas>
+
+    <!-- contenedor principal de la página -->
+    <div class="contenido">
+
+        <!-- título de la sección -->
+        <h2 class="titulo-seccion">HISTORIA</h2>
+        <div class="linea"></div>
+
+        <div class="texto">
+
+            <p>
+                Dead Draw transcurre en un submundo digital-físico conocido como <strong>La Red Muerta</strong>: un ecosistema clandestino que opera en las capas más profundas de una sociedad corporativa desbordada. Aquí no existen leyes, solo contratos. No existe la suerte, solo el cálculo.
+            </p>
+
+            <p>
+                Las dos fuerzas que dominan La Red son <strong>Corp.Bio</strong>, especialistas en curación y control biológico, y <strong>Corp.Syn</strong>, el sindicato financiero que mueve el capital y el equipo de mercado negro. Ambas facciones se disputan el control de los operadores independientes que sobreviven en los nodos de combate.
+            </p>
+
+            <h2>El Submundo</h2>
+            <p>
+                La Red Muerta no es un lugar físico ni completamente virtual. Es el espacio donde ambas realidades colisionan. Sus habitantes viven bajo presión constante, donde cada decisión tiene consecuencias irreversibles y los recursos escasean por diseño.
+            </p>
+
+            <h2>El Protocolo</h2>
+            <p>
+                En los niveles más bajos de La Red operan las arenas de combate clandestinas. Los participantes pelean usando un sistema codificado de cartas que canalizan daño, defensa y recursos reales. A este sistema se le conoce como <strong>Dead Draw</strong>.
+            </p>
+
+            <h2>Las Facciones</h2>
+            <p>
+                ♦ Corp.Bio — Biomédica <br>
+                ♦ Corp.Syn — Sindicato
+            </p>
+
+            <h2>Corp.Bio</h2>
+            <p>
+                Controlan los suministros de curación en toda La Red. Sus contratos ofrecen restauración y aumento de vitalidad a cambio de créditos y lealtad. Son los únicos que pueden devolverte la vida, pero siempre tienen un precio.
+            </p>
+
+            <h2>Corp.Syn</h2>
+            <p>
+                Dueños del capital. Ofrecen préstamos, multiplicadores de dinero y acceso al mercado negro de equipo avanzado. No curan cuerpos, financian decisiones. Cada deuda tiene interés compuesto en violencia.
+            </p>
+
+            <h2>El Operador</h2>
+            <p>
+                El jugador asume el rol de un operador independiente atrapado en los nodos de combate de La Red. Sin alianzas definidas ni recursos garantizados, debe ascender de nodo en nodo enfrentando amenazas que escalan con cada run.
+            </p>
+
+            <p>
+                Alinearse con una facción cambia las herramientas disponibles. Corp.Bio favorece la resistencia y la curación. Corp.Syn potencia el daño y la economía. Ninguna alianza es gratuita.
+            </p>
+
+            <h2>Los Enemigos</h2>
+            <p>
+                Las amenazas en La Red no son aleatorias. Cada enemigo responde a patrones calculados. Algunos drenan recursos, otros destruyen cartas del mazo. Anticipar su comportamiento es la única ventaja real disponible.
+            </p>
+
+            <h2>El Ciclo</h2>
+            <p>
+                Cada run es una nueva entrada al protocolo. Los recursos no persisten, pero el conocimiento sí. Con cada partida el operador desbloquea mejoras permanentes: mayor vitalidad base, nuevas cartas en el pool, arquetipos de mazo alternativos.
+            </p>
+
+            <p>
+                En La Red Muerta no se gana ni se pierde definitivamente. Solo se aprende a calcular mejor antes del siguiente turno.
+            </p>
+
+            <h2>La Verdad del Protocolo</h2>
+            <p>
+                Dead Draw no es solo un sistema de combate. Es un experimento. Cada decisión tomada en las arenas es registrada, analizada y usada para algo que el operador aún no comprende del todo. Sobrevivir es solo la primera capa del problema.
+            </p>
+
+        </div>
+
+        <!-- botón para volver al menú principal -->
+        <a href="../index.html" class="Menu">
+            <div class="btn">
+                <span>Menu</span>
+            </div>
+        </a>
+
+    </div>
+
+    <script>
+        // agarra el elemento canvas del HTML por su id
+        const canvas = document.getElementById("canvas");
+
+        // obtiene el contexto 2D para poder dibujar
+        const ctx = canvas.getContext("2d");
+
+        // ajusta el canvas para cubrir toda la ventana
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // alfabeto cirílico para el efecto matrix
+        const letters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
+        const lettersArray = letters.split("");
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        // todas las columnas empiezan en la fila 1
+        const drops = [];
+        for (let i = 0; i < columns; i++) { drops[i] = 1; }
+
+        function draw() {
+            // estela semitransparente para que los caracteres se desvanezcan
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // caracteres en rojo, consistente con la paleta del juego
+            ctx.fillStyle = "#e8002d";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // reinicia la gota aleatoriamente cuando llega al fondo
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) { drops[i] = 0; }
+                drops[i]++;
+            }
+        }
+
+        // ~33 fps
+        setInterval(draw, 30);
+
+        // ajusta el canvas si se redimensiona la ventana
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the styling for the mechanics page, with a matrix effect in the background and a fade-in animation for the content.
+
+*/
+
+/* Contenedor principal del texto */
+.texto {
+    max-width: 900px;       /* Limita el ancho para mejor legibilidad */
+    color: white;           /* Texto blanco, pensado para fondo oscuro */
+    font-family: monospace; /* Tipografía de código, da estética retro/técnica */
+    line-height: 1.7;       /* Espaciado entre líneas generoso, mejora lectura */
+    font-size: 18px;        /* Tamaño base cómodo para lectura */
+    text-align: justify;    /* Alinea el texto a ambos márgenes */
+    padding: 20px;          /* Espacio interior para que el texto no toque los bordes */
+}
+
+/* Títulos de sección */
+.texto h2 {
+    margin-top: 30px;               /* Separa el título del contenido anterior */
+    margin-bottom: 10px;            /* Pequeño espacio antes del párrafo siguiente */
+    color: #ff0033;                 /* Color rojo brillante, crea contraste y jerarquía */
+    text-shadow: 0 0 10px #ff0033;  /* Efecto de brillo/neón alrededor del título */
+    letter-spacing: 2px;            /* Separa las letras, hace el título más impactante */
+}
+
+/* Párrafos */
+.texto p {
+    margin-bottom: 15px;  /* Espacio entre párrafos para no amontonar el texto */
+    opacity: 0.9;         /* Ligeramente transparente en reposo (efecto sutil) */
+}
+
+/* Botón volver */
+.Menu {
+    margin-top: 30px;  /* Separa el botón del contenido de arriba */
+}
+
+/* Efecto hover en párrafos */
+.texto p:hover {
+    opacity: 1;                      /* Al pasar el mouse, el párrafo se vuelve 100% visible */
+    text-shadow: 0 0 5px #ff0033;   /* Aparece un leve brillo rojo al hacer hover */
+    transition: 0.3s;               /* La animación dura 0.3 segundos, se ve suave */
+}
+
+/* fija el canvas al fondo, detrás de todo */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+/* contenedor principal: encima del canvas, centrado */
+.contenido {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    gap: 20px;
+}
+
+/* título principal de la página */
+h1 {
+    font-family: 'Ethnocentric', monospace;
+    font-size: 60px;
+    color: white;
+    letter-spacing: 8px;
+    text-shadow: 0 0 20px #e8002d, 0 0 60px #e8002d;
+}
