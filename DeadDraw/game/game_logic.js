@@ -38,8 +38,11 @@ Possible values for `pantalla`:
 - 'juego'          : main gameplay screen; shows cards, player HUD, and the countdown timer.
 - 'seleccion_carta': card-pick screen shown between levels; player chooses one of three offered cards.
 - 'dialogo'        : pre-level dialogue screen; displays an NPC line before the round begins.
+- 'gameLore'       : initial dialogues at start of each run.
 */
 
+let lore = 0;
+let loreDialogueGenerated = false;
 
 
 class Game {
@@ -196,6 +199,11 @@ class Game {
     //also if the player can play the enemie card this function is in charge of making the interaction correct like reducind the players health
     cardEnemiaCardWeaponInteraction(){
         if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
+            $.post("http://127.0.0.1:3000/post").done(function (data) {
+
+                alert("Data Loaded: " + data);
+
+            });
             this.card_clicked.used = true;
             this.cartasArma.push(this.card_clicked);
             // Find the weapon card inside cartasArma to read its damage value
@@ -337,7 +345,7 @@ class Game {
 
 
                 else if (pantalla === 'start') {
-                    pantalla = 'dialogo';
+                    pantalla = 'gameLore';
                 }
             }
         });
@@ -375,35 +383,21 @@ class Game {
 
             // Card-selection screen detect which offered card the player clicked and add it to the deck
             else if (pantalla === 'seleccion_carta') {
-                for (let card of this.arregloCartas) {
-                    if (card.isHovered) {
-                        console.log("[Selection] Deck size before adding card:", this.cartas.length);
-                        this.cartas.push(card); // Add the chosen card to the player's deck
-                        console.log("[Selection] Deck size after adding chosen card:", this.cartas.length);
+                this.cardSelectionScreen();
+                
+            }
 
-                        // Determine which cardPool entry corresponds to the selected card
-                        // so we can retrieve its side effects
-                        let cardIndex;
-                        if (card === this.cartaSeleccionada1) cardIndex = this.card1;
-                        else if (card === this.cartaSeleccionada2) cardIndex = this.card2;
-                        else cardIndex = this.card3;
-
-                        // Each card in the pool may come with penalty cards (side effects) added to the deck
-                        for (let sideCard of cardPool[cardIndex].sideEffects()) {
-                            this.cartas.push(sideCard);
-                        }
-                        console.log("[Selection] Deck size after side effects:", this.cartas.length);
-
-                        shuffle(this.cartas); // Shuffle the deck after adding the new cards
-                        console.log("[Selection] Deck size before newLevel(true):", this.cartas.length);
-                        this.newLevel(true); // Start next level with the updated deck
-                        console.log("[Selection] Deck size after newLevel(true):", this.cartas.length);
-                        this.dialogueDone = false; // Reset so the next pre-level dialogue is shown
-                        this.preDialogueGenerated = false;
-                        this.dialogue_pregame = false;
-                        pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
-                        break;
-
+            else if (pantalla === 'gameLore') {
+                if (!loreDialogueGenerated) {
+                }
+                else {
+                    dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
+                    dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
+                    lore += 1;
+                    console.log("lore: " + lore);
+                    loreDialogueGenerated = false; // Allow the next dialogue to be generated on the following frame
+                    if (lore >= preRunDialogue.length) {
+                        pantalla = 'juego';
                     }
                 }
             }
@@ -473,8 +467,31 @@ class Game {
            
 
             neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
+
+
             
         }
+        
+        else if (pantalla === 'gameLore')
+        {
+            
+
+            if (!loreDialogueGenerated) {
+                this.loreDialogue = new Dialogue(preRunDialogue[lore]);
+                this.loreDialogue.draw(ctx);
+                loreDialogueGenerated = true;
+            }
+            else
+            {
+    
+                this.loreDialogue.update();
+                this.loreDialogue.draw(ctx);
+
+
+            }
+
+        }
+
         else if (pantalla === 'dialogo') {
             //Antes de jugar el nivel
             if (!this.preDialogueGenerated) {
@@ -726,6 +743,44 @@ class Game {
         this.playerHealth = new Player(15, 15, 100, 20, 20, this.playerHealth.money);
 
         shuffle(this.cartas);
+    }
+
+    cardSelectionScreen() {
+        for (let card of this.arregloCartas) {
+            if (card.isHovered) {
+                this.selectCard(card);
+                
+                console.log("[Selection] Deck size after side effects:", this.cartas.length);
+                shuffle(this.cartas); // Shuffle the deck after adding the new cards
+                console.log("[Selection] Deck size before newLevel(true):", this.cartas.length);
+                this.newLevel(true); // Start next level with the updated deck
+                console.log("[Selection] Deck size after newLevel(true):", this.cartas.length);
+                this.dialogueDone = false; // Reset so the next pre-level dialogue is shown
+                this.preDialogueGenerated = false;
+                this.dialogue_pregame = false;
+                pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
+                break;
+
+                    }
+                }
+            }
+
+    selectCard(card){
+                        console.log("[Selection] Deck size before adding card:", this.cartas.length);
+                        this.cartas.push(card); // Add the chosen card to the player's deck
+                        console.log("[Selection] Deck size after adding chosen card:", this.cartas.length);
+
+                        // Determine which cardPool entry corresponds to the selected card
+                        // so we can retrieve its side effects
+                        let cardIndex;
+                        if (card === this.cartaSeleccionada1) cardIndex = this.card1;
+                        else if (card === this.cartaSeleccionada2) cardIndex = this.card2;
+                        else cardIndex = this.card3;
+
+                        // Each card in the pool may come with penalty cards (side effects) added to the deck
+                        for (let sideCard of cardPool[cardIndex].sideEffects()) {
+                            this.cartas.push(sideCard);
+                        }
     }
 }
 
