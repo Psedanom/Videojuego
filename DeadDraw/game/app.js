@@ -20,7 +20,7 @@ app.post('/post', (req, res) => {
         if (err) throw err;
         console.log('Connected to MySQL Database!');
         // Example query             
-        connection.query('insert into DeadDraw.player (username) values("jose");', (err, results, fields) => {
+        connection.query('select * from Jugador;', (err, results, fields) => {
             if (err) throw err;
             console.log(results);
 

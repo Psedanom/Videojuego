@@ -199,11 +199,13 @@ class Game {
     //also if the player can play the enemie card this function is in charge of making the interaction correct like reducind the players health
     cardEnemiaCardWeaponInteraction(){
         if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
-            $.post("http://127.0.0.1:3000/post").done(function (data) {
 
-                alert("Data Loaded: " + data);
+            //Sql data base API proof of concept.
+            // $.post("http://127.0.0.1:3000/post").done(function (data) {
 
-            });
+            //     alert("Data Loaded: " + data);
+
+            // });
             this.card_clicked.used = true;
             this.cartasArma.push(this.card_clicked);
             // Find the weapon card inside cartasArma to read its damage value

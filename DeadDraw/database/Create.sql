@@ -1,6 +1,8 @@
+-- Active: 1776136239786@@cc7mri.h.filess.io@3307@DeadDraw_DB_wheneveram
 DROP SCHEMA IF EXISTS DeadDraw;
 CREATE SCHEMA DeadDraw;
 USE DeadDraw; 
+
 
 /* DROP SCHEMA IF EXISTS DeadDraw_DB_wheneveram;
 CREATE SCHEMA DeadDraw_DB_wheneveram;
@@ -16,6 +18,9 @@ CREATE TABLE Jugador(
     dinero INT NOT NULL DEFAULT 0,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
 
 CREATE TABLE Bitacora (
     idBitacora INT AUTO_INCREMENT PRIMARY KEY,
