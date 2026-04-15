@@ -65,6 +65,8 @@ class Game {
         this.seleccionando = false; // True while the card selection screen is showing a new set of cards to pick from
         this.preDialogueGenerated = false; // Guards against regenerating the pre-level dialogue object every frame
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
+        this.nivel = 0;
+        this.boss = false;
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -298,7 +300,7 @@ class Game {
         this.contador = new Tiempo();
         this.armas = new Botones(100, 470, 120, 170,"");
         this.usadas = new Botones(650, 400, 120, 170,"");
-        this.pasarRonda = new Botones(600,100,240,50,"Skip round");
+        this.pasarRonda = new Botones(600,100,240,50,"");
         this.playerHealth = new Player(15, 15, 100, 20, 20);
         shuffle(this.cartas);
 
@@ -362,6 +364,7 @@ class Game {
                         card.isHovered = card.contains(mouseX, mouseY);
                 }
                 this.armas.isHovered = this.armas.tocando(mouseX, mouseY);
+                this.pasarRonda.isHovered = this.pasarRonda.tocando(mouseX,mouseY);
                 this.usadas.isHovered = this.usadas.tocando(mouseX, mouseY);
             }
             else if (pantalla === 'seleccion_carta') {
@@ -375,6 +378,23 @@ class Game {
         canvas.addEventListener('click', (event) => {
             if (pantalla === 'juego') {
                 this.cardsClickedIntercations();
+                if(this.pasarRonda.isHovered && this.ctab == 4){
+                    if(this.boss){
+                            this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
+                    }
+                    for(let i = 0; i<4; i++){
+                        for(let card of this.cartas){
+                            if (card.inboard){
+                                card.inboard = false;
+                                
+                                this.cartas.push(card);
+                                this.index = this.cartas.indexOf(card);
+                                break;
+                            }
+                        }
+                        this.cartas.splice(this.index,1);
+                    }
+                }
             }
             else if (pantalla === 'dialogo' && !this.dialogueDone) {
                 this.dialogueDone = !this.dialogueDone;     // Any click skips the rest of the dialogue and jumps straight to gameplay
@@ -407,8 +427,15 @@ class Game {
 
     }
     update(deltaTime) {
-
-
+        if(this.nivel%5 == 0 && this.nivel != 0){
+            this.boss = true;
+        }
+        else{
+            this.boss = false;
+        }
+        this.pasarRonda.update();
+        this.usadas.update();
+        this.armas.update();
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -506,7 +533,12 @@ class Game {
             }
         }
         else if (pantalla === 'juego') {
-
+            if(this.boss){
+                ctx.fillStyle = "white";
+                ctx.font = "20px Ethnocentric";
+                ctx.textAlign = "left";
+                ctx.fillText("El jefe ha llegado", canvasWidth/2,50);
+            }
             //ROUND IN PROGRESS
             if (!this.gameover) {
                 this.armas.draw(ctx);
@@ -731,6 +763,7 @@ class Game {
                     card.number = Math.floor(card.number *= this.dificultad);
                 }
             }
+            this.nivel++;
             // Randomly assign a special ability to each weapon card.
             // probabilidadhabilidad is a 0-10 roll that acts as an ability-trigger gate
             // habilidadProb is a second 0-10 roll that selects which specific ability is assigned.
@@ -807,7 +840,7 @@ function main() {
     ctx = canvas.getContext('2d');
 
     // Load the custom font before starting the loop so the first frame renders correctly.    const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
-     const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
+     const ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/Ethnocentric-Regular.otf)');
     ethnocentric.load().then(function (loadedFont) {
         document.fonts.add(loadedFont);
         // Create the game object

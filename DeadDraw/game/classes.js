@@ -55,19 +55,28 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height) {
+    constructor(x, y, width, height,scale = 1) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.scale = scale
     }
     draw(ctx) {
         ctx.fillStyle = "white";
-        ctx.fillRect((this.x), (this.y), this.width, this.height);
+        ctx.fillRect((this.x), (this.y), this.width *this.scale, this.height * this.scale);
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
+    }
+    update(){
+        if(this.isHovered){
+            this.scale = 1.2;
+        }
+        else{
+            this.scale = 1;
+        }
     }
 }
 
