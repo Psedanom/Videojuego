@@ -9,6 +9,9 @@ Main layout + responsive canvas fix
     background-image: url("../game/assets/canvas/fondocanvas.png");
     z-index: 1;
 
+    /* Makes a glowing border taken from:
+    https://unused-css.com/blog/css-outer-glow/
+     */
     --colorBorder: #a83331;
     border: 2px solid var(--colorBorder);
     box-shadow: 0 0 10px var(--colorBorder),
@@ -17,12 +20,13 @@ Main layout + responsive canvas fix
                 0 0 40px var(--colorBorder);
 
 
-    width: min(800px, 90vw);
+     /* Causes bugs with cards hitboxes not implemented yet */
+    /* width: min(800px, 90vw);
     height: auto;
     aspect-ratio: 800 / 700;
 
     max-height: 90vh;
-    max-width: calc(90vh * 800 / 700);
+    max-width: calc(90vh * 800 / 700); */
 }
 
 #canvas2 {
