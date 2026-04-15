@@ -3,203 +3,101 @@ Emiliano Alighieri Targiano
 Jonathan Uriel Anzures García
 Pablo Sedano Morlett
 
-This file contains the narrative introduction screen shown before the game starts.
-Typewriter effect per slide, with skip option, redirects to game_view.html.
+Pantalla de introducción narrativa antes de iniciar el juego.
+Muestra texto automáticamente, permite omitir la intro y redirige al juego.
+Incluye un fondo animado tipo Matrix.
 -->
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- Permite que la página se adapte a distintos tamaños de pantalla -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título de la pestaña -->
     <title>DEAD DRAW — PROTOCOLO INICIADO</title>
 
+    <!-- Archivo de estilos -->
     <link rel="stylesheet" href="introduccion.css">
 </head>
+
 <body>
 
+    <!-- Canvas utilizado para dibujar el fondo animado -->
     <canvas id="canvas"></canvas>
+
+    <!-- Capa utilizada para el efecto de transición (fade) -->
     <div id="fade-overlay"></div>
 
+    <!-- Contenedor principal de la interfaz -->
     <div id="intro-wrapper">
 
-        <div id="slide-counter">PROTOCOLO — <span id="num-actual">01</span> / <span id="num-total">05</span></div>
-        <div class="linea-top"></div>
-
+        <!-- Contenedor del texto narrativo -->
         <div id="slide-box">
+
+            <!-- Título del slide -->
             <div id="slide-label"></div>
-            <div id="slide-text"><span id="cursor"></span></div>
+
+            <!-- Texto principal -->
+            <div id="slide-text"></div>
+
         </div>
 
+        <!-- Barra de progreso (actualmente no se usa) -->
         <div id="progress-bar-wrap">
             <div id="progress-bar"></div>
         </div>
 
+        <!-- Controles -->
         <div id="controls">
+
+            <!-- Botón para omitir la introducción -->
             <button class="btn-intro" id="btn-skip">[ OMITIR ]</button>
-            <button class="btn-intro" id="btn-next" disabled>[ SIGUIENTE ]</button>
+
         </div>
 
     </div>
 
     <script>
-        // ── slides de la introducción ──────────────────────────────────────
-        const slides = [
-            {
-                label: "// BIENVENIDO, OPERADOR",
-                text: "Bienvenido a La Red Muerta. Un ecosistema clandestino donde no existen leyes, solo contratos. No existe la suerte, solo el cálculo."
-            },
-            {
-                label: "// CONTEXTO",
-                text: "Dos facciones controlan todo: Corp.Bio administra la curación y la vitalidad. Corp.Syn maneja el capital y el equipo de mercado negro. Ninguna trabaja gratis."
-            },
-            {
-                label: "// TU ROL",
-                text: "Eres un operador independiente atrapado en los nodos de combate. Sin alianzas, sin garantías. Tu única herramienta: un mazo de cartas que canaliza daño, defensa y recursos."
-            },
-            {
-                label: "// EL PROTOCOLO",
-                text: "Cada run es una nueva entrada al protocolo. Los recursos no persisten entre partidas, pero el conocimiento sí. Aprende los patrones. Calcula antes de actuar."
-            },
-            {
-                label: "// ADVERTENCIA",
-                text: "Dead Draw no es solo un sistema de combate. Cada decisión que tomes es registrada. Sobrevivir es solo la primera capa del problema.\n\n— Suerte, operador."
-            }
-        ];
+    /* Contenido de los slides */
+    let s = [
+        ["// BIENVENIDO","Bienvenido a La Red Muerta..."],
+        ["// CONTEXTO","Dos facciones controlan todo..."],
+        ["// TU ROL","Eres un operador independiente..."],
+        ["// EL PROTOCOLO","Cada run es una nueva entrada..."],
+        ["// ADVERTENCIA","Dead Draw no es solo un sistema..."]
+    ];
 
-        // ── estado ─────────────────────────────────────────────────────────
-        let slideActual = 0;
-        let typewriterTimeout = null;
-        let escribiendo = false;
+    /* Índice del slide actual */
+    let i = 0;
 
-        // ── elementos ──────────────────────────────────────────────────────
-        const slideText   = document.getElementById("slide-text");
-        const cursor      = document.getElementById("cursor");
-        const slideLabel  = document.getElementById("slide-label");
-        const numActual   = document.getElementById("num-actual");
-        const numTotal    = document.getElementById("num-total");
-        const progressBar = document.getElementById("progress-bar");
-        const btnNext     = document.getElementById("btn-next");
-        const btnSkip     = document.getElementById("btn-skip");
-        const fadeOverlay = document.getElementById("fade-overlay");
+    /* Muestra los slides automáticamente */
+    function mostrar(){
+        document.getElementById("slide-label").textContent = s[i][0];
+        document.getElementById("slide-text").textContent = s[i][1];
 
-        numTotal.textContent = String(slides.length).padStart(2, "0");
+        i++;
 
-        // ── typewriter ─────────────────────────────────────────────────────
-        function typewrite(texto) {
-            escribiendo = true;
-            btnNext.disabled = true;
-            slideText.innerHTML = "";
-            slideText.appendChild(cursor);
-
-            let i = 0;
-            const velocidad = 28; // ms por carácter
-
-            function siguiente() {
-                if (i < texto.length) {
-                    const nodo = document.createTextNode(texto[i]);
-                    slideText.insertBefore(nodo, cursor);
-                    i++;
-                    typewriterTimeout = setTimeout(siguiente, velocidad);
-                } else {
-                    escribiendo = false;
-                    btnNext.disabled = false;
-                }
-            }
-
-            siguiente();
+        if(i < s.length){
+            setTimeout(mostrar, 2000);
+        } else {
+            setTimeout(ir, 1000);
         }
+    }
 
-        // ── cargar slide ───────────────────────────────────────────────────
-        function cargarSlide(idx) {
-            const slide = slides[idx];
+    /* Redirige al juego */
+    function ir(){
+        location.href = "../game/game_view.html";
+    }
 
-            numActual.textContent = String(idx + 1).padStart(2, "0");
-            progressBar.style.width = ((idx + 1) / slides.length * 100) + "%";
+    /* Permite omitir la introducción */
+    document.getElementById("btn-skip").onclick = ir;
 
-            slideLabel.textContent = slide.label;
-            slideLabel.classList.remove("visible");
-            requestAnimationFrame(() => slideLabel.classList.add("visible"));
+    /* Inicia la secuencia */
+    mostrar();
 
-            btnNext.textContent = (idx === slides.length - 1) ? "[ INICIAR ]" : "[ SIGUIENTE ]";
-
-            typewrite(slide.text);
-        }
-
-        // ── avanzar o completar typewriter ─────────────────────────────────
-        function avanzar() {
-            if (escribiendo) {
-                clearTimeout(typewriterTimeout);
-                slideText.innerHTML = slides[slideActual].text;
-                slideText.appendChild(cursor);
-                escribiendo = false;
-                btnNext.disabled = false;
-                if (slideActual === slides.length - 1) btnNext.textContent = "[ INICIAR ]";
-                return;
-            }
-
-            if (slideActual < slides.length - 1) {
-                slideActual++;
-                cargarSlide(slideActual);
-            } else {
-                irAlJuego();
-            }
-        }
-
-        // ── redirigir al juego ─────────────────────────────────────────────
-        function irAlJuego() {
-            fadeOverlay.classList.add("active");
-            setTimeout(() => {
-                window.location.href = "../game/game_view.html";
-            }, 900);
-        }
-
-        // ── eventos ────────────────────────────────────────────────────────
-        btnNext.addEventListener("click", avanzar);
-        btnSkip.addEventListener("click", irAlJuego);
-
-        document.addEventListener("keydown", (e) => {
-            if (e.code === "Space" || e.code === "Enter") {
-                e.preventDefault();
-                if (!btnNext.disabled || escribiendo) avanzar();
-            }
-            if (e.code === "Escape") irAlJuego();
-        });
-
-        // ── inicio ─────────────────────────────────────────────────────────
-        cargarSlide(0);
-
-        // ── canvas matrix ──────────────────────────────────────────────────
-        const canvas  = document.getElementById("canvas");
-        const ctx     = canvas.getContext("2d");
-        canvas.width  = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const letters      = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
-        const lettersArray = letters.split("");
-        const fontSize     = 16;
-        const drops        = Array(Math.floor(canvas.width / fontSize)).fill(1);
-
-        function draw() {
-            ctx.fillStyle = "rgba(0,0,0,0.05)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#e8002d";
-            ctx.font = fontSize + "px monospace";
-            drops.forEach((y, i) => {
-                const char = lettersArray[Math.floor(Math.random() * lettersArray.length)];
-                ctx.fillText(char, i * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
-
-        setInterval(draw, 30);
-
-        window.addEventListener("resize", () => {
-            canvas.width  = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-    </script>
+</script>
 
 </body>
 </html>
