@@ -21,7 +21,7 @@ class Tiempo {
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
         ctx.textAlign = "left";
-        ctx.fillText("Tiempo restante " + Math.floor(this.tiempolim / 1000), canvasWidth - 200, 30);
+        ctx.fillText("Time left " + Math.floor(this.tiempolim / 1000), canvasWidth - 200, 30);
     }
 }
 //Holds and renders all player stats: health bar, current health, and money
