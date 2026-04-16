@@ -1,0 +1,144 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+Estilos del tutorial de Dead Draw.
+*/
+
+/* body */
+body {
+    background-color: #0a0a0a;
+    margin: 0;
+    display: block;
+    justify-content: unset;
+    min-height: unset;
+}
+
+/* fija el canvas al fondo, detrás de todo */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+/* contenedor principal: encima del canvas, centrado */
+.contenido {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    gap: 20px;
+}
+
+/* título principal de la página */
+h1 {
+    font-family: 'Ethnocentric', monospace;
+    font-size: 60px;
+    color: white;
+    letter-spacing: 8px;
+    text-shadow: 0 0 20px #e8002d, 0 0 60px #e8002d;
+}
+
+/* Contenedor principal del texto */
+.texto {
+    max-width: 900px;
+    color: white;
+    font-family: monospace;
+    line-height: 1.7;
+    font-size: 18px;
+    text-align: justify;
+    padding: 20px;
+}
+
+/* Títulos de sección */
+.texto h2 {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    color: #ff0033;
+    text-shadow: 0 0 10px #ff0033;
+    letter-spacing: 2px;
+}
+
+/* Párrafos */
+.texto p {
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+/* Efecto hover en párrafos */
+.texto p:hover {
+    opacity: 1;
+    text-shadow: 0 0 5px #ff0033;
+    transition: 0.3s;
+}
+
+/* Teclas */
+.tecla {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 0.85rem;
+    color: white;
+    margin: 0 2px;
+    font-family: monospace;
+}
+
+/* Tipos de carta */
+.carta-tipo {
+    display: inline-block;
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    margin-right: 6px;
+    letter-spacing: 1px;
+    font-family: monospace;
+}
+
+.espada  { color: #4fc3f7; border-color: #4fc3f7; }
+.enemigo { color: #ef5350; border-color: #ef5350; }
+.vida    { color: #66bb6a; border-color: #66bb6a; }
+
+/* Bloques de habilidades */
+.habilidad-bloque {
+    background: rgba(232, 0, 45, 0.05);
+    border: 1px solid rgba(232, 0, 45, 0.2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.habilidad-bloque .tag {
+    font-size: 0.85rem;
+    color: #ff0033;
+    text-shadow: 0 0 6px #ff0033;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    font-family: monospace;
+}
+
+.habilidad-bloque p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Bloques de loot */
+.loot-bloque {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-family: monospace;
+}
+
+.loot-bloque .nombre     { color: white;   font-size: 0.95rem; margin-bottom: 4px; }
+.loot-bloque .ventaja    { color: #66bb6a; font-size: 0.85rem; }
+.loot-bloque .desventaja { color: #ef5350; font-size: 0.85rem; }
