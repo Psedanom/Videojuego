@@ -1,0 +1,52 @@
+/*
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+This file contains the styling for the login and registration page, with a matrix effect in the background and a fade-in animation for the content.
+*/
+
+#loginBtn{
+    font-family:'Oswald',sans-serif;
+    font-size:0.75rem;
+    letter-spacing:4px;
+    padding:10px 28px;
+    border:1px solid #a83838;
+    background: rgb(0, 0, 0);
+    color:#ffffff;
+    cursor:pointer;
+    
+}
+#registerBtn{
+    font-family:'Oswald',sans-serif;
+    font-size:0.75rem;
+    letter-spacing:4px;
+    padding:10px 28px;
+    border:1px solid #a83838;
+    background:rgb(0, 0, 0);
+    color:#ffffff;
+    cursor:pointer;
+}
+
+#registerBtn:hover, #loginBtn:hover{
+   
+    border-color:#666;
+    
+}
+#canvas2 {
+    position: fixed;
+    z-index: -1;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: hidden;
+
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

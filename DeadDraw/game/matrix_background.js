@@ -28,7 +28,7 @@ function matrixBackground() {
             ctx2.fillStyle = "rgba(0,0,0,0.05)";
             ctx2.fillRect(0, 0, canvas2.width , canvas2.height);
 
-            ctx2.fillStyle = "#e8002d";
+            ctx2.fillStyle = "#277401";
             ctx2.font = fontSize + "px monospace";
 
             for (let i = 0; i < drops.length; i++) {

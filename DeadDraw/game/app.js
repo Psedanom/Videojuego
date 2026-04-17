@@ -31,6 +31,31 @@ app.post('/post', (req, res) => {
     res.send("Ok")
 });
 
+app.post('/register', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    console.log("posted");
+    const connection = mysql.createConnection({
+        host: '127.0.0.1',
+        user: 'root',
+        password: 'Pablouno1',
+        database: 'DeadDraw'
+    });
+    connection.connect((err) => {
+        if (err) throw err;
+        console.log('Connected to MySQL Database!');
+        // Example query             
+        connection.query('insert into jugador(correo,contrasena) values (?,?)',[username,password], (err, results, fields) => {
+            if (err) throw err;
+            console.log(results);
+
+        });
+        // Close the connection     
+        connection.end();
+    });
+    res.send("Ok")
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
