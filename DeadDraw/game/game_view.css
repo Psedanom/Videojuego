@@ -12,7 +12,7 @@ Main layout + responsive canvas fix
     /* Makes a glowing border taken from:
     https://unused-css.com/blog/css-outer-glow/
      */
-    --colorBorder: #277401;
+    --colorBorder: #a83331;
     border: 2px solid var(--colorBorder);
     box-shadow: 0 0 10px var(--colorBorder),
                 0 0 20px var(--colorBorder),

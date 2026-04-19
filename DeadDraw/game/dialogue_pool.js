@@ -32,3 +32,4 @@ const preRunDialogue = [                      // LIMITE DE CARACTERES EN DONDE E
 ];
 
 
+// En esta ciudad todo se arregla jugando cartas

@@ -497,14 +497,10 @@ class Game {
 
             neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
 
-
-            
         }
         
         else if (pantalla === 'gameLore')
         {
-            
-
             if (!loreDialogueGenerated) {
                 this.loreDialogue = new Dialogue(preRunDialogue[lore]);
                 this.loreDialogue.draw(ctx);
@@ -512,11 +508,8 @@ class Game {
             }
             else
             {
-    
                 this.loreDialogue.update();
                 this.loreDialogue.draw(ctx);
-
-
             }
 
         }
