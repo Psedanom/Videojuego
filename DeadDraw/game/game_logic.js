@@ -67,6 +67,8 @@ class Game {
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
         this.nivel = 0;
         this.boss = false;
+        this.enemigosEliminados = 0;  // counts every enemy defeated with a weapon during this run
+        this.danoRecibido = 0;        // tracks total damage taken from enemies this run
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -191,7 +193,9 @@ class Game {
         else if(this.card_clicked.enemie()){
             // Non-heal card played directly to discard: apply its effect and send it to the pile
             this.moveCartasUsadas();
-            this.card_clicked.actionUse(this.playerHealth);   
+            let vidaAntes = this.playerHealth.health; // save health before the attack to measure actual damage taken
+            this.card_clicked.actionUse(this.playerHealth);
+            this.danoRecibido += Math.max(0, vidaAntes - this.playerHealth.health); // actual health lost this interaction
         }
         else{
             this.moveCartasUsadas();
@@ -216,7 +220,10 @@ class Game {
                     this.numberArma = cartasrma.number; // Weapon's attack value used to reduce incoming enemy damage
                 }
             }
+            let vidaAntes = this.playerHealth.health; // save health before the attack to measure actual damage taken
             this.card_clicked.actionWeapon(this.playerHealth, this.numberArma);
+            this.enemigosEliminados += 1; // counts each enemy defeated with a weapon this run
+            this.danoRecibido += Math.max(0, vidaAntes - this.playerHealth.health); // actual health lost this interaction
             // xar / yar: target coordinates where the card snaps to inside the weapon slot zone.
             // posicion offsets each successive card slightly to the right so they don't stack perfectly.
             this.moverCartasArma(this.card_clicked,this.posicion);
@@ -316,38 +323,39 @@ class Game {
             }
         });
 
-
         window.addEventListener('keydown', (event) => {
 
             if (event.key == ' ') {
                 // If the round has ended, decide what to do next based on how it ended
                 if (this.gameover) {
-                    switch (this.reason) {
-                        case 1:
-                            console.log("Restarting game after losing due to health");
-                            
-                            pantalla = 'juego';
-                            this.newLevel(false);
-                            break;
-                        case 2:
-                            console.log("Restarting game after losing due to time");
-                            
-                            pantalla = 'juego';
-                            this.newLevel(false);
-                            break;
-                        case 3:
-                            console.log("Restarting game after winning by using all cards");
-                            this.dialogueDone = false;
-                            this.preDialogueGenerated = false;
-                            this.dialogue_pregame = false;
-                            pantalla = 'seleccion_carta';
-                            this.newLevel(true);
-                            break;
+                    // First press after game over goes to the summary screen
+                    if (pantalla !== 'resumen') {
+                        pantalla = 'resumen';
+                    }
+                    // Second press on the summary screen proceeds to restart or card selection
+                    else {
+                        switch (this.reason) {
+                            case 1:
+                                console.log("Restarting game after losing due to health");
+                                pantalla = 'juego';
+                                this.newLevel(false);
+                                break;
+                            case 2:
+                                console.log("Restarting game after losing due to time");
+                                pantalla = 'juego';
+                                this.newLevel(false);
+                                break;
+                            case 3:
+                                console.log("Restarting game after winning by using all cards");
+                                this.dialogueDone = false;
+                                this.preDialogueGenerated = false;
+                                this.dialogue_pregame = false;
+                                pantalla = 'seleccion_carta';
+                                this.newLevel(true);
+                                break;
+                        }
                     }
                 }
-
-
-
                 else if (pantalla === 'start') {
                     pantalla = 'gameLore';
                 }
@@ -703,7 +711,79 @@ class Game {
             ctx.strokeText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
             ctx.fillText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
         }
+        else if (pantalla === 'resumen') {
+            // Title color and text depend on how the run ended, reusing reason codes from gameOverReason()
+            // reason 3 means victory (all cards used), anything else means loss
+            let titleColor;
+            let titleText;
+            if (this.reason === 3) {
+                titleColor = '#ffd700';
+                titleText = "RUN COMPLETADA";
+            }
+            else {
+                titleColor = '#ff0040';
+                titleText = "GAME OVER";
+            }
 
+            // Title keeps a little glow so it stands out
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = titleColor;
+            ctx.fillStyle = titleColor;
+            ctx.font = "50px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText(titleText, canvasWidth / 2, 120);
+
+            // All other text uses minimal glow for readability
+            ctx.shadowBlur = 3;
+            ctx.font = "25px Ethnocentric";
+            ctx.shadowColor = '#00bfff';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText("RESUMEN DE LA RUN", canvasWidth / 2, 220);
+
+            // What is lost: these values reset every run
+            ctx.font = "18px Ethnocentric";
+            ctx.shadowColor = '#ff0040';
+            ctx.fillStyle = '#ff0040';
+            ctx.fillText("SE PIERDE:", canvasWidth / 2, 290);
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "16px Ethnocentric";
+            ctx.fillText("Vida restante: "       + Math.floor(this.playerHealth.health), canvasWidth / 2, 325);
+            ctx.fillText("Tiempo restante: " + Math.floor(this.contador.tiempolim / 1000), canvasWidth / 2, 350);
+
+            // What is kept: money already survives via newLevel() as it is passed to the new Player()
+            ctx.shadowBlur = 3;
+            ctx.shadowColor = '#00bfff';
+            ctx.fillStyle = '#00bfff';
+            ctx.font = "18px Ethnocentric";
+            ctx.fillText("SE CONSERVA:", canvasWidth / 2, 410);
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "16px Ethnocentric";
+            ctx.fillText("Monedas: "             + Math.floor(this.playerHealth.money),  canvasWidth / 2, 445);
+
+            // General stats accumulated during this run
+            ctx.shadowBlur = 3;
+            ctx.shadowColor = '#ffd700';
+            ctx.fillStyle = '#ffd700';
+            ctx.font = "18px Ethnocentric";
+            ctx.fillText("STATS DE LA RUN:", canvasWidth / 2, 505);
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "16px Ethnocentric";
+            ctx.fillText("Nivel alcanzado: "     + this.nivel,                           canvasWidth / 2, 540);
+            ctx.fillText("Enemigos eliminados: " + this.enemigosEliminados,              canvasWidth / 2, 565);
+            ctx.fillText("Dano recibido: "       + Math.floor(this.danoRecibido),        canvasWidth / 2, 590);
+
+            ctx.shadowBlur = 3;
+            ctx.shadowColor = '#00bfff';
+            ctx.fillStyle = '#00bfff';
+            ctx.font = "16px Ethnocentric";
+            ctx.fillText("Presiona espacio para continuar", canvasWidth / 2, 650);
+        }
     }
 
     // Resets the board for a new round. If the player won, scales up card numbers and assigns
@@ -734,6 +814,9 @@ class Game {
 
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
             this.cartas = [];
+            // Reset run stats on loss so they start fresh for the new run
+            this.enemigosEliminados = 0;
+            this.danoRecibido = 0;
             for (let i = 1; i < 11; i++) {
                 let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
                 this.cartas.push(card);
