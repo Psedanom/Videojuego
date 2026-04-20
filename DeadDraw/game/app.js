@@ -58,8 +58,41 @@ app.post('/register', (req, res) => {
                 if(err.code === 'ER_DUP_ENTRY')
                     res.send("This email is already registered");
             }
+            connection.query('select * from Player where email = ?',username, (err, results, fields) => {
+            res.send(results);
             console.log(results);
+            });
 
+            connection.end();
+        });
+        // Close the connection     
+    });
+    
+});
+
+app.post('/registerUsername', (req, res) => {
+    const username = req.body.username;
+    const mail = req.body.mail
+
+    console.log("posted");
+    const connection = mysql.createConnection({
+        host: '127.0.0.1',
+        user: 'root',
+        password: 'Pablouno1',
+        database: 'DeadDraw'
+    });
+    connection.connect((err) => {
+        if (err) throw err;
+        console.log('Connected to MySQL Database!');
+        // Example query   
+                  
+        connection.query('update Player set username = ? where idPlayer = ?',[username,mail.idPlayer], (err, results, fields) => {
+            if (err){
+                if(err.code === 'ER_DUP_ENTRY')
+                    res.send("This username is taken");
+            }
+            console.log(results);
+            res.send("Username registered");
         });
         // Close the connection     
         connection.end();

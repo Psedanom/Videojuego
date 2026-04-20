@@ -14,7 +14,6 @@ the game state, player interactions, win/loss conditions, and screen transitions
 
 
 
-
 // Canvas dimensions in pixels
 const canvasWidth = 800;
 const canvasHeight = 700;
@@ -22,12 +21,11 @@ const canvasHeight = 700;
 let oldTime = 0;
 
 let ctx;
-
+let user = JSON.parse(localStorage.getItem("player")); // convert the string data into an object
+let baseHealth = user.baseHealth;
 let game;
-
 // Guards the board repopulation logic so it only runs once per empty-board event
 let terminado = false;
-
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
 /*
@@ -46,7 +44,6 @@ let loreDialogueGenerated = false;
 class Game {
     constructor(canvas) {
         this.cartas = [];  // Master array of all card objects in the current deck
-
         this.dificultad = 1.1 // Difficulty multiplier applied to card numbers each time the player wins a level (10% increase per level)
         this.createEventListeners();
         this.initObjects();
@@ -299,7 +296,7 @@ class Game {
         this.armas = new Botones(100, 470, 120, 170,"");
         this.usadas = new Botones(650, 400, 120, 170,"");
         this.pasarRonda = new Botones(600,100,240,50,"");
-        this.playerHealth = new Player(15, 15, 100, 20, 20);
+        this.playerHealth = new Player(15, 15, 100, 20, user.baseHealth);
         shuffle(this.cartas);
 
     }
@@ -822,7 +819,7 @@ function drawScene(newTime) {
 }
 
 function main() {
-
+    console.log(user);    
     const canvas = document.getElementById('canvas');
     
     canvas.width = canvasWidth;

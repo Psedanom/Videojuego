@@ -10,13 +10,14 @@ USE DeadDraw_DB_wheneveram; */
 
 CREATE TABLE Player(
     idPlayer INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(255) NOT NULL DEFAULT 'Player',
+    username VARCHAR(255) UNIQUE,
     baseHealth INT NOT NULL DEFAULT 20,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     registrationDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     baseTime INT NOT NULL DEFAULT 100,
     money INT NOT NULL DEFAULT 0,
+    role VARCHAR(255) NOT NULL DEFAULT 'player',
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -123,3 +124,4 @@ CREATE TABLE CardEffect (
     FOREIGN KEY (idEffect) REFERENCES Effect(idEffect)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+update Player set username = 'hola' where idPlayer = 1;
