@@ -21,7 +21,6 @@ const canvasHeight = 700;
 
 let oldTime = 0;
 
-
 let ctx;
 
 let game;
@@ -31,7 +30,6 @@ let terminado = false;
 
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
-
 /*
 Possible values for `pantalla`:
 - 'start'          : title screen; waits for the player to press Space to continue.

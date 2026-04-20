@@ -1,4 +1,4 @@
--- Active: 1776136239786@@cc7mri.h.filess.io@3307@DeadDraw_DB_wheneveram
+-- Active: 1727878930875@@127.0.0.1@3306@deaddraw
 DROP SCHEMA IF EXISTS DeadDraw;
 CREATE SCHEMA DeadDraw;
 USE DeadDraw; 
@@ -8,119 +8,118 @@ USE DeadDraw;
 CREATE SCHEMA DeadDraw_DB_wheneveram;
 USE DeadDraw_DB_wheneveram; */
 
-CREATE TABLE Jugador(
-    idJugador INT PRIMARY KEY AUTO_INCREMENT,
-    vidaBase INT NOT NULL DEFAULT 20,
-    correo VARCHAR(255) NOT NULL,
-    contrasena VARCHAR(255) NOT NULL,
-    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    tiempoBase INT NOT NULL DEFAULT 100,
-    dinero INT NOT NULL DEFAULT 0,
+CREATE TABLE Player(
+    idPlayer INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL DEFAULT 'Player',
+    baseHealth INT NOT NULL DEFAULT 20,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    registrationDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    baseTime INT NOT NULL DEFAULT 100,
+    money INT NOT NULL DEFAULT 0,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
 
-CREATE TABLE Bitacora (
-    idBitacora INT AUTO_INCREMENT PRIMARY KEY,
-    idJugador INT NOT NULL,
-    horaConexion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-    horaDesconexion TIMESTAMP NOT NULL,
-    duracionSesion INT NOT NULL,
-    activo BOOLEAN NOT NULL,
-    tiempoActividad INT NOT NULL,
+CREATE TABLE Logbook (
+    idLogbook INT AUTO_INCREMENT PRIMARY KEY,
+    idPlayer INT NOT NULL,
+    connectionTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    disconnectionTime TIMESTAMP,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idJugador) REFERENCES Jugador(idJugador)
+    FOREIGN KEY (idPlayer) REFERENCES Player(idPlayer)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE Baraja (
-    idBaraja INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
+CREATE TABLE Deck (
+    idDeck INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE Table Partida(
-    idPartida INT AUTO_INCREMENT PRIMARY KEY,
-    idJugador INT NOT NULL,
-    puntaje INT NOT NULL,
-    resultado ENUM('victoria', 'derrota', 'en progreso') NOT NULL DEFAULT 'en progreso',
-    fechaInicio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    fechaFin TIMESTAMP NULL,
+CREATE Table MatchGame(
+    idMatchGame INT AUTO_INCREMENT PRIMARY KEY,
+    idPlayer INT NOT NULL,
+    score INT NOT NULL,
+    result ENUM('victory', 'defeat', 'in progress') NOT NULL DEFAULT 'in progress',
+    startDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    endDate TIMESTAMP NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    Foreign Key (idJugador) REFERENCES Jugador(idJugador)
+    Foreign Key (idPlayer) REFERENCES Player(idPlayer)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE Table JugadorBaraja(
-    idJugador INT NOT NULL,
-    idBaraja INT NOT NULL,
-    vecesUsada INT NOT NULL DEFAULT 0,
+CREATE Table PlayerDeck(
+    idPlayer INT NOT NULL,
+    idDeck INT NOT NULL,
+    timesUsed INT NOT NULL DEFAULT 0,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idJugador) REFERENCES Jugador(idJugador),
-    FOREIGN KEY (idBaraja) REFERENCES Baraja(idBaraja)
+    FOREIGN KEY (idPlayer) REFERENCES Player(idPlayer),
+    FOREIGN KEY (idDeck) REFERENCES Deck(idDeck)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE Lootbox(
     idLootbox INT AUTO_INCREMENT PRIMARY KEY,
-    costo INT NOT NULL,
-    calidad TINYINT NOT NULL,
+    cost INT NOT NULL,
+    quality TINYINT NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE Table JugadorLootbox(
-    idJugador INT NOT NULL,
+CREATE Table PlayerLootbox(
+    idPlayer INT NOT NULL,
     idLootbox INT NOT NULL,
-    fechaApertura TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    openingDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idJugador) REFERENCES Jugador(idJugador),
+    FOREIGN KEY (idPlayer) REFERENCES Player(idPlayer),
     FOREIGN KEY (idLootbox) REFERENCES Lootbox(idLootbox)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE Carta(
-    idCarta INT AUTO_INCREMENT PRIMARY KEY,
-    costo INT NOT NULL,
-    valor INT NOT NULL,
-    palo ENUM('corazones', 'diamantes', 'treboles', 'picas') NOT NULL,
+CREATE TABLE Card(
+    idCard INT AUTO_INCREMENT PRIMARY KEY,
+    cost INT NOT NULL,
+    value INT NOT NULL,
+    suit ENUM('hearts', 'diamonds', 'clubs', 'spades') NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE CartaEnBaraja(
-    idCarta INT NOT NULL,
-    idBaraja INT NOT NULL,
-    fechaAgregado TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE CardInDeck(
+    idCard INT NOT NULL,
+    idDeck INT NOT NULL,
+    addedDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idCarta) REFERENCES Carta(idCarta),
-    FOREIGN KEY (idBaraja) REFERENCES Baraja(idBaraja)
+    FOREIGN KEY (idCard) REFERENCES Card(idCard),
+    FOREIGN KEY (idDeck) REFERENCES Deck(idDeck)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE Table Efecto(
-    idEfecto INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    descripcion VARCHAR(255) NOT NULL,
-    tipo ENUM('ataque', 'defensa', 'curacion') NOT NULL,
+CREATE Table Effect(
+    idEffect INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    type ENUM('attack', 'defense', 'healing') NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE MejoraPremio(
-    idEfecto INT NOT NULL,
-    calidad TINYINT NOT NULL,
+CREATE TABLE RewardUpgrade(
+    idEffect INT NOT NULL,
+    quality TINYINT NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idEfecto) REFERENCES Efecto(idEfecto)
+    FOREIGN KEY (idEffect) REFERENCES Effect(idEffect)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE CartaPremio (
-    idCarta INT NOT NULL,
-    calidad TINYINT NOT NULL,
+CREATE TABLE RewardCard (
+    idCard INT NOT NULL,
+    quality TINYINT NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idCarta) REFERENCES Carta(idCarta)
+    FOREIGN KEY (idCard) REFERENCES Card(idCard)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE CartaEfecto (
-    idCarta INT NOT NULL,
-    idEfecto INT NOT NULL,
-    fechaAplicacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE CardEffect (
+    idCard INT NOT NULL,
+    idEffect INT NOT NULL,
+    applicationDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idCarta) REFERENCES Carta(idCarta),
-    FOREIGN KEY (idEfecto) REFERENCES Efecto(idEfecto)
+    FOREIGN KEY (idCard) REFERENCES Card(idCard),
+    FOREIGN KEY (idEffect) REFERENCES Effect(idEffect)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

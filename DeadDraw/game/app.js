@@ -7,8 +7,11 @@ const port = 3000
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors())
-app.post('/post', (req, res) => {
+
+app.post('/login', (req, res) => {
     //const nombre = req.body.input;
+    const username = req.body.username;
+    const password = req.body.password;
     console.log("posted");
     const connection = mysql.createConnection({
         host: '127.0.0.1',
@@ -20,15 +23,20 @@ app.post('/post', (req, res) => {
         if (err) throw err;
         console.log('Connected to MySQL Database!');
         // Example query             
-        connection.query('select * from Jugador;', (err, results, fields) => {
-            if (err) throw err;
-            console.log(results);
-
+        connection.query('select * from Player where email = ? and password = ?',[username,password], (err, results, fields) => {
+            if (results.length == 0) {
+                res.send("Incorrect password or email");
+                results = null;
+            }
+            else{
+                res.send(results);
+                
+            }
         });
         // Close the connection     
         connection.end();
     });
-    res.send("Ok")
+    //res.send("Ok")
 });
 
 app.post('/register', (req, res) => {
@@ -45,15 +53,18 @@ app.post('/register', (req, res) => {
         if (err) throw err;
         console.log('Connected to MySQL Database!');
         // Example query             
-        connection.query('insert into jugador(correo,contrasena) values (?,?)',[username,password], (err, results, fields) => {
-            if (err) throw err;
+        connection.query('insert into Player(email, password) values(?, ?)',[username,password], (err, results, fields) => {
+            if (err){
+                if(err.code === 'ER_DUP_ENTRY')
+                    res.send("This email is already registered");
+            }
             console.log(results);
 
         });
         // Close the connection     
         connection.end();
     });
-    res.send("Ok")
+    
 });
 
 app.listen(port, () => {
