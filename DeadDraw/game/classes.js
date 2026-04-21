@@ -81,14 +81,17 @@ class Botones {
 }
 
 class Dialogue {
-    constructor(texto, character = imgMaton) {
+   // sprite parameter allows overriding the default imgMaton character image.
+    // If no sprite is passed, falls back to imgMaton to preserve existing behaviour.
+    constructor(texto, sprite = imgMaton) {
+        this.sprite = sprite;   
         this.x = canvasWidth / 2 - 400;
         this.y = canvasHeight - canvasHeight / 4;
         this.texto = texto;
         this.caracteresVisibles = 0; // How many characters are currently visible (grows each frame)
         this.velocidad = 0.2; // Characters revealed per frame (fractional to slow the scroll)
         this.done = false; // True once the full text has been revealed
-        this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
+        //this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
         this.characterx = canvasWidth - 400;
         this.charactery = canvasHeight - 420;
 
@@ -115,7 +118,8 @@ class Dialogue {
 
     }
     draw(ctx) {
-        ctx.drawImage(imgMaton, this.characterx, this.charactery, 400, 300);
+        // Draw the character sprite; defaults to imgMaton if no override was provided
+        ctx.drawImage(this.sprite, this.characterx, this.charactery, 400, 300);
         ctx.drawImage(imgDialogue, this.x, this.y, 800, canvasHeight / 4);
         ctx.textAlign = "left";
         ctx.font = "15px Ethnocentric";
