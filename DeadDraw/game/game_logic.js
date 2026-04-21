@@ -194,11 +194,20 @@ class Game {
             this.moveCartasUsadas();
         }
         else if(this.card_clicked.enemie()){
-            // Non-heal card played directly to discard: apply its effect and send it to the pile
             this.moveCartasUsadas();
-            let vidaAntes = this.playerHealth.health; // save health before the attack to measure actual damage taken
+            let vidaAntes = this.playerHealth.health;
             this.card_clicked.actionUse(this.playerHealth);
-            this.danoRecibido += Math.max(0, vidaAntes - this.playerHealth.health); // actual health lost this interaction
+            this.danoRecibido += Math.max(0, vidaAntes - this.playerHealth.health);
+
+            switch(this.card_clicked.habilidad) {
+                case "cursedEnemy":
+                    this.playerHealth.health -= 1;
+                    this.danoRecibido += 1;
+                    break;
+                case "timeEater":
+                    this.contador.tiempolim -= 15000;
+                    break;
+            }
         }
         else{
             this.moveCartasUsadas();
@@ -227,6 +236,18 @@ class Game {
             this.card_clicked.actionWeapon(this.playerHealth, this.numberArma);
             this.enemigosEliminados += 1; // counts each enemy defeated with a weapon this run
             this.danoRecibido += Math.max(0, vidaAntes - this.playerHealth.health); // actual health lost this interaction
+            switch(this.card_clicked.habilidad){
+                case "absoluteDamage":
+                    this.playerHealth.money = Math.floor(this.playerHealth.money / 2);
+                    break;
+                case "cursedEnemy":
+                    this.playerHealth.money -= Math.floor(this.card_clicked.number / 2);
+                    if (this.playerHealth.money < 0) this.playerHealth.money = 0;
+                    break;
+                case "goldStealer":
+                    this.playerHealth.money += Math.floor(this.card_clicked.number / 2);
+                    break;
+            }
             // xar / yar: target coordinates where the card snaps to inside the weapon slot zone.
             // posicion offsets each successive card slightly to the right so they don't stack perfectly.
             this.moverCartasArma(this.card_clicked,this.posicion);
@@ -290,24 +311,37 @@ class Game {
 
     abilityObtention(card){
         this.probabilidadhabilidad = getRandomIntegerInclusive(0,10);
-        if (this.probabilidadhabilidad <= 9) { // to debug weapons abilities flip >= into a <=
+        if (this.probabilidadhabilidad <= 9) {
             this.habilidadProb = getRandomIntegerInclusive(0,10);
             if (card.arma()) {
-                // habilidadProb 0-4  (50%): reduce all board enemies by 1
                 if (this.habilidadProb >= 0 && this.habilidadProb <= 4) {
                     card.habilidad = "enemieslos";
                 }
-                // habilidadProb 5-7  (30%): heal the player for half the weapon's value
                 else if (this.habilidadProb >= 5 && this.habilidadProb <= 7) {
                     card.habilidad = "killhealth";
                 }
-                // habilidadProb 8-9  (20%): automatically discard one enemy from the board
                 else if (this.habilidadProb >= 8 && this.habilidadProb <= 9) {
                     card.habilidad = "passEnemie";
                 }
-                // habilidadProb > 9  (unreachable with current 0-10 range; dead branch)
                 else {
                     card.habilidad = "healthpassEnemie";
+                }
+            }
+            else if (card.enemie()) {
+                this.habilidadEnemieProb = getRandomIntegerInclusive(0,10);
+                if (this.habilidadEnemieProb >= 0) {
+                    if (this.habilidadProb >= 0 && this.habilidadProb <= 3) {
+                        card.habilidad = "absoluteDamage";
+                    }
+                    else if (this.habilidadProb >= 4 && this.habilidadProb <= 6) {
+                        card.habilidad = "cursedEnemy";
+                    }
+                    else if (this.habilidadProb >= 7 && this.habilidadProb <= 8) {
+                        card.habilidad = "timeEater";
+                    }
+                    else {
+                        card.habilidad = "goldStealer";
+                    }
                 }
             }
         }
@@ -333,6 +367,26 @@ class Game {
         this.usadas = new Botones(650, 400, 120, 170,"");
         this.pasarRonda = new Botones(600,100,240,50,"");
         this.playerHealth = new Player(15, 15, 100, 20, 20);
+        /*for (let card of this.cartas) {
+        if (card instanceof CardEnemie) {
+                this.habilidadProb = getRandomIntegerInclusive(0,10);
+                this.habilidadEnemieProb = getRandomIntegerInclusive(0,10);
+                if (this.habilidadEnemieProb >= 0) {
+                    if (this.habilidadProb >= 0 && this.habilidadProb <= 3) {
+                        card.habilidad = "absoluteDamage";
+                    }
+                    else if (this.habilidadProb >= 4 && this.habilidadProb <= 6) {
+                        card.habilidad = "cursedEnemy";
+                    }
+                    else if (this.habilidadProb >= 7 && this.habilidadProb <= 8) {
+                        card.habilidad = "timeEater";
+                    }
+                    else {
+                        card.habilidad = "goldStealer";
+                    }
+                }
+            }
+        }*/ //only for debug, the abilityObtention is assigned at the start of the level (only enemies cards).
         shuffle(this.cartas);
 
     }

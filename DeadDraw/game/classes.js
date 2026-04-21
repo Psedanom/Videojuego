@@ -168,7 +168,22 @@ class Cards {
         ctx.textAlign = "center";
         ctx.fillText(this.number, this.x + 90, this.y + 30);
         ctx.font = "10px Arial";
-        ctx.fillText(this.habilidad,this.x + 50, this.y+100);
+        ctx.fillText(this.habilidad, this.x + 50, this.y + 100);
+        if (this.habilidad && this.habilidad !== "" && this.enemie && this.enemie()) {
+            const colores = {
+                "absoluteDamage": "#ffd700",
+                "cursedEnemy":    "#ff0040",
+                "timeEater":      "#9b00ff",
+                "goldStealer":    "#00ff99"
+            };
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = colores[this.habilidad] || "#ffffff";
+            ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
+            ctx.font = "8px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText("★", this.x + this.width / 2, this.y + this.height - 8);
+            ctx.shadowBlur = 0;
+        }
         
     }
     contains(mx, my) {
