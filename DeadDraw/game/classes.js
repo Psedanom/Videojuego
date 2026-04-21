@@ -160,7 +160,7 @@ class Cards {
             this.width * this.scale,
             this.height * this.scale);
         ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
+        ctx.font = "20px Ethnocentric";
         ctx.textAlign = "center";
         ctx.fillText(this.number, this.x + 90, this.y + 30);
         ctx.font = "10px Arial";

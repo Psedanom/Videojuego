@@ -439,7 +439,7 @@ class Game {
             for (let card of this.cartas) {
                 if (!card.used && card.inboard) {
                     if (card.x > 100) {
-                        card.x -= 500 * (deltaTime / 1000); // 80px por segundo, ajusta a tu gusto
+                        card.x -= 1000 * (deltaTime / 1000); // 80px por segundo, ajusta a tu gusto
                         todasEnPosicion = false;
                     }  
                 }
