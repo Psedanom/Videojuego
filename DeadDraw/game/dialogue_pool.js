@@ -31,4 +31,24 @@ const preRunDialogue = [                      // LIMITE DE CARACTERES EN DONDE E
 
 ];
 
+// En esta ciudad todo se arregla jugando cartas
 
+// Dialogues displayed when the player clicks a card for the first time during level 0.
+// Each card type has three possible lines picked at random.
+const cartaDialogueArma = [
+    `Use me to fight!\nI'll help you reduce\nthe damage you take.`,
+    `Together we are unstoppable.\nLet me fight for you.`,
+    `I'm your weapon.\nTrust me and we'll defeat them all.`
+];
+
+const cartaDialogueEnemie = [
+    `Haha! You really think\nyou can beat me? Think again.`,
+    `You don't stand a chance\nagainst me. Give up now.`,
+    `You'll never defeat me.\nI'm stronger than you can imagine.`
+];
+
+const cartaDialogueVida = [
+    `I'm here to heal\nyour wounds. Let me restore you.`,
+    `Don't give up yet.\nLet me mend your injuries.`,
+    `With my power you'll fight again.\nRest for a moment.`
+];

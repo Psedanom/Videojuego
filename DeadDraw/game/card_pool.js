@@ -37,7 +37,6 @@ const cardPool = [
         makeCard() {
             return new CardVida(0, 200, 112.5, 150, 20, "corazones", 1, false, false, true, "",imgCorazon)
         },
-
         sideEffects() {
 
             return [

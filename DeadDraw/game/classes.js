@@ -81,14 +81,17 @@ class Botones {
 }
 
 class Dialogue {
-    constructor(texto, character = imgMaton) {
+   // sprite parameter allows overriding the default imgMaton character image.
+    // If no sprite is passed, falls back to imgMaton to preserve existing behaviour.
+    constructor(texto, sprite = imgMaton) {
+        this.sprite = sprite;   
         this.x = canvasWidth / 2 - 400;
         this.y = canvasHeight - canvasHeight / 4;
         this.texto = texto;
         this.caracteresVisibles = 0; // How many characters are currently visible (grows each frame)
         this.velocidad = 0.2; // Characters revealed per frame (fractional to slow the scroll)
         this.done = false; // True once the full text has been revealed
-        this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
+        //this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
         this.characterx = canvasWidth - 400;
         this.charactery = canvasHeight - 420;
 
@@ -115,7 +118,8 @@ class Dialogue {
 
     }
     draw(ctx) {
-        ctx.drawImage(imgMaton, this.characterx, this.charactery, 400, 300);
+        // Draw the character sprite; defaults to imgMaton if no override was provided
+        ctx.drawImage(this.sprite, this.characterx, this.charactery, 400, 300);
         ctx.drawImage(imgDialogue, this.x, this.y, 800, canvasHeight / 4);
         ctx.textAlign = "left";
         ctx.font = "15px Ethnocentric";
@@ -164,7 +168,22 @@ class Cards {
         ctx.textAlign = "center";
         ctx.fillText(this.number, this.x + 90, this.y + 30);
         ctx.font = "10px Arial";
-        ctx.fillText(this.habilidad,this.x + 50, this.y+100);
+        ctx.fillText(this.habilidad, this.x + 50, this.y + 100);
+        if (this.habilidad && this.habilidad !== "" && this.enemie && this.enemie()) {
+            const colores = {
+                "absoluteDamage": "#ffd700",
+                "cursedEnemy":    "#ff0040",
+                "timeEater":      "#9b00ff",
+                "goldStealer":    "#00ff99"
+            };
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = colores[this.habilidad] || "#ffffff";
+            ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
+            ctx.font = "8px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText("★", this.x + this.width / 2, this.y + this.height - 8);
+            ctx.shadowBlur = 0;
+        }
         
     }
     contains(mx, my) {
