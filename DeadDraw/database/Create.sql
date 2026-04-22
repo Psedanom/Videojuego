@@ -42,22 +42,17 @@ CREATE TABLE Deck (
 CREATE Table MatchGame(
     idMatchGame INT AUTO_INCREMENT PRIMARY KEY,
     idPlayer INT NOT NULL,
+    idDeck INT NOT NULL,
     score INT NOT NULL,
     result ENUM('victory', 'defeat', 'in progress') NOT NULL DEFAULT 'in progress',
     startDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     endDate TIMESTAMP NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    Foreign Key (idPlayer) REFERENCES Player(idPlayer)
+    Foreign Key (idPlayer) REFERENCES Player(idPlayer),
+    Foreign Key (idDeck) REFERENCES Deck(idDeck)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE Table PlayerDeck(
-    idPlayer INT NOT NULL,
-    idDeck INT NOT NULL,
-    timesUsed INT NOT NULL DEFAULT 0,
-    lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (idPlayer) REFERENCES Player(idPlayer),
-    FOREIGN KEY (idDeck) REFERENCES Deck(idDeck)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE Lootbox(
     idLootbox INT AUTO_INCREMENT PRIMARY KEY,
@@ -77,9 +72,8 @@ CREATE Table PlayerLootbox(
 
 CREATE TABLE Card(
     idCard INT AUTO_INCREMENT PRIMARY KEY,
-    cost INT NOT NULL,
     value INT NOT NULL,
-    suit ENUM('hearts', 'diamonds', 'clubs', 'spades') NOT NULL,
+    suit ENUM('CardEnemie', 'CardEspada', 'CardVida') NOT NULL,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

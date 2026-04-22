@@ -269,7 +269,7 @@ class Game {
                 else if (this.habilidadProb >= 8 && this.habilidadProb <= 9) {
                     card.habilidad = "passEnemie";
                 }
-                // habilidadProb > 9  (unreachable with current 0-10 range; dead branch)
+               
                 else {
                     card.habilidad = "healthpassEnemie";
                 }
