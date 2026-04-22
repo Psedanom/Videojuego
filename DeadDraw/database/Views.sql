@@ -1,5 +1,6 @@
 /* this view is used to get the cards that are in the maze, it is used to get the cards that are in the maze and their values, it is used to get the cards that are in the maze and their values and their deck id
 */
+/* from the Create.sql file */
 CREATE view card_in_maze AS
 SELECT idCard, value,idDeck from Card INNER JOIN CardInDeck USING(idCard);
 
@@ -27,4 +28,26 @@ SELECT username, score FROM player INNER JOIN matchgame USING(idPlayer) ORDER BY
 CREATE View player_lootboxes AS
 SELECT username, idLootbox, cost,quality,openingDate FROM player INNER JOIN playerlootbox USING(idPlayer) INNER JOIN lootbox USING (idLootbox) ORDER BY openingDate DESC;
 
-CREATE view player_rewards AS
+
+ALTER VIEW player_deckTimesUsed AS
+SELECT username, name, COUNT(idDeck) AS times_used
+FROM player
+INNER JOIN matchgame USING (idPlayer)
+INNER JOIN deck USING (idDeck)
+GROUP BY username, name;
+
+SELECT * from player_deckTimesUsed;
+
+
+
+/* View to get the active time for each player in seconds */
+CREATE view player_active_time AS
+SELECT username, TIMESTAMPDIFF(SECOND, startDate, endDate) as active_time FROM player INNER JOIN matchgame USING(idPlayer) WHERE endDate IS NOT NULL ORDER BY active_time DESC;
+
+SELECT * from player_active_time;
+
+CREATE VIEW player_timesWined AS
+SELECT username,sum(result = 'victory') as times_wined FROM player INNER JOIN matchgame USING(idPlayer) GROUP BY username ORDER BY times_wined DESC;   
+
+
+SELECT * from player_timeswined;
