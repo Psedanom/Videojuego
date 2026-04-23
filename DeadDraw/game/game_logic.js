@@ -14,24 +14,20 @@ the game state, player interactions, win/loss conditions, and screen transitions
 
 
 
-
 // Canvas dimensions in pixels
 const canvasWidth = 800;
 const canvasHeight = 700;
 
 let oldTime = 0;
 
-
 let ctx;
-
+let user = JSON.parse(localStorage.getItem("player")); // convert the string data into an object
+let baseHealth = user.baseHealth;
 let game;
-
 // Guards the board repopulation logic so it only runs once per empty-board event
 let terminado = false;
-
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
-
 /*
 Possible values for `pantalla`:
 - 'start'          : title screen; waits for the player to press Space to continue.
@@ -48,7 +44,6 @@ let loreDialogueGenerated = false;
 class Game {
     constructor(canvas) {
         this.cartas = [];  // Master array of all card objects in the current deck
-
         this.dificultad = 1.1 // Difficulty multiplier applied to card numbers each time the player wins a level (10% increase per level)
         this.createEventListeners();
         this.initObjects();
@@ -366,7 +361,7 @@ class Game {
         this.armas = new Botones(100, 470, 120, 170,"");
         this.usadas = new Botones(650, 400, 120, 170,"");
         this.pasarRonda = new Botones(600,100,240,50,"");
-        this.playerHealth = new Player(15, 15, 100, 20, 20);
+        this.playerHealth = new Player(15, 15, 100, 20, user.baseHealth);
         /*for (let card of this.cartas) {
         if (card instanceof CardEnemie) {
                 this.habilidadProb = getRandomIntegerInclusive(0,10);
@@ -536,14 +531,20 @@ class Game {
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
         if (this.ctab <= 1) {
+            let todasEnPosicion = true;
             for (let card of this.cartas) {
                 if (!card.used && card.inboard) {
-                    card.x = 100;
-                    this.tablaVacia = true;
+                    if (card.x > 100) {
+                        card.x -= 1000 * (deltaTime / 1000); // 80px por segundo, ajusta a tu gusto
+                        todasEnPosicion = false;
+                    }  
                 }
             }
-            terminado = false; // Allow the board-refill branch in draw() to run once
-            this.ctab = 4;     // Reset the plays-per-turn counter
+            if(todasEnPosicion){
+                this.tablaVacia = true; 
+                terminado = false; // Allow the board-refill branch in draw() to run once
+                this.ctab = 4;     // Reset the plays-per-turn counter
+            }
         }
         for (let card of this.cartas) {
             card.update();
@@ -1011,7 +1012,7 @@ function drawScene(newTime) {
 }
 
 function main() {
-
+    console.log(user);    
     const canvas = document.getElementById('canvas');
     
     canvas.width = canvasWidth;
@@ -1021,7 +1022,7 @@ function main() {
 
     // Load the custom font before starting the loop so the first frame renders correctly.    const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
      const ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/Ethnocentric-Regular.otf)');
-    ethnocentric.load().then(function (loadedFont) {
+        ethnocentric.load().then(function (loadedFont) {
         document.fonts.add(loadedFont);
         // Create the game object
         game = new Game(canvas);
