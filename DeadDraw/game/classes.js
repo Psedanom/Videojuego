@@ -19,7 +19,7 @@ class Tiempo {
     }
     draw(ctx) {
         ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
+        ctx.font = "20px Ethnocentric";
         ctx.textAlign = "left";
         ctx.fillText("Time left " + Math.floor(this.tiempolim / 1000), canvasWidth - 200, 30);
     }
@@ -44,27 +44,34 @@ class Player {
         ctx.fillStyle = "red";
         ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
         ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
+        ctx.font = "20px Ethnocentric";
         ctx.textAlign = "center";
         ctx.fillText(this.health, this.width - 35, this.height + 12);
         ctx.fillStyle = "yellow";
-        ctx.font = "20px Arial";
+        ctx.font = "20px Ethnocentric";
         ctx.textAlign = "center";
         ctx.fillText(this.money, canvasWidth / 2, this.height + 12);
     }
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,scale = 1) {
+    constructor(x, y, width, height,text,scale = 1) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.scale = scale
+        this.text = text;
+        this.xantes = x;
+        this.yantes = y;
     }
     draw(ctx) {
         ctx.fillStyle = "white";
         ctx.fillRect((this.x), (this.y), this.width *this.scale, this.height * this.scale);
+        ctx.fillStyle = "yellow";
+        ctx.font = "20px Ethnocentric";
+        ctx.textAlign = "center";
+        ctx.fillText(this.text, this.x + this.width / 2 * this.scale, this.y + this.height / 2 * this.scale);
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
@@ -73,9 +80,13 @@ class Botones {
     update(){
         if(this.isHovered){
             this.scale = 1.2;
+            this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the button centered while scaling
+            this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the button centered while scaling
         }
         else{
             this.scale = 1;
+            this.x = this.xantes;
+            this.y = this.yantes;
         }
     }
 }
@@ -281,6 +292,9 @@ class CardVida extends Cards {
     }
     esVida() {
         return true;
+    }
+    enemie() {
+        return false;
     }
 }
 

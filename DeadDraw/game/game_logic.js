@@ -27,7 +27,7 @@ let game;
 // Guards the board repopulation logic so it only runs once per empty-board event
 let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
-let pantalla = 'start';
+let pantalla = 'menu';
 /*
 Possible values for `pantalla`:
 - 'start'          : title screen; waits for the player to press Space to continue.
@@ -247,6 +247,7 @@ class Game {
             // xar / yar: target coordinates where the card snaps to inside the weapon slot zone.
             // posicion offsets each successive card slightly to the right so they don't stack perfectly.
             this.moverCartasArma(this.card_clicked,this.posicion);
+            //user.money += Math.floor(this.card_clicked.number / 2);
             this.playerHealth.money += Math.floor(this.card_clicked.number / 2);
             // Store this enemy's number so the next enemy played must be strictly lower
             this.numeroAnterior = this.card_clicked.number;
@@ -361,8 +362,12 @@ class Game {
         this.contador = new Tiempo();
         this.armas = new Botones(100, 470, 120, 170,"");
         this.usadas = new Botones(650, 400, 120, 170,"");
-        this.pasarRonda = new Botones(600,100,240,50,"");
-        this.playerHealth = new Player(15, 15, 100, 20, user.baseHealth);
+        this.pasarRonda = new Botones(600,100,240,50,"Skip Round");
+        this.play = new Botones(300,0 + canvasHeight*0.1,200,100,"Play");
+        this.logout = new Botones(300, 0 + canvasHeight*0.3, 200, 100,"Logout");
+        this.settings = new Botones(300, 0 + canvasHeight*0.5, 200, 100,"Settings");
+        this.statistics = new Botones(300, 0 + canvasHeight*0.7, 200, 100,"Statistics");
+        this.playerHealth = new Player(15, 15, 100, 20, user.baseHealth,user.money);
         /*for (let card of this.cartas) {
         if (card instanceof CardEnemie) {
                 this.habilidadProb = getRandomIntegerInclusive(0,10);
@@ -440,7 +445,7 @@ class Game {
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
 
-            if (pantalla === 'juego') {
+            if (pantalla === 'juego' || pantalla === 'menu') {
                 for (let card of this.cartas) {
                     if (!card.used)
                         card.isHovered = card.contains(mouseX, mouseY);
@@ -448,6 +453,10 @@ class Game {
                 this.armas.isHovered = this.armas.tocando(mouseX, mouseY);
                 this.pasarRonda.isHovered = this.pasarRonda.tocando(mouseX, mouseY);
                 this.usadas.isHovered = this.usadas.tocando(mouseX, mouseY);
+                this.settings.isHovered = this.settings.tocando(mouseX, mouseY);
+                this.statistics.isHovered = this.statistics.tocando(mouseX, mouseY);
+                this.logout.isHovered = this.logout.tocando(mouseX, mouseY);
+                this.play.isHovered = this.play.tocando(mouseX, mouseY);
             }
             else if (pantalla === 'seleccion_carta') {
                 if (this.arregloCartas) {
@@ -472,7 +481,7 @@ class Game {
                 if(this.pasarRonda.isHovered && this.ctab == 4){
                     if(this.skipebutton){
                         if(this.boss){
-                                this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
+                            this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
                         }
                         for(let i = 0; i<4; i++){
                             for(let card of this.cartas){
@@ -488,6 +497,11 @@ class Game {
                         }
                         this.skipebutton = false;
                     }
+                }
+            }
+            else if (pantalla === 'menu') {
+                if (this.play.isHovered) {
+                    pantalla = 'gameLore';
                 }
             }
             else if (pantalla === 'dialogo' && !this.dialogueDone) {
@@ -532,6 +546,10 @@ class Game {
         this.pasarRonda.update();
         this.usadas.update();
         this.armas.update();
+        this.play.update();
+        this.logout.update();
+        this.settings.update();
+        this.statistics.update();
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -596,25 +614,13 @@ class Game {
 
     draw(ctx) {
         ctx.shadowBlur = 0; // Reset glow to zero to prevent it from leaking into subsequent draw calls
-        if (pantalla === 'start') {
-            
-            // Neon blue glow
-            neonText(65, '#00bfff', "DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
-           
-
-            neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
-
-        }
-        
-        else if (pantalla === 'gameLore')
-        {
+        if (pantalla === 'gameLore'){
             if (!loreDialogueGenerated) {
                 this.loreDialogue = new Dialogue(preRunDialogue[lore]);
                 this.loreDialogue.draw(ctx);
                 loreDialogueGenerated = true;
             }
-            else
-            {
+            else{
                 this.loreDialogue.update();
                 this.loreDialogue.draw(ctx);
             }
@@ -631,6 +637,13 @@ class Game {
                 this.dialogue_pregame.update();
                 this.dialogue_pregame.draw(ctx);
             }
+        }
+
+        else if (pantalla === 'menu') {
+            this.play.draw(ctx);
+            this.logout.draw(ctx);
+            this.settings.draw(ctx);
+            this.statistics.draw(ctx);
         }
         // Displays the card dialogue screen using the same Dialogue system as pre-level dialogues.
         // dialogue_carta is instantiated in cardsClickedIntercations() when a card is first clicked.
