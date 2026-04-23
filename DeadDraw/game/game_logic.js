@@ -15,12 +15,12 @@ the game state, player interactions, win/loss conditions, and screen transitions
 
 
 // Canvas dimensions in pixels
-const canvasWidth = 800;
+const canvasWidth = 1200;
 const canvasHeight = 700;
 
 //Card dimensions in pixels
-const cardWidth = 120;
-const cardHeight = 150;
+const cardWidth = 160;
+const cardHeight = 190;
 
 let oldTime = 0;
 
@@ -362,10 +362,10 @@ class Game {
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170,"");
-        this.usadas = new Botones(650, 400, 120, 170,"");
-        this.pasarRonda = new Botones(600,100,240,50,"");
-        this.playerHealth = new Player(15, 15, 100, 20, user.baseHealth);
+        this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, "");
+        this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight, "");
+        this.pasarRonda = new Botones(canvasWidth * 0.75, canvasHeight * 0.143, canvasWidth * 0.3, canvasHeight * 0.071, "");
+        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, user.baseHealth);
         /*for (let card of this.cartas) {
         if (card instanceof CardEnemie) {
                 this.habilidadProb = getRandomIntegerInclusive(0,10);
@@ -538,10 +538,10 @@ class Game {
             let todasEnPosicion = true;
             for (let card of this.cartas) {
                 if (!card.used && card.inboard) {
-                    if (card.x > 100) {
-                        card.x -= 1000 * (deltaTime / 1000); // 80px por segundo, ajusta a tu gusto
+                    if (card.x > canvasWidth * 0.125) {
+                        card.x -= 1000 * (deltaTime / 1000);
                         todasEnPosicion = false;
-                    }  
+                    }
                 }
             }
             if(todasEnPosicion){
@@ -648,22 +648,20 @@ class Game {
                 this.contador.draw(ctx);
 
                 this.num = 0;
-                let posicion = 100; // X coordinate where the first card of this batch is placed
+                let posicion = canvasWidth * 0.125;
                 // tablaVacia is true at the start of a new board turn; expand the visible card count by 3
                 // and shift the starting position right so the layout stays balanced
                 if (this.tablaVacia && !terminado) {
-                    this.cantidadCartasTablero += 3
-                    posicion = 262.5
-                    this.curacionUsada = false; // Allow healing again at the start of each new board turn
+                    this.cantidadCartasTablero += 3;
+                    posicion = canvasWidth * 0.328;
+                    this.curacionUsada = false;
                 }
 
-                // Place cards onto the board up to the current cantidadCartasTablero limit.
-                // Cards that are already used or already placed (inboard) are skipped.
                 for (let card of this.cartas) {
                     if (this.num < this.cantidadCartasTablero) {
                         if (!card.used && !card.inboard) {
                             card.x = posicion;
-                            posicion += 162.5; // Horizontal gap between adjacent cards
+                            posicion += canvasWidth * 0.203; //DEBUGEAR DEFAULT 0.203
                             card.inboard = true;
                         }
                         card.draw(ctx);
@@ -752,17 +750,18 @@ class Game {
             // Turn off glow before drawing card sprites to avoid unintended bleed
             ctx.shadowBlur = 0;
 
-            // Position and draw the three offered cards at fixed horizontal slots
-            this.cartaSeleccionada1.x = cardHeight;
-            this.cartaSeleccionada1.y = 200;
+            // Position and draw the three offered cards evenly spaced across the canvas
+            const selMargin = (canvasWidth - 3 * cardWidth) / 4;
+            this.cartaSeleccionada1.x = selMargin;
+            this.cartaSeleccionada1.y = canvasHeight * 0.286;
             this.cartaSeleccionada1.draw(ctx);
 
-            this.cartaSeleccionada2.x = 325;
-            this.cartaSeleccionada2.y = 200;
+            this.cartaSeleccionada2.x = selMargin * 2 + cardWidth;
+            this.cartaSeleccionada2.y = canvasHeight * 0.286;
             this.cartaSeleccionada2.draw(ctx);
 
-            this.cartaSeleccionada3.x = 500;
-            this.cartaSeleccionada3.y = 200;
+            this.cartaSeleccionada3.x = selMargin * 3 + cardWidth * 2;
+            this.cartaSeleccionada3.y = canvasHeight * 0.286;
             this.cartaSeleccionada3.draw(ctx);
 
 
@@ -957,10 +956,10 @@ class Game {
             }
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170);
-        this.usadas = new Botones(650, 400, 120, 170);
+        this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight);
+        this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight);
         // Preserve the player's money across levels; everything else resets to defaults
-        this.playerHealth = new Player(15, 15, 100, 20, 20, this.playerHealth.money);
+        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, 20, this.playerHealth.money);
 
         shuffle(this.cartas);
     }

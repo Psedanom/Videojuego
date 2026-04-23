@@ -85,15 +85,17 @@ class Dialogue {
     // If no sprite is passed, falls back to imgMaton to preserve existing behaviour.
     constructor(texto, sprite = imgMaton) {
         this.sprite = sprite;   
-        this.x = canvasWidth / 2 - 400;
-        this.y = canvasHeight - canvasHeight / 4;
+        this.x = 0;
+        // Scale dialogue box height proportionally with canvas width so it doesn't stretch
+        this.dialogH = (canvasWidth / 800) * (canvasHeight / 4);
+        this.y = canvasHeight - this.dialogH;
         this.texto = texto;
         this.caracteresVisibles = 0; // How many characters are currently visible (grows each frame)
         this.velocidad = 0.2; // Characters revealed per frame (fractional to slow the scroll)
         this.done = false; // True once the full text has been revealed
-        //this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
-        this.characterx = canvasWidth - 400;
-        this.charactery = canvasHeight - 420;
+        // Character is right-aligned; size derived from canvasHeight to preserve the original 4:3 aspect ratio
+        this.characterx = canvasWidth - canvasHeight * (4 / 7);
+        this.charactery = canvasHeight * 0.4;
 
         // Prevents the scroll sound from being re-triggered every frame while text is scrolling
         this.soundDone = false; // True after the sound has been started for this dialogue instance
@@ -119,8 +121,8 @@ class Dialogue {
     }
     draw(ctx) {
         // Draw the character sprite; defaults to imgMaton if no override was provided
-        ctx.drawImage(this.sprite, this.characterx, this.charactery, 400, 300);
-        ctx.drawImage(imgDialogue, this.x, this.y, 800, canvasHeight / 4);
+        ctx.drawImage(this.sprite, this.characterx, this.charactery, canvasHeight * (4 / 7), canvasHeight * (3 / 7));
+        ctx.drawImage(imgDialogue, this.x, this.y, canvasWidth, this.dialogH);
         ctx.textAlign = "left";
         ctx.font = "15px Ethnocentric";
         ctx.fillStyle = "white";
@@ -134,7 +136,7 @@ class Dialogue {
         // Technique sourced from https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
         let words = textoMostrado.split('\n');
         for (let i = 0; i < words.length; i++) {
-            ctx.fillText(words[i], this.x + 226, this.y + 80 + (i * lineheight));
+            ctx.fillText(words[i], this.x + canvasWidth * 0.282, this.y + 80 + (i * lineheight));
 
         }
     }
@@ -253,6 +255,9 @@ class CardVida extends Cards {
     }
     esVida() {
         return true;
+    }
+    enemie() {
+        return false;
     }
 }
 
