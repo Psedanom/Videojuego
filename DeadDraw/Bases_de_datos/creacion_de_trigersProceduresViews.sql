@@ -83,6 +83,7 @@ BEGIN
 END$$
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS INSERT_player_passwordTooShort;
 /*this trigger is used to not allow the player to have a password that is less than 8 characters long
 */
 DELIMITER $$
@@ -91,7 +92,7 @@ BEFORE INSERT ON player
 FOR EACH ROW
 BEGIN
     IF LENGTH(NEW.password) < 8 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Password must be at least 8 characters long';
+       signal SQLSTATE '45000' SET MESSAGE_TEXT = 'Password must be at least 8 characters long';
     END IF;
 END$$
 DELIMITER ;

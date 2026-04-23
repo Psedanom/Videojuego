@@ -16,7 +16,7 @@ app.post('/login', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: 'Pablouno1',
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -46,17 +46,24 @@ app.post('/register', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: 'Pablouno1',
         database: 'deaddraw'
     });
     connection.connect((err) => {
-        if (err) throw err;
+        if (err) console.log(err);
         console.log('Connected to MySQL Database!');
         // Example query             
         connection.query('insert into Player(email, password) values(?, ?)',[username,password], (err, results, fields) => {
             if (err){
-                if(err.code === 'ER_DUP_ENTRY')
+                if(err.code === 'ER_DUP_ENTRY'){
                     res.send("This email is already registered");
+                    return;
+                }
+                    
+                else{
+                    res.send("Password must be at least 8 characters long");
+                    return;
+                }
             }
             connection.query('select * from Player where email = ?',username, (err, results, fields) => {
             res.send(results);
@@ -78,7 +85,7 @@ app.post('/registerUsername', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: 'Pablouno1',
         database: 'deaddraw'
     });
     connection.connect((err) => {

@@ -13,6 +13,11 @@ function register() {
                 alert(data);
                 return;
             }
+            else if(data === "Password must be at least 8 characters long"){
+                alert(data);
+                return;
+            }
+            
             localStorage.setItem("player",JSON.stringify(data[0]));
             window.location.href = "registerUsername.html";
             alert("Register completed");
@@ -41,7 +46,7 @@ function login() {
                 player = data[0];
                 localStorage.setItem("player",JSON.stringify(data[0]));    
                 // localStorage.setItem("baseHealth", player.baseHealth);
-                window.location.href = "../game/game_view.html";
+                window.location.href = "../index.html";
             }
         });
     }
