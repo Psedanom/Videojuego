@@ -16,7 +16,7 @@ app.post('/login', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: 'Habana_12345',
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -46,7 +46,7 @@ app.post('/register', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: 'Habana_12345',
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -85,7 +85,7 @@ app.post('/registerUsername', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: 'Habana_12345',
         database: 'deaddraw'
     });
     connection.connect((err) => {

@@ -80,6 +80,34 @@ class Botones {
     }
 }
 
+class lootbox {
+    constructor(x, y, width, height, cost) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+    draw(ctx) {
+        ctx.fillStyle = "purple";
+        ctx.fillRect((this.x), (this.y), this.width, this.height);
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Lootbox", this.x + this.width / 2, this.y + this.height / 2);
+    }
+    tocando(mx, my) {
+        return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
+    }
+
+    update() {
+            if(this.isHovered){
+                this.scale = 1.2;
+            }
+            else{
+                this.scale = 1;
+            }
+    }
+}
 class Dialogue {
    // sprite parameter allows overriding the default imgMaton character image.
     // If no sprite is passed, falls back to imgMaton to preserve existing behaviour.

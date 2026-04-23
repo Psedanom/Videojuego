@@ -67,6 +67,7 @@ class Game {
         this.dialogoArmaVisto = false;    // True after the weapon card dialogue has been shown once
         this.dialogoEnemieVisto = false;  // True after the enemy card dialogue has been shown once
         this.dialogoVidaVisto = false;    // True after the health card dialogue has been shown once
+        this.skipebutton = true;
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -469,20 +470,23 @@ class Game {
             else if (pantalla === 'juego') {
                 this.cardsClickedIntercations();
                 if(this.pasarRonda.isHovered && this.ctab == 4){
-                    if(this.boss){
-                            this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
-                    }
-                    for(let i = 0; i<4; i++){
-                        for(let card of this.cartas){
-                            if (card.inboard){
-                                card.inboard = false;
-                                
-                                this.cartas.push(card);
-                                this.index = this.cartas.indexOf(card);
-                                break;
-                            }
+                    if(this.skipebutton){
+                        if(this.boss){
+                                this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
                         }
-                        this.cartas.splice(this.index,1);
+                        for(let i = 0; i<4; i++){
+                            for(let card of this.cartas){
+                                if (card.inboard){
+                                    card.inboard = false;
+                                    
+                                    this.cartas.push(card);
+                                    this.index = this.cartas.indexOf(card);
+                                    break;
+                                }
+                            }
+                            this.cartas.splice(this.index,1);
+                        }
+                        this.skipebutton = false;
                     }
                 }
             }
@@ -518,6 +522,7 @@ class Game {
 
     }
     update(deltaTime) {
+        this.fourth = 0;
         if(this.nivel%5 == 0 && this.nivel != 0){
             this.boss = true;
         }
@@ -545,6 +550,11 @@ class Game {
                 terminado = false; // Allow the board-refill branch in draw() to run once
                 this.ctab = 4;     // Reset the plays-per-turn counter
             }
+
+            if(this.fourth %2 == 0){
+                this.skipebutton = true;
+            }
+            this.fourth += 1;
         }
         for (let card of this.cartas) {
             card.update();
