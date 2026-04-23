@@ -93,7 +93,7 @@ class Game {
             // "passEnemie" discard the first enemy found on the board without dealing damage
             else if (this.card_clicked.habilidad == "passEnemie") {
                 for (let card of this.cartas) {
-                    if (card.enemie && card.inboard) {
+                    if (card.enemie && card.inboard && this.ctab > 1) {
                         this.discardEnemy(card);
                         break;// Only skips one enemy per use
                     }
@@ -102,7 +102,7 @@ class Game {
             //"healthpassEnemie" discard the first board enemy AND restore health equal to this card's full number
             else if (this.card_clicked.habilidad == "healthpassEnemie") {
                 for (let card of this.cartas) {
-                    if (card.enemie && card.inboard) {
+                    if (card.enemie && card.inboard && this.ctab > 1) {
                         this.discardEnemy(card);
                         break;
                     }
@@ -360,8 +360,8 @@ class Game {
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170,"");
-        this.usadas = new Botones(650, 400, 120, 170,"");
+        this.armas = new Botones(100, 470, 120, 170," ");
+        this.usadas = new Botones(650, 400, 120, 170," ");
         this.pasarRonda = new Botones(600,100,240,50,"Skip Round");
         this.play = new Botones(300,0 + canvasHeight*0.1,200,100,"Play");
         this.logout = new Botones(300, 0 + canvasHeight*0.3, 200, 100,"Logout");
@@ -976,8 +976,8 @@ class Game {
             }
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170);
-        this.usadas = new Botones(650, 400, 120, 170);
+        this.armas = new Botones(100, 470, 120, 170,"");
+        this.usadas = new Botones(650, 400, 120, 170,"");
         // Preserve the player's money across levels; everything else resets to defaults
         this.playerHealth = new Player(15, 15, 100, 20, 20, this.playerHealth.money);
 

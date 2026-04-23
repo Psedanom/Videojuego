@@ -66,6 +66,7 @@ class Botones {
         this.yantes = y;
     }
     draw(ctx) {
+        
         ctx.fillStyle = "white";
         ctx.fillRect((this.x), (this.y), this.width *this.scale, this.height * this.scale);
         ctx.fillStyle = "yellow";
