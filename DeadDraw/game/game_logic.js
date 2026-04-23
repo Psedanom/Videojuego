@@ -531,14 +531,20 @@ class Game {
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
         if (this.ctab <= 1) {
+            let todasEnPosicion = true;
             for (let card of this.cartas) {
                 if (!card.used && card.inboard) {
-                    card.x = 100;
-                    this.tablaVacia = true;
+                    if (card.x > 100) {
+                        card.x -= 1000 * (deltaTime / 1000); // 80px por segundo, ajusta a tu gusto
+                        todasEnPosicion = false;
+                    }  
                 }
             }
-            terminado = false; // Allow the board-refill branch in draw() to run once
-            this.ctab = 4;     // Reset the plays-per-turn counter
+            if(todasEnPosicion){
+                this.tablaVacia = true; 
+                terminado = false; // Allow the board-refill branch in draw() to run once
+                this.ctab = 4;     // Reset the plays-per-turn counter
+            }
         }
         for (let card of this.cartas) {
             card.update();
@@ -1016,7 +1022,7 @@ function main() {
 
     // Load the custom font before starting the loop so the first frame renders correctly.    const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
      const ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/Ethnocentric-Regular.otf)');
-    ethnocentric.load().then(function (loadedFont) {
+        ethnocentric.load().then(function (loadedFont) {
         document.fonts.add(loadedFont);
         // Create the game object
         game = new Game(canvas);

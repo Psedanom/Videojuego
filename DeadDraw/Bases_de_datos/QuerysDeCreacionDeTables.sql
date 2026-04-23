@@ -1,7 +1,7 @@
 -- Active: 1727878930875@@127.0.0.1@3306@deaddraw
 DROP SCHEMA IF EXISTS DeadDraw;
 CREATE SCHEMA DeadDraw;
-USE DeadDraw; 
+USE deaddraw; 
 
 
 /* DROP SCHEMA IF EXISTS DeadDraw_DB_wheneveram;
