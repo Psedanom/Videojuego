@@ -181,7 +181,7 @@ class Cards {
             ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
             ctx.font = "8px Ethnocentric";
             ctx.textAlign = "center";
-            ctx.fillText("★", this.x + this.width / 2, this.y + this.height - 8);
+            ctx.fillText("*", this.x + this.width / 2, this.y + this.height - 8);
             ctx.shadowBlur = 0;
         }
         
