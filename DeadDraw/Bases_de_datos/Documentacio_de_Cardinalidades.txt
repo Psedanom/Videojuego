@@ -8,13 +8,24 @@ This file contains the documentation of cardinalities in Crow's Foot notation
 Relaciones y Cardinalidades:
 
 Jugador -> Bitacora          1:N     Jugador 1 -----< Bitacora
+Bitacora -> Jugador          1:1     Bitacora 1 ----- 1 Jugador
 Jugador -> Partida           1:N     Jugador 1 -----< Partida
+Partida -> Jugador           1:1     Partida 1 ----- 1 Jugador
 Partida -> Baraja            1:1     Partida 1 ----- 1 Baraja
+Baraja -> Partida            1:N     Baraja 1 -----< Partida
 Baraja -> CartaEnBaraja      1:N     Baraja 1 -----< CartaEnBaraja
+CartaEnBaraja -> Baraja      N:1     CartaEnBaraja >----- 1 Baraja
 Carta -> CartaEnBaraja       1:N     Carta 1 -----< CartaEnBaraja
+CartaEnBaraja -> Carta       N:1     CartaEnBaraja >----- 1 Carta
 Jugador -> JugadorLootbox    1:N     Jugador 1 -----< JugadorLootbox
+JugadorLootbox -> Jugador    1:1     JugadorLootbox 1 ----- 1 Jugador
 Lootbox -> JugadorLootbox    1:N     Lootbox 1 -----< JugadorLootbox
+JugadorLootbox -> Lootbox    1:1     JugadorLootbox 1 ----- 1 Lootbox
 Carta -> CartaPremio         1:N     Carta 1 -----< CartaPremio
+CartaPremio -> Carta         1:1     CartaPremio 1 ----- 1 Carta
 Efecto -> MejoraPremio       1:N     Efecto 1 -----< MejoraPremio
+MejoraPremio -> Efecto       1:1     MejoraPremio 1 ----- 1 Efecto
 Carta -> CartaEfecto         1:N     Carta 1 -----< CartaEfecto
+CartaEfecto -> Carta         N:1     CartaEfecto >----- 1 Carta
 Efecto -> CartaEfecto        1:N     Efecto 1 -----< CartaEfecto
+CartaEfecto -> Efecto        1:1     CartaEfecto 1 ----- 1 Efecto
