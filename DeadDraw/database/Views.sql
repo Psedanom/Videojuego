@@ -1,11 +1,13 @@
 /* this view is used to get the cards that are in the maze, it is used to get the cards that are in the maze and their values, it is used to get the cards that are in the maze and their values and their deck id
 */
-/* from the Create.sql file */
 CREATE view card_in_maze AS
 SELECT idCard, value,idDeck from Card INNER JOIN CardInDeck USING(idCard);
 
+
+
 CREATE view card_effects AS
 SELECT idCard,suit,name  FROM Card INNER JOIN CardEffect USING(idCard) INNER JOIN Effect USING(idEffect) ORDER BY idCard;
+SELECT * from card_effects;
 
 CREATE view deck_cards AS
 SELECT name, COUNT(`idCard`) from deck INNER JOIN CardInDeck USING(idDeck) INNER JOIN Card USING(idCard) group by idDeck;
@@ -49,5 +51,9 @@ SELECT * from player_active_time;
 CREATE VIEW player_timesWined AS
 SELECT username,sum(result = 'victory') as times_wined FROM player INNER JOIN matchgame USING(idPlayer) GROUP BY username ORDER BY times_wined DESC;   
 
-
 SELECT * from player_timeswined;
+
+CREATE VIEW deck_card_types AS
+select name,suit, count(*) as count from deck INNER JOIN cardindeck USING(idDeck) INNER JOIN card USING(idCard) group by name, suit;
+
+ SELECT * from deck_card_types;
