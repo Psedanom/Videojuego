@@ -18,6 +18,10 @@ the game state, player interactions, win/loss conditions, and screen transitions
 const canvasWidth = 800;
 const canvasHeight = 700;
 
+//Card dimensions in pixels
+const cardWidth = 120;
+const cardHeight = 150;
+
 let oldTime = 0;
 
 let ctx;
@@ -344,17 +348,17 @@ class Game {
     initObjects() {
 
         for (let i = 1; i < 11; i++) {
-            let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
+            let card = new CardEspada(0, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
             this.cartas.push(card);
         }
         for(let i = 1; i < 3; i++){
             for (let i = 1; i < 10; i++) {
-                let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "",imgPicas);
+                let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgPicas);
                 this.cartas.push(card);
             }
         }
         for (let i = 1; i < 11; i++) {
-            let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "",imgCorazon);
+            let card = new CardVida(0, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
@@ -749,7 +753,7 @@ class Game {
             ctx.shadowBlur = 0;
 
             // Position and draw the three offered cards at fixed horizontal slots
-            this.cartaSeleccionada1.x = 150;
+            this.cartaSeleccionada1.x = cardHeight;
             this.cartaSeleccionada1.y = 200;
             this.cartaSeleccionada1.draw(ctx);
 
@@ -923,17 +927,17 @@ class Game {
             this.dialogoEnemieVisto = false;
             this.dialogoVidaVisto = false;
             for (let i = 1; i < 11; i++) {
-                let card = new CardEspada(0, 200, 112.5, 150, i, "diamantes", 1, false, false, true, "",imgRombos);
+                let card = new CardEspada(0, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
                 this.cartas.push(card);
             }
             for(let i = 1; i < 3; i++){
                 for (let i = 1; i < 10; i++) {
-                    let card = new CardEnemie(0, 200, 112.5, 150, i, "treboles", 1, false, false, true, "",imgPicas);
+                    let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgPicas);
                     this.cartas.push(card);
                 }
             }
             for (let i = 1; i < 11; i++) {
-                let card = new CardVida(0, 200, 112.5, 150, i, "corazones", 1, false, false, true, "",imgCorazon);
+                let card = new CardVida(0, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
                 this.cartas.push(card);
             }
         }

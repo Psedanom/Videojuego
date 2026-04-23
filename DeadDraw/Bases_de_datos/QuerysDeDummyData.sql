@@ -65,7 +65,7 @@ INSERT INTO Player (username, baseHealth, email, password, money, role) VALUES
 ('GhostCard',   20, 'ghostcard@gmail.com',    '$contrasena26',  245, 'player'),
 ('RuneDealer',  20, 'runedealer@gmail.com',   '$contrasena27',  190, 'player'),
 ('ChaosHand',   20, 'chaoshand@gmail.com',    '$contrasena28',  305, 'player'),
-('NullVoid',    20, 'nullvoid@gmail.com',     '$contrasena29',  150, 'player'),
+('NullVoid',    20, 'nullvoid@gmail.com',     '$contrasena29',  151, 'player'),
 ('LastDraw',    20, 'lastdraw@gmail.com',     '$contrasena30',  225, 'player');
 
 
