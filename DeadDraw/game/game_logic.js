@@ -979,8 +979,8 @@ class Game {
             }
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(100, 470, 120, 170);
-        this.usadas = new Botones(650, 400, 120, 170);
+        this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight,"");
+        this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight,"");
         // Preserve the player's money across levels; everything else resets to defaults
         this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, 20, this.playerHealth.money);
 

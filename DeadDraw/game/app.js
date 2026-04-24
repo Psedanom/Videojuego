@@ -4,6 +4,10 @@ const mysql = require('mysql2');
 const app = express()
 const port = 3000
 
+// CHANGE TO YOUR OWN DATABASE CONFIGURATION
+
+const dbpassword = dbpassword;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors())
@@ -21,7 +25,7 @@ app.post('/money', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -44,7 +48,7 @@ app.post('/login', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -74,7 +78,7 @@ app.post('/register', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -113,7 +117,7 @@ app.post('/registerUsername', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Habana_12345',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {

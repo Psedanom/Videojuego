@@ -1,4 +1,6 @@
 -- Active: 1727878930875@@127.0.0.1@3306@deaddraw
+/* La base de datos esta hecha por IA, pero curada por nosotros */
+
 
 USE DeadDraw;
 
