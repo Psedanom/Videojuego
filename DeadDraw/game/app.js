@@ -4,10 +4,42 @@ const mysql = require('mysql2');
 const app = express()
 const port = 3000
 
+// CHANGE TO YOUR OWN DATABASE CONFIGURATION
+
+const dbpassword = dbpassword;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors())
+app.post('/money', (req, res) => {
+    //const nombre = req.body.input;
+    const username = req.body.username;
+    const password = req.body.password;
+    const money = req.body.money;
+    const baseHealth = req.body.baseHealth;
+    
 
+
+
+    console.log("posted");
+    const connection = mysql.createConnection({
+        host: '127.0.0.1',
+        user: 'root',
+        password: dbpassword,
+        database: 'deaddraw'
+    });
+    connection.connect((err) => {
+        if (err) throw err;
+        console.log('Connected to MySQL Database!');
+        // Example query             
+        connection.query('update Player set money = money + ? where email = ? and password = ?',[amount,username,password], (err, results, fields) => {
+            res.send("Money added");
+        });
+        // Close the connection     
+        connection.end();
+    });
+    //res.send("Ok")
+});
 app.post('/login', (req, res) => {
     //const nombre = req.body.input;
     const username = req.body.username;
@@ -16,7 +48,7 @@ app.post('/login', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -46,7 +78,7 @@ app.post('/register', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {
@@ -85,7 +117,7 @@ app.post('/registerUsername', (req, res) => {
     const connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: dbpassword,
         database: 'deaddraw'
     });
     connection.connect((err) => {
