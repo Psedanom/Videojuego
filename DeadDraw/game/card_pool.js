@@ -40,7 +40,7 @@ const cardPool = [
         sideEffects() {
 
             return [
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas)
             ]
         }
@@ -54,9 +54,9 @@ const cardPool = [
         },
         sideEffects() {
             return [
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgPicas)
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles)
             ]
         }
 
@@ -70,11 +70,11 @@ const cardPool = [
         },  
         sideEffects() {
             return [
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgPicas)
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles)
             ]
         }
     }

@@ -31,7 +31,7 @@ let game;
 // Guards the board repopulation logic so it only runs once per empty-board event
 let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
-let pantalla = 'menu';
+let pantalla = 'start';
 /*
 Possible values for `pantalla`:
 - 'start'          : title screen; waits for the player to press Space to continue.
@@ -355,7 +355,7 @@ class Game {
         }
         for(let i = 1; i < 3; i++){
             for (let i = 1; i < 10; i++) {
-                let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgPicas);
+                let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
                 this.cartas.push(card);
             }
         }
@@ -367,10 +367,10 @@ class Game {
         this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ");
         this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight, " ");
         this.pasarRonda = new Botones(canvasWidth * 0.75, canvasHeight * 0.143, canvasWidth * 0.3, canvasHeight * 0.071, "Skip Round");
-        this.play = new Botones(300,0 + canvasHeight*0.1,200,100,"Play");
-        this.logout = new Botones(300, 0 + canvasHeight*0.3, 200, 100,"Logout");
-        this.settings = new Botones(300, 0 + canvasHeight*0.5, 200, 100,"Settings");
-        this.statistics = new Botones(300, 0 + canvasHeight*0.7, 200, 100,"Statistics");
+        this.play = new Botones(canvasWidth/2 - 100,0 + canvasHeight*0.1,200,100,"Play");
+        this.logout = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.3, 200, 100,"Logout");
+        this.settings = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.5, 200, 100,"Settings");
+        this.statistics = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.7, 200, 100,"Statistics");
         this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, user.baseHealth,user.money);
         /*for (let card of this.cartas) {
         if (card instanceof CardEnemie) {
@@ -440,7 +440,7 @@ class Game {
                     }
                 }
                 else if (pantalla === 'start') {
-                    pantalla = 'gameLore';
+                    pantalla = 'menu';
                 }
             }
         });
@@ -449,7 +449,7 @@ class Game {
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
 
-            if (pantalla === 'juego' || pantalla === 'menu') {
+            if (pantalla === 'juego'){
                 for (let card of this.cartas) {
                     if (!card.used)
                         card.isHovered = card.contains(mouseX, mouseY);
@@ -457,6 +457,9 @@ class Game {
                 this.armas.isHovered = this.armas.tocando(mouseX, mouseY);
                 this.pasarRonda.isHovered = this.pasarRonda.tocando(mouseX, mouseY);
                 this.usadas.isHovered = this.usadas.tocando(mouseX, mouseY);
+                
+            }
+            else if (pantalla === 'menu') {
                 this.settings.isHovered = this.settings.tocando(mouseX, mouseY);
                 this.statistics.isHovered = this.statistics.tocando(mouseX, mouseY);
                 this.logout.isHovered = this.logout.tocando(mouseX, mouseY);
@@ -618,7 +621,16 @@ class Game {
 
     draw(ctx) {
         ctx.shadowBlur = 0; // Reset glow to zero to prevent it from leaking into subsequent draw calls
-        if (pantalla === 'gameLore'){
+        if (pantalla === 'start') {
+            
+            // Neon blue glow
+            neonText(65, '#00bfff', "DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
+           
+
+            neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
+
+        }
+        else if (pantalla === 'gameLore'){
             if (!loreDialogueGenerated) {
                 this.loreDialogue = new Dialogue(preRunDialogue[lore]);
                 this.loreDialogue.draw(ctx);
@@ -954,7 +966,7 @@ class Game {
             }
             for(let i = 1; i < 3; i++){
                 for (let i = 1; i < 10; i++) {
-                    let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgPicas);
+                    let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
                     this.cartas.push(card);
                 }
             }

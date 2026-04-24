@@ -55,7 +55,7 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,text,scale = 1) {
+    constructor(x, y, width, height,text,scale = 1, color = "red") {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -64,31 +64,62 @@ class Botones {
         this.text = text;
         this.xantes = x;
         this.yantes = y;
+        this.color = color;
+        this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
+        this.wasHovered = false;
     }
     draw(ctx) {
         
-        ctx.fillStyle = "white";
-        ctx.fillRect((this.x), (this.y), this.width *this.scale, this.height * this.scale);
-        ctx.fillStyle = "yellow";
+        
+        
+        ctx.beginPath();
+        ctx.roundRect(this.x, this.y, this.width * this.scale, this.height * this.scale, 10);
+        ctx.fillStyle = "black";
+        ctx.fill();
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 100;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+
+        ctx.fillStyle = this.color;
         ctx.font = "20px Ethnocentric";
         ctx.textAlign = "center";
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.fillStyle = "white";
+        ctx.strokeText(this.text, this.x + this.width / 2 * this.scale, this.y + this.height / 2 * this.scale);
         ctx.fillText(this.text, this.x + this.width / 2 * this.scale, this.y + this.height / 2 * this.scale);
+        ctx.shadowBlur = 0;
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
-        return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
+        return mx >= this.xantes && mx <= this.xantes + this.width && my >= this.yantes && my <= this.yantes + this.height;
     }
     update(){
+
+        //Sound playing fix provided by AI, the variable wasHovered is AI idea but the way to play the audio is ours
         if(this.isHovered){
+            if (!this.wasHovered) {
+                hoverSound.currentTime = 0;
+                hoverSound.play();
+                this.audioplayed = true;
+            }
             this.scale = 1.2;
             this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the button centered while scaling
             this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the button centered while scaling
         }
         else{
+            this.audioplayed = false;
             this.scale = 1;
             this.x = this.xantes;
             this.y = this.yantes;
         }
+        this.wasHovered = this.isHovered;
     }
 }
 
