@@ -152,7 +152,43 @@ class Botones {
         this.selectSound.play();
     }
 }
+class bossBar{
+    constructor(x, y, width, height, roundsleft , totalRounds) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.roundsleft = roundsleft;
+        this.totalRounds = totalRounds;
+    }
+    draw(ctx) {
+        // Fondo negro
+        ctx.fillStyle = "black";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
 
+        // Relleno rojo proporcional a rondas restantes
+        ctx.fillStyle = "red";
+        let fillWidth = this.height * (this.roundsleft / this.totalRounds);
+        ctx.fillRect(this.x, this.y, this.width, fillWidth);
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = "red";
+        ctx.shadowBlur = 15;
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+        ctx.shadowBlur = 0;
+
+        // Etiqueta de rondas restantes
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = "white";
+        ctx.font = "12px Ethnocentric";
+        ctx.textAlign = "center";
+        ctx.fillText("BOSS " + this.roundsleft + "/" + this.totalRounds, 0, 4);
+        ctx.restore();
+    }
+}
 class lootbox {
     constructor(x, y, width, height, cost) {
         this.x = x;

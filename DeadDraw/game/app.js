@@ -6,7 +6,7 @@ const port = 3000
 
 // CHANGE TO YOUR OWN DATABASE CONFIGURATION
 
-const dbpassword = dbpassword;
+const dbpassword = "Habana_12345";
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
