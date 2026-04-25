@@ -12,7 +12,10 @@ the game state, player interactions, win/loss conditions, and screen transitions
 
 
 
+let font = "regular";
 
+// "regular" for ethnocentric font
+// "OpenDyslexic" for the OpenDyslexic font
 
 // Canvas dimensions in pixels
 const canvasWidth = 1200;
@@ -23,7 +26,6 @@ const cardWidth = 160;
 const cardHeight = 190;
 
 let oldTime = 0;
-
 let ctx;
 let user = JSON.parse(localStorage.getItem("player")); // convert the string data into an object
 let baseHealth = user.baseHealth;
@@ -267,6 +269,8 @@ class Game {
     cardsClickedIntercations(){
         for (let card of this.cartas) {
             if (card.isHovered && !card.used) {
+                cardSelected.currentTime = 0; // Reset the sound to allow it to play again immediately if the player clicks multiple cards in quick succession
+                cardSelected.play();
                 this.clicked = true;
                 this.card_clicked = card;
                 // Only show card dialogue during level 0 and only once per card interaction.
@@ -518,7 +522,7 @@ class Game {
             }
             else if (pantalla === 'menu') {
                 if (this.play.isHovered) {
-
+                    this.play.click();
                     pantalla = 'gameLore';
                 }
             }
@@ -1087,8 +1091,15 @@ function main() {
     ctx = canvas.getContext('2d');
 
     // Load the custom font before starting the loop so the first frame renders correctly.    const ethnocentric = new FontFace('Ethnocentric', 'url(../assets/fonts/Ethnocentric-Regular.otf)');
-     const ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/Ethnocentric-Regular.otf)');
-        ethnocentric.load().then(function (loadedFont) {
+    
+    let ethnocentric;
+    if (font === "regular"){
+        ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/Ethnocentric-Regular.otf)');
+    }
+    else{
+        ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/OpenDyslexic-Regular.otf)');
+    }
+    ethnocentric.load().then(function (loadedFont) {
         document.fonts.add(loadedFont);
         // Create the game object
         game = new Game(canvas);

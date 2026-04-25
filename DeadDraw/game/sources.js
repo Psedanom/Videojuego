@@ -31,6 +31,10 @@ imgMaton.src = '../game/assets/maton.png';
 const dialogueSound = document.createElement("audio");
 dialogueSound.src = "../game/assets/sound/textscroll.wav";
 
+const cardSelected = document.createElement("audio");
+cardSelected.src = "../game/assets/sound/cardSelected.ogg";
+cardSelected.volume = 0.5;
+
 // Sound effects played when hovering over a button
 const hoverSound = document.createElement("audio");
 hoverSound.src = "../game/assets/sound/menuHover.mp3";
@@ -58,7 +62,7 @@ playingSelect.volume = 0.3
 
 const menuSelect = document.createElement("audio");
 menuSelect.src = "../game/assets/sound/menuSelect.wav";
-menuSelect.volume = 0.3;
+menuSelect.volume = 0.7;
 
 
 // Looping music
