@@ -55,18 +55,39 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,text,scale = 1, color = "red") {
+    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal") {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.scale = scale
+        this.defaultScale = scale;
         this.text = text;
         this.xantes = x;
         this.yantes = y;
         this.color = color;
         this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
         this.wasHovered = false;
+        this.buttonType = buttonType; // Different type of buttons have different sound effects
+        this.selectSound = playingSelect; // Sound effect played when the button is clicked; defaults to the generic playingSelect sound but is overridden for menu buttons in the constructor
+
+        switch (this.buttonType) {
+            case "normal":
+                this.sound = hoverSound;
+                if (this.text === "Play") 
+                this.selectSound = menuSelect;
+                break;
+            case "skipButton":
+                this.sound = skipRound;
+                this.selectSound = playingSelect;
+                break;
+            case "cardPlace":
+                this.sound = cardPlaces;
+                this.selectSound = playingSelect;
+                break;
+        }
+
+
     }
     draw(ctx) {
         
@@ -87,39 +108,48 @@ class Botones {
         ctx.fillStyle = this.color;
         ctx.font = "20px Ethnocentric";
         ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.shadowColor = this.color;
         ctx.shadowBlur = 15;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = 2;
         ctx.fillStyle = "white";
-        ctx.strokeText(this.text, this.x + this.width / 2 * this.scale, this.y + this.height / 2 * this.scale);
-        ctx.fillText(this.text, this.x + this.width / 2 * this.scale, this.y + this.height / 2 * this.scale);
+        ctx.strokeText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        ctx.textBaseline = "alphabetic";
         ctx.shadowBlur = 0;
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
-        return mx >= this.xantes && mx <= this.xantes + this.width && my >= this.yantes && my <= this.yantes + this.height;
+        // return mx >= this.xantes && mx <= this.xantes + this.width && my >= this.yantes && my <= this.yantes + this.height;
+        return mx >= this.x && mx <= this.x + this.width * this.scale && my >= this.y && my <= this.y + this.height * this.scale;
     }
     update(){
 
         //Sound playing fix provided by AI, the variable wasHovered is AI idea but the way to play the audio is ours
         if(this.isHovered){
+            
             if (!this.wasHovered) {
-                hoverSound.currentTime = 0;
-                hoverSound.play();
+                this.sound.currentTime = 0;
+                this.sound.play();
                 this.audioplayed = true;
+                this.scale *= 1.2;
             }
-            this.scale = 1.2;
+            // this.scale = 1.2;
             this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the button centered while scaling
             this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the button centered while scaling
         }
         else{
             this.audioplayed = false;
-            this.scale = 1;
+            this.scale = this.defaultScale;
             this.x = this.xantes;
             this.y = this.yantes;
         }
         this.wasHovered = this.isHovered;
+    }
+    click() {
+        this.selectSound.currentTime = 0;
+        this.selectSound.play();
     }
 }
 
@@ -151,22 +181,21 @@ class lootbox {
             }
     }
 }
+
 class Dialogue {
    // sprite parameter allows overriding the default imgMaton character image.
     // If no sprite is passed, falls back to imgMaton to preserve existing behaviour.
     constructor(texto, sprite = imgMaton) {
         this.sprite = sprite;   
-        this.x = 0;
-        // Scale dialogue box height proportionally with canvas width so it doesn't stretch
-        this.dialogH = (canvasWidth / 800) * (canvasHeight / 4);
-        this.y = canvasHeight - this.dialogH;
+        this.x = canvasWidth / 2 - 400;
+        this.y = canvasHeight - canvasHeight / 4;
         this.texto = texto;
         this.caracteresVisibles = 0; // How many characters are currently visible (grows each frame)
-        this.velocidad = 0.2; // Characters revealed per frame (fractional to slow the scroll)
+        this.velocidad = 0.40; // Characters revealed per frame (fractional to slow the scroll)
         this.done = false; // True once the full text has been revealed
-        // Character is right-aligned; size derived from canvasHeight to preserve the original 4:3 aspect ratio
-        this.characterx = canvasWidth - canvasHeight * (4 / 7);
-        this.charactery = canvasHeight * 0.4;
+        //this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
+        this.characterx = canvasWidth - 600;
+        this.charactery = canvasHeight - 420;
 
         // Prevents the scroll sound from being re-triggered every frame while text is scrolling
         this.soundDone = false; // True after the sound has been started for this dialogue instance
@@ -192,8 +221,8 @@ class Dialogue {
     }
     draw(ctx) {
         // Draw the character sprite; defaults to imgMaton if no override was provided
-        ctx.drawImage(this.sprite, this.characterx, this.charactery, canvasHeight * (4 / 7), canvasHeight * (3 / 7));
-        ctx.drawImage(imgDialogue, this.x, this.y, canvasWidth, this.dialogH);
+        ctx.drawImage(this.sprite, this.characterx, this.charactery, 400, 300);
+        ctx.drawImage(imgDialogue, this.x, this.y, 850, canvasHeight / 4);
         ctx.textAlign = "left";
         ctx.font = "15px Ethnocentric";
         ctx.fillStyle = "white";
@@ -207,7 +236,7 @@ class Dialogue {
         // Technique sourced from https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
         let words = textoMostrado.split('\n');
         for (let i = 0; i < words.length; i++) {
-            ctx.fillText(words[i], this.x + canvasWidth * 0.282, this.y + 80 + (i * lineheight));
+            ctx.fillText(words[i], this.x + 240, this.y + 70 + (i * lineheight));
 
         }
     }
@@ -229,6 +258,8 @@ class Cards {
         this.enMazo = enMazo;  // True while the card is still in the deck, waiting to be drawn
         this.habilidad = habilidad; // Special ability string (e.g. "enemieslos", "killhealth"). Empty string means no ability.
         this.img = img;        // The suit image asset drawn on the card face
+        this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
+        this.wasHovered = false;
     }
     draw(ctx) {
         ctx.fillStyle = "black";
@@ -237,11 +268,11 @@ class Cards {
             this.width * this.scale,
             this.height * this.scale);
         ctx.fillStyle = "white";
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.fillText(this.number, this.x + 90, this.y + 30);
-        ctx.font = "10px Arial";
-        ctx.fillText(this.habilidad, this.x + 50, this.y + 100);
+        ctx.font = `${20*this.scale}px Ethnocentric`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.number, this.x + 125*this.scale, this.y + 52*this.scale);
+        ctx.font = `${10*this.scale}px Arial`;
+        ctx.fillText(this.habilidad, this.x + 50*this.scale, this.y + 100*this.scale);
         if (this.habilidad && this.habilidad !== "" && this.enemie && this.enemie()) {
             const colores = {
                 "absoluteDamage": "#ffd700",
@@ -252,9 +283,9 @@ class Cards {
             ctx.shadowBlur = 6;
             ctx.shadowColor = colores[this.habilidad] || "#ffffff";
             ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
-            ctx.font = "8px Ethnocentric";
-            ctx.textAlign = "center";
-            ctx.fillText("★", this.x + this.width / 2, this.y + this.height - 8);
+            ctx.font = `${8*this.scale}px Ethnocentric`;
+            ctx.textAlign = "right";
+            ctx.fillText("★", (this.x + this.width / 2)*this.scale, (this.y + this.height - 8)*this.scale);
             ctx.shadowBlur = 0;
         }
         
@@ -270,10 +301,20 @@ class Cards {
     }
     update() {
         if (this.isHovered) {
+            if (!this.wasHovered) {
+                console.log(this.type + " is hovered"); // Debug log to verify hover detection
+                cardSound.playbackRate = 1.5 + getRandomIntegerInclusive(0,0.5); // Randomize pitch for variety
+                cardSound.currentTime = 0;
+                cardSound.play();
+                this.audioplayed = true;
+            }
             this.scale = 1.2;
         } else {
+            // cardSound.playbackRate = 1; // Reset pitch to normal for the next hover
+            this.audioplayed = false;
             this.scale = 1;
         }
+        this.wasHovered = this.isHovered;
     }
     click(x, y) {
         this.x = x;

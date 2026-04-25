@@ -32,6 +32,8 @@ let game;
 let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
+
+let playedMusic = false; // Flag to ensure the background music starts only once
 /*
 Possible values for `pantalla`:
 - 'start'          : title screen; waits for the player to press Space to continue.
@@ -292,6 +294,7 @@ class Game {
                 break;  
             }           
             else if (this.armas.isHovered && this.clicked) {
+                this.armas.click();
                 if (this.card_clicked.arma()) {
                     this.cardIntroductionInArmas();
                     this.posicion = 20;
@@ -305,6 +308,7 @@ class Game {
                 break;
             }
             else if (this.usadas.isHovered && this.clicked) {
+                this.usadas.click();
                 this.checkingCardTypeUsed();
             }
         }
@@ -350,28 +354,29 @@ class Game {
     initObjects() {
 
         for (let i = 1; i < 11; i++) {
-            let card = new CardEspada(0, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
+            let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
             this.cartas.push(card);
         }
         for(let i = 1; i < 3; i++){
             for (let i = 1; i < 10; i++) {
-                let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
+                let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
                 this.cartas.push(card);
             }
         }
         for (let i = 1; i < 11; i++) {
-            let card = new CardVida(0, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
+            let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ");
-        this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight, " ");
-        this.pasarRonda = new Botones(canvasWidth * 0.75, canvasHeight * 0.143, canvasWidth * 0.3, canvasHeight * 0.071, "Skip Round");
+        this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
+        this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
+        this.pasarRonda = new Botones(canvasWidth * 0.75, canvasHeight * 0.143, canvasWidth * 0.2, canvasHeight * 0.071, "Skip Round",undefined, undefined,"skipButton");
         this.play = new Botones(canvasWidth/2 - 100,0 + canvasHeight*0.1,200,100,"Play");
         this.logout = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.3, 200, 100,"Logout");
         this.settings = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.5, 200, 100,"Settings");
         this.statistics = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.7, 200, 100,"Statistics");
         this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, user.baseHealth,user.money);
+        this.skipInitialDialogue = new Botones(canvasWidth * 0.1 - 70, canvasHeight * 0.84, 200, 50, "Skip", 0.7, "#62ecff");
         /*for (let card of this.cartas) {
         if (card instanceof CardEnemie) {
                 this.habilidadProb = getRandomIntegerInclusive(0,10);
@@ -472,6 +477,10 @@ class Game {
                     }
                 }
             }
+            else if (pantalla === 'gameLore') {
+                this.skipInitialDialogue.isHovered = this.skipInitialDialogue.tocando(mouseX, mouseY);
+            }
+
         });
         canvas.addEventListener('click', (event) => {
             // Card dialogue screen: any click dismisses the dialogue and returns to gameplay.
@@ -487,6 +496,7 @@ class Game {
                 this.cardsClickedIntercations();
                 if(this.pasarRonda.isHovered && this.ctab == 4){
                     if(this.skipebutton){
+                        this.pasarRonda.click();
                         if(this.boss){
                             this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
                         }
@@ -508,6 +518,7 @@ class Game {
             }
             else if (pantalla === 'menu') {
                 if (this.play.isHovered) {
+
                     pantalla = 'gameLore';
                 }
             }
@@ -525,9 +536,13 @@ class Game {
             }
 
             else if (pantalla === 'gameLore') {
-                if (!loreDialogueGenerated) {
+                if (this.skipInitialDialogue.isHovered) {
+                    pantalla = 'juego';
+                    dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
+                    dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
                 }
                 else {
+                    
                     dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
                     dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
                     lore += 1;
@@ -557,6 +572,7 @@ class Game {
         this.logout.update();
         this.settings.update();
         this.statistics.update();
+        this.skipInitialDialogue.update();
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -590,6 +606,11 @@ class Game {
             for (let card of this.arregloCartas) {
                 card.update();
             }
+        }
+        if(pantalla === 'menu' && !playedMusic){
+            menuMusic.currentTime = 0; // Ensure the music starts from the beginning
+            menuMusic.play();
+            playedMusic = true; // Set the flag to prevent restarting the music on subsequent menu visits
         }
 
         // Check win/loss condition every frame
@@ -628,6 +649,7 @@ class Game {
            
 
             neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
+            
 
         }
         else if (pantalla === 'gameLore'){
@@ -637,6 +659,7 @@ class Game {
                 loreDialogueGenerated = true;
             }
             else{
+                this.skipInitialDialogue.draw(ctx);
                 this.loreDialogue.update();
                 this.loreDialogue.draw(ctx);
             }
@@ -991,8 +1014,8 @@ class Game {
             }
         }
         this.contador = new Tiempo();
-        this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight,"");
-        this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight,"");
+        // this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight,"", undefined, undefined,"cardPlace");
+        // this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight,"",undefined, undefined,"cardPlace");
         // Preserve the player's money across levels; everything else resets to defaults
         this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, 20, this.playerHealth.money);
 
@@ -1036,6 +1059,11 @@ class Game {
                             this.cartas.push(sideCard);
                         }
     }
+
+    buttonPressed()
+    {
+
+    }
 }
 
 
@@ -1066,8 +1094,7 @@ function main() {
         game = new Game(canvas);
         drawScene(0);
     });
-    // Create the game object
-    game = new Game(canvas);
+    
 
-    drawScene(0);
+
 }
