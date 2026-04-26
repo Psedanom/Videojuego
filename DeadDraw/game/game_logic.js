@@ -278,8 +278,8 @@ class Game {
                 cardSelected.play();
                 this.clicked = true;
                 this.card_clicked = card;
-                this.card_clicked.xantes = this.card_clicked.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid    
-                this.card_clicked.yantes = this.card_clicked.y;
+                this.card_clicked.used = true; // Mark the card as used immediately to prevent multiple interactions while dragging
+                this.card_clicked.update(); // Update the card's position to reflect the click before any potential move
                 // Only show card dialogue during level 0 and only once per card interaction.
                 // cartaDialogueDone is flipped to true after the player dismisses the dialogue,
                 // preventing it from triggering again for the rest of the run.
@@ -361,6 +361,10 @@ class Game {
             let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
+        this.lootbox1 = new lootbox((canvasWidth - canvasWidth * 0.125) -75, canvasHeight - canvasHeight * 0.6, 150, 150,50);
+        this.lootbox2 = new lootbox((canvasWidth - canvasWidth * 0.375) -75, canvasHeight - canvasHeight * 0.6, 150, 150,100);
+        this.lootbox3 = new lootbox((canvasWidth - canvasWidth * 0.625) -75, canvasHeight - canvasHeight * 0.6, 150, 150,200);
+        this.lootbox4 = new lootbox((canvasWidth - canvasWidth * 0.875) -75, canvasHeight - canvasHeight * 0.6, 150, 150,500);
         this.bossBar = new bossBar(canvasWidth -canvasWidth * 0.95, canvasHeight/2 - 200, 30, 400,20,20);
         this.contador = new Tiempo();
         this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
@@ -462,9 +466,14 @@ class Game {
                 }
                 else{
                     this.clicked = false;
+                    this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
+                    this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
+                    this.card_clicked.xantes2 = this.card_clicked.x;
+                    this.card_clicked.yantes2 = this.card_clicked.y;
                     this.card_clicked.x = this.card_clicked.xantes;
                     this.card_clicked.y = this.card_clicked.yantes;
                     this.card_clicked = null;
+                    
                 }
                 
                 //break;
@@ -475,6 +484,10 @@ class Game {
             }
             else{
                 this.clicked = false;
+                this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
+                this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
+                this.card_clicked.xantes2 = this.card_clicked.x;
+                this.card_clicked.yantes2 = this.card_clicked.y;
                 this.card_clicked.x = this.card_clicked.xantes;
                 this.card_clicked.y = this.card_clicked.yantes;
                 this.card_clicked = null;
@@ -494,6 +507,9 @@ class Game {
                 if(this.clicked && this.card_clicked){
                     this.card_clicked.x = this.mouseX - this.card_clicked.width/2;
                     this.card_clicked.y = this.mouseY - this.card_clicked.height/2;
+                    this.card_clicked.xantes2 = this.card_clicked.x;
+                    this.card_clicked.yantes2 = this.card_clicked.y;
+
                 }
                 this.armas.isHovered = this.armas.tocando(this.mouseX, this.mouseY);
                 this.pasarRonda.isHovered = this.pasarRonda.tocando(this.mouseX, this.mouseY);
@@ -513,6 +529,12 @@ class Game {
                     }
                 }
             }
+            else if(pantalla === 'lootboxes'){
+                this.lootbox1.isHovered = this.lootbox1.tocando(this.mouseX, this.mouseY);
+                this.lootbox2.isHovered = this.lootbox2.tocando(this.mouseX, this.mouseY);
+                this.lootbox3.isHovered = this.lootbox3.tocando(this.mouseX, this.mouseY);
+                this.lootbox4.isHovered = this.lootbox4.tocando(this.mouseX, this.mouseY);
+            }
             else if(pantalla === 'seleccion_de_pantalla'){
                 this.sleccioncard.isHovered = this.sleccioncard.tocando(this.mouseX, this.mouseY);
                 this.selectionlootboxes.isHovered = this.selectionlootboxes.tocando(this.mouseX, this.mouseY);
@@ -525,7 +547,7 @@ class Game {
         canvas.addEventListener('mousedown', (event) => {
             // Card dialogue screen: any click dismisses the dialogue and returns to gameplay.
             // cartaDialogueDone is set to true so cardsClickedIntercations does not reopen it on the same click.
-                if (pantalla === 'dialogo_carta') {
+            if (pantalla === 'dialogo_carta') {
        
                 dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
                 dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
@@ -579,8 +601,21 @@ class Game {
                 }
                 else if (this.selectionlootboxes.isHovered) {
                     this.selectionlootboxes.click();
-                    // For now, the loot box button just gives the player a free card from the current level's card pool.
-                    // This is where the loot box purchase flow would be implemented in a full version of the game.
+                    pantalla = "lootboxes";
+                }
+            }
+            else if(pantalla === 'lootboxes'){
+                if(this.lootbox1.isHovered){
+                    this.lootbox1.click(this.playerHealth,this.contador,this.cartas);
+                }
+                else if(this.lootbox2.isHovered){
+                    this.lootbox2.click(this.playerHealth,this.contador,this.cartas);
+                }
+                else if(this.lootbox3.isHovered){
+                    this.lootbox3.click(this.playerHealth,this.contador ,this.cartas);
+                }
+                else if(this.lootbox4.isHovered){
+                    this.lootbox4.click(this.playerHealth,this.contador,this.cartas);
                 }
             }
             else if (pantalla === 'dialogo' && !this.dialogueDone) {
@@ -636,6 +671,10 @@ class Game {
         this.skipInitialDialogue.update();
         this.sleccioncard.update();
         this.selectionlootboxes.update();
+        this.lootbox1.update();
+        this.lootbox2.update();
+        this.lootbox3.update();
+        this.lootbox4.update();
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -770,6 +809,16 @@ class Game {
             this.settings.draw(ctx);
             this.statistics.draw(ctx);
         }
+        else if (pantalla === 'lootboxes') {
+            // Neon text style for the screen title
+            neonText(30, '#00bfff', "LOOTBOXES", canvasWidth / 2, 40);      
+            this.lootbox1.draw(ctx);
+            this.lootbox2.draw(ctx);
+            this.lootbox3.draw(ctx);
+            this.lootbox4.draw(ctx);
+            this.playerHealth.draw(ctx);
+        }
+        
         // Displays the card dialogue screen using the same Dialogue system as pre-level dialogues.
         // dialogue_carta is instantiated in cardsClickedIntercations() when a card is first clicked.
         else if (pantalla === 'dialogo_carta') {
@@ -808,6 +857,10 @@ class Game {
                             card.x = posicion;
                             posicion += canvasWidth * 0.203; //DEBUGEAR DEFAULT 0.203
                             card.inboard = true;
+                            card.xantes2 = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+                            card.yantes2 = card.y;
+                            card.xantes = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+                            card.yantes = card.y;
                         }
                         card.draw(ctx);
                         this.num += 1;
@@ -900,15 +953,20 @@ class Game {
             this.cartaSeleccionada1.x = selMargin;
             this.cartaSeleccionada1.y = canvasHeight * 0.286;
             this.cartaSeleccionada1.draw(ctx);
+            this.cartaSeleccionada1.xantes = this.cartaSeleccionada1.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
+            this.cartaSeleccionada1.yantes = this.cartaSeleccionada1.y;
 
             this.cartaSeleccionada2.x = selMargin * 2 + cardWidth;
             this.cartaSeleccionada2.y = canvasHeight * 0.286;
             this.cartaSeleccionada2.draw(ctx);
+            this.cartaSeleccionada2.xantes = this.cartaSeleccionada2.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
+            this.cartaSeleccionada2.yantes = this.cartaSeleccionada2.y;
 
             this.cartaSeleccionada3.x = selMargin * 3 + cardWidth * 2;
             this.cartaSeleccionada3.y = canvasHeight * 0.286;
             this.cartaSeleccionada3.draw(ctx);
-
+            this.cartaSeleccionada3.xantes = this.cartaSeleccionada3.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
+            this.cartaSeleccionada3.yantes = this.cartaSeleccionada3.y;
 
             //Neon style for card info labels
             
