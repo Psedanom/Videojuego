@@ -408,7 +408,7 @@ class Cards {
             this.scale = 1.2;
             this.x = this.xantes2 - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
             this.y = this.yantes2 - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
-        } else if(!this.isHovered && !this.used) {
+        } else if(!this.isHovered && this.inboard) {
             // cardSound.playbackRate = 1; // Reset pitch to normal for the next hover
             this.audioplayed = false;
             this.scale = 1;
@@ -416,14 +416,22 @@ class Cards {
             this.yantes2 = this.yantes;
             this.x = this.xantes2; // Snap back to original coordinates when not hovered
             this.y = this.yantes2;
+        }else if(!this.inboard && this.used){
+            this.x = this.xantes2; // Move off-screen to the right when removed from the board  
+            this.y = this.yantes2; // Move off-screen downwards when removed from the board
+            this.scale = 1; // Shrink to invisible when removed from the board
+        }
+        if(this.used && this.inboard){
+            this.xantes2 = this.x;  // Update backup coordinates to the card's current position when it's played, in case it needs to snap back before being removed from the board
+            this.yantes2 = this.y;
         }
         this.wasHovered = this.isHovered;
     }
     click(x, y) {
         this.x = x;
         this.y = y;
-        this.used = true;
-
+        this.xantes2 = x; // Update backup coordinates to the card's new position when it's clicked, in case it needs to snap back
+        this.yantes2 = y;
     }
 
 }

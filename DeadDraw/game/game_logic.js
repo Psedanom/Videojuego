@@ -145,8 +145,8 @@ class Game {
     // moves the selected card to the weapon slot at the given horizontal (pos),
     // then marks it as played and decrements the board turn counter    
     moverCartasArma(card_clicked,pos){
-        this.xar = this.armas.x + pos;
-        this.yar = this.armas.y;
+        this.xar = this.armas.xantes + pos;
+        this.yar = this.armas.yantes;
         card_clicked.click(this.xar, this.yar);
         this.clicked = false;
         card_clicked.inboard = false;
@@ -154,17 +154,17 @@ class Game {
     }
     // Caches the discard pile's current position for reuse across discard operations
     giveUsadasPosition(){
-        this.xus = this.usadas.x;
-        this.yus = this.usadas.y;
+        this.xus = this.usadas.xantes ;
+        this.yus = this.usadas.yantes ; 
     }
     // Moves the selected card to the discard pile and decrements the board turn counter
     moveCartasUsadas(){
-        this.giveUsadasPosition();
+        this.giveUsadasPosition();  
         this.card_clicked.click(this.xus, this.yus);
+        this.cartasUsadas.push(this.card_clicked);
         this.clicked = false;
         this.card_clicked.inboard = false;
         this.ctab -= 1;
-        this.cartasUsadas.push(this.card_clicked);
     }
     //cheks wether there is an armas inside the array, then depending moves the card or cards to the corresponding position
     cardIntroductionInArmas(){
@@ -178,7 +178,6 @@ class Game {
             this.insertCardsIntoArmasArray()
             this.moverCartasArma(this.card_clicked,0);
             this.poolAbilities();
-            
         }
         else if(!this.hayArma){ 
             this.insertCardsIntoArmasArray();
@@ -186,7 +185,7 @@ class Game {
             this.moverCartasArma(this.card_clicked,0)
             this.card_arma = this.card_clicked;
             this.poolAbilities();
-        }
+        } 
     }
     //Checks what type of card is beeing used
     checkingCardTypeUsed(){
@@ -231,6 +230,7 @@ class Game {
 
             // });
             this.card_clicked.used = true;
+            this.card_clicked.scale = 1;
             this.cartasArma.push(this.card_clicked);
             // Find the weapon card inside cartasArma to read its damage value
             for (let cartasrma of this.cartasArma) { //CHECAR
@@ -454,29 +454,29 @@ class Game {
             if (this.clicked && this.card_clicked) {
                 if (this.armas.isHovered && this.clicked) {
                     this.armas.click();
-                if (this.card_clicked.arma()) {
-                    this.cardIntroductionInArmas();
-                    this.posicion = 20;
-                }
-                // A weapon card is already in the slot and the player is playing an enemy card against it.
-                // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
-                // OR be the first enemy played against this weapon (cartasArma.length < 2).
-                else if (this.hayArma && this.card_clicked.enemie()) {
-                    this.cardEnemiaCardWeaponInteraction();
-                }
-                else{
-                    this.clicked = false;
-                    this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
-                    this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
-                    this.card_clicked.xantes2 = this.card_clicked.x;
-                    this.card_clicked.yantes2 = this.card_clicked.y;
-                    this.card_clicked.x = this.card_clicked.xantes;
-                    this.card_clicked.y = this.card_clicked.yantes;
-                    this.card_clicked = null;
-                    
-                }
-                
-                //break;
+                    if (this.card_clicked.arma()) {
+                        this.cardIntroductionInArmas();
+                        this.posicion = 20;
+                    }
+                    // A weapon card is already in the slot and the player is playing an enemy card against it.
+                    // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
+                    // OR be the first enemy played against this weapon (cartasArma.length < 2).
+                    else if (this.hayArma && this.card_clicked.enemie()) {
+                        this.cardEnemiaCardWeaponInteraction();
+                    }
+                    else{
+                        this.clicked = false;
+                        this.card_clicked.inboard = true; // Return the card to the board if it's not a weapon or valid enemy play
+                        this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
+                        this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
+                        this.card_clicked.xantes2 = this.card_clicked.x;
+                        this.card_clicked.yantes2 = this.card_clicked.y;
+                        this.card_clicked.x = this.card_clicked.xantes;
+                        this.card_clicked.y = this.card_clicked.yantes;
+                        this.card_clicked = null;
+                        
+                    }
+                     //break;
             }
             else if (this.usadas.isHovered && this.clicked) {
                 this.usadas.click();
@@ -555,7 +555,7 @@ class Game {
                 return; // Prevent any further click handling this frame
             }
             else if (pantalla === 'juego') {
-
+                console.log(this.ctab);
                 this.cardsClickedIntercations();
                 if(this.pasarRonda.isHovered && this.ctab == 4){
                     if(this.skipebutton){
@@ -684,6 +684,8 @@ class Game {
                 if (!card.used && card.inboard) {
                     if (card.x > canvasWidth * 0.125) {
                         card.x -= 1000 * (deltaTime / 1000);
+                        card.xantes2 = card.x;
+                        card.xantes = card.x;
                         todasEnPosicion = false;
                     }
                 }
