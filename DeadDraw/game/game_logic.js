@@ -265,9 +265,14 @@ class Game {
         }
         else {
             this.clicked = false;
+            this.card_clicked.inboard = true; // Return the card to the board if it's not a weapon or valid enemy play
+            this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
+            this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
+            this.card_clicked.xantes2 = this.card_clicked.x;
+            this.card_clicked.yantes2 = this.card_clicked.y;
             this.card_clicked.x = this.card_clicked.xantes;
             this.card_clicked.y = this.card_clicked.yantes;
-            this.card_clicked = null;
+            this.card_clicked.update();
         }
     }
     //For every card in the deck checks if this card is being clicked and returns whatever the card has to do
@@ -346,7 +351,7 @@ class Game {
         }
     }
     initObjects() {
-
+        pantalla = 'start';
         for (let i = 1; i < 11; i++) {
             let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
             this.cartas.push(card);
@@ -730,7 +735,7 @@ class Game {
     // the player's health drops to 0 or below (loss), or the timer runs out (loss)
     isGameOver() {
         for (let card of this.cartas) {
-            if (!card.used && card.enemie()) {
+            if (!card.used && card.enemie() && !card.inboard) {
                 this.win = false;
                 break;
             }
@@ -927,7 +932,6 @@ class Game {
             neonText(30, '#00bfff', "SELECCIONA UNA CARTA", canvasWidth / 2, 40);
         
             this.arregloCartas = [this.cartaSeleccionada1, this.cartaSeleccionada2, this.cartaSeleccionada3];
-
             // Only pick new random cards once per visit to this screen.
             // seleccionando is flipped to true immediately so this block doesn't re-run every frame.
             if (!this.seleccionando) {
@@ -953,22 +957,27 @@ class Game {
             const selMargin = (canvasWidth - 3 * cardWidth) / 4;
             this.cartaSeleccionada1.x = selMargin;
             this.cartaSeleccionada1.y = canvasHeight * 0.286;
-            this.cartaSeleccionada1.draw(ctx);
             this.cartaSeleccionada1.xantes = this.cartaSeleccionada1.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
             this.cartaSeleccionada1.yantes = this.cartaSeleccionada1.y;
+            this.cartaSeleccionada1.xantes2 = this.cartaSeleccionada1.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
+            this.cartaSeleccionada1.yantes2 = this.cartaSeleccionada1.y;
+            this.cartaSeleccionada1.draw(ctx);
 
             this.cartaSeleccionada2.x = selMargin * 2 + cardWidth;
             this.cartaSeleccionada2.y = canvasHeight * 0.286;
-            this.cartaSeleccionada2.draw(ctx);
             this.cartaSeleccionada2.xantes = this.cartaSeleccionada2.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
             this.cartaSeleccionada2.yantes = this.cartaSeleccionada2.y;
+            this.cartaSeleccionada2.xantes2 = this.cartaSeleccionada2.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
+            this.cartaSeleccionada2.yantes2 = this.cartaSeleccionada2.y;
+            this.cartaSeleccionada2.draw(ctx);
 
             this.cartaSeleccionada3.x = selMargin * 3 + cardWidth * 2;
             this.cartaSeleccionada3.y = canvasHeight * 0.286;
-            this.cartaSeleccionada3.draw(ctx);
             this.cartaSeleccionada3.xantes = this.cartaSeleccionada3.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
             this.cartaSeleccionada3.yantes = this.cartaSeleccionada3.y;
-
+            this.cartaSeleccionada3.xantes2 = this.cartaSeleccionada3.x; // Cache original coordinates for snap-back if the player clicks but doesn't select this card
+            this.cartaSeleccionada3.yantes2 = this.cartaSeleccionada3.y;
+            this.cartaSeleccionada3.draw(ctx);
             //Neon style for card info labels
             
             ctx.textAlign = "left";
@@ -1105,7 +1114,13 @@ class Game {
             this.cartas[i].used = false;
             this.cartas[i].inboard = false;
             this.cartas[i].enMazo = true;
-            this.cartas[i].x = 0;
+            this.cartas[i].scale = 1;
+            this.cartas[i].xantes = 2000;
+            this.cartas[i].yantes = 200;
+            this.cartas[i].xantes2 = 2000;
+            this.cartas[i].yantes2 = 200;
+            this.cartas[i].isHovered = false;
+            this.cartas[i].x =2000;
             this.cartas[i].y = 200;
             this.cartas[i].dialogueMostrado = true; // Prevent card dialogues from showing again after level 0
         }
@@ -1118,9 +1133,14 @@ class Game {
         this.cantidadCartasTablero = 4;
         this.tablaVacia = false;
         this.gameover = false;
+        this.clicked = false;
+        this.curacionUsada = false;
+        this.skipebutton = false;
+        this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
 
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
             this.cartas = [];
+            this.nivel = 0;
             // Reset run stats on loss so they start fresh for the new run
             this.enemigosEliminados = 0;
             this.danoRecibido = 0;
@@ -1131,21 +1151,22 @@ class Game {
             this.dialogoEnemieVisto = false;
             this.dialogoVidaVisto = false;
             for (let i = 1; i < 11; i++) {
-                let card = new CardEspada(0, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
+                let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
                 this.cartas.push(card);
             }
             for(let i = 1; i < 3; i++){
                 for (let i = 1; i < 10; i++) {
-                    let card = new CardEnemie(0, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
+                    let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
                     this.cartas.push(card);
                 }
             }
             for (let i = 1; i < 11; i++) {
-                let card = new CardVida(0, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
+                let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
                 this.cartas.push(card);
             }
         }
         else {
+
             // Scale weapon and enemy card values by the current difficulty multiplier
             for (let card of this.cartas) {
                 if (card.arma || card.enemie) {
