@@ -450,9 +450,17 @@ class Cards {
                 this.audioplayed = true;
             }
             this.scale = 1.2;
-            this.x = this.xantes2 - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
-            this.y = this.yantes2 - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
-        } else if(!this.isHovered && this.inboard) {
+            if(pantalla == "juego"){
+                this.x = this.xantes2 - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
+                this.y = this.yantes2 - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
+            }
+            if(pantalla == "seleccion_carta"){
+                this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
+                this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
+                console.log(1);
+            }
+        } 
+        else if(!this.isHovered && this.inboard) {
             // cardSound.playbackRate = 1; // Reset pitch to normal for the next hover
             this.audioplayed = false;
             this.scale = 1;
@@ -464,6 +472,11 @@ class Cards {
             this.x = this.xantes2; // Move off-screen to the right when removed from the board  
             this.y = this.yantes2; // Move off-screen downwards when removed from the board
             this.scale = 1; // Shrink to invisible when removed from the board
+        }
+        else if(!this.used && !this.inboard){
+            this.x = this.xantes2; // Move back to original coordinates if the card is unplayed but somehow ended up off-board (e.g. dragged out and released without selecting)
+            this.y = this.yantes2;
+            this.scale = 1; // Ensure the card is at normal scale if it's not being hovered, in case it was left in a scaled state after being dragged
         }
         if(this.used && this.inboard){
             this.xantes2 = this.x;  // Update backup coordinates to the card's current position when it's played, in case it needs to snap back before being removed from the board
