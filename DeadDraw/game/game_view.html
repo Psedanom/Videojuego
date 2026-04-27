@@ -1,10 +1,3 @@
-<!-- 
- Emiliano Alighieri Targiano
-Jonathan Uriel Anzures García
-Pablo Sedano Morlett
-
-This file contains the main HTML for the game, including both canvas and the scripts needed to run the game.
--->
 <!DOCTYPE html>
 <html>
 
@@ -12,28 +5,267 @@ This file contains the main HTML for the game, including both canvas and the scr
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="game_view.css">
+    <link rel="stylesheet" href="side_menu.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="../Menu/inicioSesion_registro.js"></script>   <!-- Functions for login and register, with global variables -->
-  
+    <script src="../Menu/inicioSesion_registro.js"></script>
     <script src="game_logic.js"></script>
-    <script src="card_pool.js"></script> <!--Loot pool de las cartas -->
-    <script src="matrix_background.js"></script> <!--Fondo de Matrix -->
-    <script src="dialogue_pool.js"></script> <!--Pool de diálogos -->
-    <script src="classes.js"></script> <!--Classes needed for the game -->
-    <script src="sources.js"></script> <!--Sources for images and audio -->
-    <script src="outside_functions.js"></script> <!--Functions needed for the game -->
+    <script src="card_pool.js"></script>
+    <script src="matrix_background.js"></script>
+    <script src="dialogue_pool.js"></script>
+    <script src="classes.js"></script>
+    <script src="sources.js"></script>
+    <script src="outside_functions.js"></script>
+
+    <style>
+        /* ── Tutorial overlay backdrop ── */
+        #tutorial-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(3px);
+            overflow-y: auto;
+        }
+
+        /* ── Tutorial panel ── */
+        #tutorial-panel {
+            position: relative;
+            margin: 40px auto;
+            width: min(860px, 92vw);
+            background: #0a0a0a;
+            border: 1px solid #e8002d;
+            border-radius: 6px;
+            padding: 36px 44px 44px;
+            color: #d0d0d0;
+            font-family: 'Ethnocentric', monospace, sans-serif;
+            box-shadow: 0 0 30px rgba(232, 0, 45, 0.35);
+        }
+
+        /* close button — top-right X */
+        #tutorial-close {
+            position: absolute;
+            top: 14px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #e8002d;
+            font-size: 26px;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+        #tutorial-close:hover { color: #ff4d6d; }
+
+        /* headings */
+        #tutorial-panel h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: #e8002d;
+            letter-spacing: 6px;
+            margin: 0 0 28px;
+            text-shadow: 0 0 14px rgba(232,0,45,0.7);
+        }
+        #tutorial-panel h2 {
+            font-size: 0.85rem;
+            color: #00bfff;
+            letter-spacing: 3px;
+            margin: 22px 0 8px;
+            text-shadow: 0 0 8px rgba(0,191,255,0.5);
+        }
+        #tutorial-panel p {
+            font-size: 0.78rem;
+            line-height: 1.7;
+            margin: 0 0 6px;
+        }
+
+        /* keyboard key chip */
+        .tecla {
+            display: inline-block;
+            background: #1a1a1a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 1px 7px;
+            font-size: 0.72rem;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        /* card-type badges */
+        .carta-tipo {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+        .espada  { background:#1e3a5f; color:#62b5e5; border:1px solid #62b5e5; }
+        .enemigo { background:#2e1a1a; color:#ef9a9a; border:1px solid #ef5350; }
+        .vida    { background:#1a2e1a; color:#a5d6a7; border:1px solid #66bb6a; }
+
+        /* ability / loot blocks */
+        .habilidad-bloque, .loot-bloque {
+            background: #111;
+            border-left: 3px solid #e8002d;
+            border-radius: 3px;
+            padding: 8px 14px;
+            margin: 8px 0;
+            font-size: 0.76rem;
+        }
+        .habilidad-bloque .tag {
+            color: #ffd700;
+            font-size: 0.72rem;
+            margin-bottom: 4px;
+        }
+        .loot-bloque .nombre    { color: #fff; font-weight: bold; margin-bottom: 4px; }
+        .loot-bloque .ventaja   { color: #66bb6a; }
+        .loot-bloque .desventaja { color: #ef5350; }
+    </style>
 </head>
 
 <body>
+
+    <!-- Canvas del fondo Matrix (z-index 0, el más atrás) -->
     <canvas id='canvas2'></canvas>
+
+    <!-- Canvas del juego principal (z-index 1, al frente) -->
     <canvas id='canvas'></canvas>
 
+    <!-- ══════════════ TUTORIAL OVERLAY ══════════════ -->
+    <div id="tutorial-overlay">
+        <div id="tutorial-panel">
+            <button id="tutorial-close" title="Cerrar tutorial">✕</button>
+
+            <h1>TUTORIAL</h1>
+
+            <h2>Objetivo</h2>
+            <p>
+                Juega todas las cartas del mazo sin quedarte sin vida ni sin tiempo.
+                Cada nivel que superas incrementa la dificultad un 10% y te ofrece
+                una carta de recompensa para agregar a tu mazo.
+            </p>
+
+            <h2>Controles</h2>
+            <p>
+                <span class="tecla">Espacio</span> — avanzar pantallas, descartar diálogos y reiniciar al perder.<br>
+                <span class="tecla">Click en carta</span> — selecciona la carta del tablero.<br>
+                <span class="tecla">Click en slot de arma</span> — coloca la carta como arma o enfrenta un enemigo contra el arma activa.<br>
+                <span class="tecla">Click en descarte</span> — juega la carta directamente: cura, daño al jugador, o descarte simple.
+            </p>
+
+            <h2>Tipos de Cartas</h2>
+            <p>
+                <span class="carta-tipo espada">ESPADA ♦</span>
+                Carta de arma. Colócala en el slot de arma para reducir el daño
+                de los enemigos. Los enemigos deben jugarse en orden descendente de valor.
+            </p>
+            <p>
+                <span class="carta-tipo enemigo">ENEMIGO ♣</span>
+                Ataca al jugador. Directo al descarte: daño completo.
+                Enfrentado al arma: daño = enemigo − arma.
+                Ganas monedas igual a la mitad del valor del enemigo.
+            </p>
+            <p>
+                <span class="carta-tipo vida">VIDA ♥</span>
+                Restaura vida igual a su valor. Solo una carta de vida por turno.
+                La vida no puede superar el máximo de 20.
+            </p>
+
+            <h2>Turno de Tablero</h2>
+            <p>
+                Cada turno se colocan 4 cartas en el tablero y tienes 4 jugadas.
+                Al agotarlas, las cartas no usadas regresan al mazo y se reparte
+                un nuevo grupo. El tablero crece de a 3 cartas con cada refill.
+            </p>
+
+            <h2>Combate con Arma</h2>
+            <p>
+                Con un arma equipada, los enemigos pueden jugarse contra ella.
+                El daño recibido es la diferencia entre el valor del enemigo y el arma.
+                Si el arma es más poderosa, no recibes daño.
+                Los enemigos deben jugarse en orden descendente contra la misma arma.
+            </p>
+
+            <h2>Habilidades Especiales</h2>
+            <p>
+                Al ganar un nivel, las espadas pueden obtener una habilidad
+                aleatoria que se activa al colocarlas en el slot de arma.
+            </p>
+
+            <div class="habilidad-bloque">
+                <div class="tag">enemieslos — 50% de probabilidad</div>
+                <p>Reduce en 1 el valor de todos los enemigos activos en el tablero.</p>
+            </div>
+            <div class="habilidad-bloque">
+                <div class="tag">killhealth — 30% de probabilidad</div>
+                <p>Restaura vida igual a la mitad del valor de la espada.</p>
+            </div>
+            <div class="habilidad-bloque">
+                <div class="tag">passEnemie — 20% de probabilidad</div>
+                <p>Descarta automáticamente el primer enemigo visible sin recibir daño.</p>
+            </div>
+
+            <h2>Cartas de Recompensa</h2>
+            <p>
+                Al completar un nivel, eliges 1 de 3 cartas del loot pool.
+                Cada una tiene una ventaja y agrega enemigos al mazo como costo.
+            </p>
+
+            <div class="loot-bloque">
+                <div class="nombre">Vial de Vida</div>
+                <div class="ventaja">+ Restaura 20 de vida</div>
+                <div class="desventaja">- Agrega 2 enemigos al mazo</div>
+            </div>
+            <div class="loot-bloque">
+                <div class="nombre">Gran Espada</div>
+                <div class="ventaja">+ Espada con valor 12</div>
+                <div class="desventaja">- Agrega 3 enemigos al mazo</div>
+            </div>
+            <div class="loot-bloque">
+                <div class="nombre">Gran Espada 2.0</div>
+                <div class="ventaja">+ Espada con valor 15</div>
+                <div class="desventaja">- Agrega 5 enemigos al mazo</div>
+            </div>
+
+            <h2>Fin de Ronda</h2>
+            <p>
+                <strong style="color:#ef5350">Vida ≤ 0</strong> — Game Over. El mazo se reinicia sin dificultad acumulada.<br>
+                <strong style="color:#ef5350">Tiempo agotado</strong> — Game Over. Igual que perder por vida.<br>
+                <strong style="color:#ffd700">Todas las cartas jugadas</strong> — Victoria. La dificultad escala y vas a selección de carta.
+            </p>
+
+        </div><!-- /#tutorial-panel -->
+    </div><!-- /#tutorial-overlay -->
+  
+
+    <!-- Menú lateral de navegación -->
+    <nav id="side-menu">
+        <div class="btn" onclick="confirmarMenu()"><span>MENU</span></div>
+        <a href="../Menu/mecanicas.html" target="_blank"><div class="btn"><span>MECÁNICAS</span></div></a>
+        <a href="../Menu/Historia.html"  target="_blank"><div class="btn"><span>HISTORIA</span></div></a>
+        <!-- TUTORIAL ahora abre el overlay en lugar de una pestaña nueva -->
+        <div class="btn" onclick="abrirTutorial()" style="cursor:pointer"><span>TUTORIAL</span></div>
+    </nav>
+
     
-
-
     <script> main(); </script>
-
     <script> matrixBackground(); </script>
+    <script>
+        /* ── Menú principal ── */
+        function confirmarMenu() {
+            if (confirm("¡Cuidado! Estás por regresar al menú y perderás tu partida.")) {
+                window.location.href = "../index.html";
+            }
+        }
+        const overlay = document.getElementById('tutorial-overlay');
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) cerrarTutorial();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && overlay.style.display === 'block') cerrarTutorial();
+        });
+    </script>
 </body>
 
 </html>
