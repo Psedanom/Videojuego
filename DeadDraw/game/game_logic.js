@@ -473,8 +473,7 @@ class Game {
                         this.card_clicked.yantes2 = this.card_clicked.y;
                         this.card_clicked.x = this.card_clicked.xantes;
                         this.card_clicked.y = this.card_clicked.yantes;
-                        this.card_clicked = null;
-                        
+                        this.card_clicked.update();
                     }
                      //break;
             }
@@ -490,7 +489,7 @@ class Game {
                 this.card_clicked.yantes2 = this.card_clicked.y;
                 this.card_clicked.x = this.card_clicked.xantes;
                 this.card_clicked.y = this.card_clicked.yantes;
-                this.card_clicked = null;
+                this.card_clicked.update();
             }
         }
 
@@ -507,8 +506,8 @@ class Game {
                 if(this.clicked && this.card_clicked){
                     this.card_clicked.x = this.mouseX - this.card_clicked.width/2;
                     this.card_clicked.y = this.mouseY - this.card_clicked.height/2;
-                    this.card_clicked.xantes2 = this.card_clicked.x;
-                    this.card_clicked.yantes2 = this.card_clicked.y;
+                    this.card_clicked.xantes2 = this.card_clicked.xantes;
+                    this.card_clicked.yantes2 = this.card_clicked.yantes;
 
                 }
                 this.armas.isHovered = this.armas.tocando(this.mouseX, this.mouseY);

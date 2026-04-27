@@ -408,7 +408,8 @@ class Cards {
             this.scale = 1.2;
             this.x = this.xantes2 - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
             this.y = this.yantes2 - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
-        } else if(!this.isHovered && this.inboard) {
+        } 
+        else if(!this.isHovered && this.inboard) {
             // cardSound.playbackRate = 1; // Reset pitch to normal for the next hover
             this.audioplayed = false;
             this.scale = 1;
