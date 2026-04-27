@@ -361,12 +361,17 @@ class Game {
             let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
             this.cartas.push(card);
         }
-        for(let i = 1; i < 3; i++){
-            for (let i = 1; i < 10; i++) {
-                let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
-                this.cartas.push(card);
-            }
+
+        for (let i = 1; i < 10; i++) {
+            let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
+            this.cartas.push(card);
         }
+        
+        for (let i = 1; i < 10; i++) {
+            let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
+        }
+
+    
         for (let i = 1; i < 11; i++) {
             let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);

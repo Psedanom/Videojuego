@@ -245,7 +245,7 @@ class Dialogue {
 }
 
 class Cards {
-    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img) {
+    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img, centerImg = null) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -260,6 +260,26 @@ class Cards {
         this.img = img;        // The suit image asset drawn on the card face
         this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
         this.wasHovered = false;
+        
+        if (centerImg == null) {
+            let number = getRandomIntegerInclusive(0,3);
+            switch (type) {
+                case "diamantes":
+                    this.centerImg = centerWeaponImages[number];
+                    break;
+                case "treboles":
+                    this.centerImg = centerEnemyImages[number];
+                    break;
+                case "picas":
+                    this.centerImg = centerEnemyImages[number];
+                    break;
+                case "corazones":
+                    this.centerImg = imgMedkit;
+                    break;
+            }
+        }
+
+
     }
     draw(ctx) {
         ctx.fillStyle = "black";
@@ -267,6 +287,7 @@ class Cards {
             this.y,
             this.width * this.scale,
             this.height * this.scale);
+        ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
         ctx.fillStyle = "white";
         ctx.font = `${20*this.scale}px Ethnocentric`;
         ctx.textAlign = "right";
