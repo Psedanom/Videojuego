@@ -12,28 +12,35 @@ This file contains the main HTML for the game, including both canvas and the scr
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="game_view.css">
+    <link rel="stylesheet" href="side_menu.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="../Menu/inicioSesion_registro.js"></script>   <!-- Functions for login and register, with global variables -->
-  
+    <script src="../Menu/inicioSesion_registro.js"></script>
     <script src="game_logic.js"></script>
-    <script src="card_pool.js"></script> <!--Loot pool de las cartas -->
-    <script src="matrix_background.js"></script> <!--Fondo de Matrix -->
-    <script src="dialogue_pool.js"></script> <!--Pool de diálogos -->
-    <script src="classes.js"></script> <!--Classes needed for the game -->
-    <script src="sources.js"></script> <!--Sources for images and audio -->
-    <script src="outside_functions.js"></script> <!--Functions needed for the game -->
+    <script src="card_pool.js"></script>
+    <script src="matrix_background.js"></script>
+    <script src="dialogue_pool.js"></script>
+    <script src="classes.js"></script>
+    <script src="sources.js"></script>
+    <script src="outside_functions.js"></script>
+      
+
 </head>
 
 <body>
+    <canvas id='canvas3'></canvas>
     <canvas id='canvas2'></canvas>
     <canvas id='canvas'></canvas>
 
-    
-
+   <nav id="side-menu">
+    <a href="../index.html" target="_blank"><div class="btn"><span>MENU</span></div></a>
+    <a href="../Menu/mecanicas.html" target="_blank"><div class="btn"><span>MECÁNICAS</span></div></a>
+    <a href="../Menu/Historia.html"  target="_blank"><div class="btn"><span>HISTORIA</span></div></a>
+    <a href="../Menu/tutorial.html"  target="_blank"><div class="btn"><span>TUTORIAL</span></div></a>
+    </nav>
 
     <script> main(); </script>
-
     <script> matrixBackground(); </script>
+    
 </body>
 
 </html>

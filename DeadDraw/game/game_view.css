@@ -5,28 +5,21 @@ Pablo Sedano Morlett
 
 Main layout + responsive canvas fix
 */
+
 #canvas {
     background-image: url("../game/assets/canvas/fondocanvas.png");
     z-index: 1;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 
-    /* Makes a glowing border taken from:
-    https://unused-css.com/blog/css-outer-glow/
-     */
     --colorBorder: #a83331;
     border: 2px solid var(--colorBorder);
     box-shadow: 0 0 10px var(--colorBorder),
                 0 0 20px var(--colorBorder),
                 0 0 30px var(--colorBorder),
                 0 0 40px var(--colorBorder);
-
-
-     /* Causes bugs with cards hitboxes not implemented yet */
-    /* width: min(800px, 90vw);
-    height: auto;
-    aspect-ratio: 800 / 700;
-
-    max-height: 90vh;
-    max-width: calc(90vh * 800 / 700); */
 }
 
 #canvas2 {
