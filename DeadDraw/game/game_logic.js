@@ -1140,7 +1140,7 @@ class Game {
         this.gameover = false;
         this.clicked = false;
         this.curacionUsada = false;
-        this.skipebutton = false;
+        this.skipebutton = true;
         this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
 
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
