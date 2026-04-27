@@ -237,7 +237,7 @@
 
         </div><!-- /#tutorial-panel -->
     </div><!-- /#tutorial-overlay -->
-    <!-- ════════════════════════════════════════════ -->
+  
 
     <!-- Menú lateral de navegación -->
     <nav id="side-menu">
@@ -248,7 +248,7 @@
         <div class="btn" onclick="abrirTutorial()" style="cursor:pointer"><span>TUTORIAL</span></div>
     </nav>
 
-    <!-- Inicia el juego y el fondo Matrix -->
+    
     <script> main(); </script>
     <script> matrixBackground(); </script>
     <script>
@@ -258,31 +258,10 @@
                 window.location.href = "../index.html";
             }
         }
-
-      
         const overlay = document.getElementById('tutorial-overlay');
-
-        function abrirTutorial() {
-            overlay.style.display = 'block';
-            // Pausa el temporizador del juego (variable global definida en game_logic.js)
-            if (typeof tutorialAbierto !== 'undefined') tutorialAbierto = true;
-        }
-
-        function cerrarTutorial() {
-            overlay.style.display = 'none';
-            // Reanuda el temporizador
-            if (typeof tutorialAbierto !== 'undefined') tutorialAbierto = false;
-        }
-
-        // Botón ✕ dentro del panel
-        document.getElementById('tutorial-close').addEventListener('click', cerrarTutorial);
-
-        // Click en el fondo oscuro (fuera del panel) también cierra
         overlay.addEventListener('click', function (e) {
             if (e.target === overlay) cerrarTutorial();
         });
-
-        // Tecla Escape cierra el tutorial
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && overlay.style.display === 'block') cerrarTutorial();
         });
