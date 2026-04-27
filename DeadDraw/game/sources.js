@@ -108,8 +108,22 @@ menuSelect.volume = 0.7;
 // Looping music
 const menuMusic = document.createElement("audio");
 menuMusic.src = "../game/assets/sound/music.mp3";
-menuMusic.volume = 0.2;
+menuMusic.volume = 0.5;
 menuMusic.loop = true;
+
+// ===================== LootBoxes =====================
+
+const lootboxBlue = new Image();
+lootboxBlue.src = '../game/assets/lootboxes/LootboxBlue.png';
+
+const lootboxPurple = new Image();
+lootboxPurple.src = '../game/assets/lootboxes/LootboxPurple.png';
+
+const lootboxYellow = new Image();
+lootboxYellow.src = '../game/assets/lootboxes/LootboxYellow.png';
+
+const lootboxGreen = new Image();
+lootboxGreen.src = '../game/assets/lootboxes/LootboxGreen.png';
 
 
 
