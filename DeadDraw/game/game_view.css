@@ -5,15 +5,9 @@ Pablo Sedano Morlett
 
 Main layout + responsive canvas fix
 */
-
 #canvas {
     background-image: url("../game/assets/canvas/fondocanvas.png");
     z-index: 1;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
     --colorBorder: #a83331;
     border: 2px solid var(--colorBorder);
     box-shadow: 0 0 10px var(--colorBorder),

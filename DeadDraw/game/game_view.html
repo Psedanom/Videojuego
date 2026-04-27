@@ -1,10 +1,3 @@
-<!-- 
- Emiliano Alighieri Targiano
-Jonathan Uriel Anzures García
-Pablo Sedano Morlett
-
-This file contains the main HTML for the game, including both canvas and the scripts needed to run the game.
--->
 <!DOCTYPE html>
 <html>
 
@@ -22,25 +15,35 @@ This file contains the main HTML for the game, including both canvas and the scr
     <script src="classes.js"></script>
     <script src="sources.js"></script>
     <script src="outside_functions.js"></script>
-      
-
 </head>
 
 <body>
-    <canvas id='canvas3'></canvas>
+
+    <!-- Canvas del fondo Matrix (z-index 0, el más atrás) -->
     <canvas id='canvas2'></canvas>
+
+    <!-- Canvas del juego principal (z-index 1, al frente) -->
     <canvas id='canvas'></canvas>
 
-   <nav id="side-menu">
-    <a href="../index.html" target="_blank"><div class="btn"><span>MENU</span></div></a>
-    <a href="../Menu/mecanicas.html" target="_blank"><div class="btn"><span>MECÁNICAS</span></div></a>
-    <a href="../Menu/Historia.html"  target="_blank"><div class="btn"><span>HISTORIA</span></div></a>
-    <a href="../Menu/tutorial.html"  target="_blank"><div class="btn"><span>TUTORIAL</span></div></a>
+    <!-- Menú lateral de navegación -->
+    <nav id="side-menu">
+        <div class="btn" onclick="confirmarMenu()"><span>MENU</span></div>
+        <a href="../Menu/mecanicas.html" target="_blank"><div class="btn"><span>MECÁNICAS</span></div></a>
+        <a href="../Menu/Historia.html"  target="_blank"><div class="btn"><span>HISTORIA</span></div></a>
+        <a href="../Menu/tutorial.html"  target="_blank"><div class="btn"><span>TUTORIAL</span></div></a>
     </nav>
 
+    <!-- Inicia el juego y el fondo Matrix -->
     <script> main(); </script>
     <script> matrixBackground(); </script>
-    
+    <script>
+       
+        function confirmarMenu() {
+            if (confirm("¡Cuidado! Estás por regresar al menú y perderás tu partida.")) {
+                window.location.href = "../index.html";
+            }
+        }
+    </script>
 </body>
 
 </html>
