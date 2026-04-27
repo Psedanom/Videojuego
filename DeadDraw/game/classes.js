@@ -26,31 +26,35 @@ class Tiempo {
 }
 //Holds and renders all player stats: health bar, current health, and money
 class Player {
-    constructor(x, y, width, height, maxHealth, startingMoney = 0) {
+    constructor(x, y, width, height, maxHealth, money = 100) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.maxHealth = maxHealth;
         this.health = maxHealth;
-        this.money = startingMoney;
+        this.money = money;
     }
     draw(ctx) {
         ctx.fillStyle = "black";
         ctx.fillRect((this.x), (this.y), this.width, this.height);
         // healthli is the pixel width of the filled portion of the health bar,
         // proportional to (current health / max health)
-        let healthli = (this.health / this.maxHealth) * this.width;
-        ctx.fillStyle = "red";
-        ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.fillText(this.health, this.width - 35, this.height + 12);
-        ctx.fillStyle = "yellow";
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.fillText(this.money, canvasWidth / 2, this.height + 12);
+        if(pantalla == "juego"){
+            let healthli = (this.health / this.maxHealth) * this.width;
+            ctx.fillStyle = "red";
+            ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
+            ctx.fillStyle = "white";
+            ctx.font = "20px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText(this.health, this.width - 35, this.height + 12);
+        }
+        if(pantalla == "juego" || pantalla == "lootboxes"){
+            ctx.fillStyle = "yellow";
+            ctx.font = "20px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText(`Money: ${this.money}$`, canvasWidth / 2,canvasHeight-20);
+        }
     }
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
@@ -152,21 +156,85 @@ class Botones {
         this.selectSound.play();
     }
 }
-
-class lootbox {
-    constructor(x, y, width, height, cost) {
+class bossBar{
+    constructor(x, y, width, height, roundsleft , totalRounds) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.roundsleft = roundsleft;
+        this.totalRounds = totalRounds;
     }
     draw(ctx) {
-        ctx.fillStyle = "purple";
-        ctx.fillRect((this.x), (this.y), this.width, this.height);
+        // Fondo negro
+        ctx.fillStyle = "black";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // Relleno rojo proporcional a rondas restantes
+        ctx.fillStyle = "red";
+        let fillWidth = this.height * (this.roundsleft / this.totalRounds);
+        ctx.fillRect(this.x, this.y, this.width, fillWidth);
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = "red";
+        ctx.shadowBlur = 15;
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+        ctx.shadowBlur = 0;
+
+        // Etiqueta de rondas restantes
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+        ctx.rotate(-Math.PI / 2);
         ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
+        ctx.font = "12px Ethnocentric";
         ctx.textAlign = "center";
-        ctx.fillText("Lootbox", this.x + this.width / 2, this.y + this.height / 2);
+        ctx.fillText("BOSS " + this.roundsleft + "/" + this.totalRounds, 0, 4);
+        ctx.restore();
+    }
+}
+class lootbox {
+    constructor(x, y, width, height, cost,scale = 1) {
+        this.x = x;
+        this.y = y;
+        this.xantes = x;
+        this.yantes = y;
+        this.width = width;
+        this.height = height;
+        this.cost = cost;
+        this.isHovered = false;
+        this.scale = scale;
+        
+        switch (this.cost) {
+            case 50:
+                this.sprite = lootboxGreen;
+                this.color = "#6eff78";
+                break;
+            case 100:
+                this.sprite = lootboxBlue;
+                this.color = "#6de7ff";
+                break;
+            case 200:
+                this.sprite = lootboxPurple;
+                this.color = "#b47aff";
+                break;
+            case 500:
+                this.sprite = lootboxYellow;
+                this.color = "#fdbc27";
+                break;
+            case true:
+                this.sprite = lootboxGreen;
+                this.color = "#6eff78";
+                break;
+        }
+    }
+    draw(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y, this.width * this.scale, this.height * this.scale);
+        ctx.font = "20px Ethnocentric";
+        ctx.textAlign = "center";
+        neonText(20,this.color, `${this.cost}$`,this.x + (this.width *this.scale) / 2, this.y +100+ (this.height * this.scale) / 2 );
+        // neonText(65, '#00bfff', "DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
+        // ctx.fillText(this.cost, this.x + (this.width *this.scale) / 2, this.y +100+ (this.height * this.scale) / 2);
     }
     tocando(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
@@ -175,10 +243,64 @@ class lootbox {
     update() {
             if(this.isHovered){
                 this.scale = 1.2;
+                this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the lootbox centered while scaling
+                this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the lootbox centered while scaling
             }
             else{
                 this.scale = 1;
+                this.x = this.xantes;
+                this.y = this.yantes;   
             }
+    }
+    click(player,contador,cartas) {
+        if (player.money >= this.cost) {
+            if(this.cost == 50){
+                player.money -= this.cost;
+                this.prob = getRandomIntegerInclusive(1,100);
+                if(this.prob <= 10){
+                    player.maxHealth += 5;
+                    console.log("max health increased to " + player.maxHealth);
+                }
+                else if(this.prob <= 20){
+                    player.money += 50;
+                    console.log("money increased to " + player.money);
+                }
+                else if(this.prob <= 30){
+                    contador.tiempoSegundos += 5;
+                    console.log("time increased to " + contador.tiempoSegundos);
+                }
+                else if(this.prob <= 50){
+                    for(let card of cartas){
+                        if(card.enemie()){
+                            card.number = Math.max(card.number + card.number * 0.5);
+                            console.log("enemy number increased to " + card.number);
+                            break;
+                        }
+                    }
+                }
+                else if(this.prob <= 75){
+                    for(let card of cartas){
+                        if(card.arma()){
+                            card.number = Math.max(card.number + 1);
+                            console.log("weapon damage increased to " + card.number);
+                            break;
+                        }
+                    }
+                }
+                else{
+                    for(let card of cartas){
+                        if(card.esVida()){
+                            card.number = Math.max(card.number + 1);
+                            console.log("health card increased to " + card.number);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            player.money = 0;
+        } 
     }
 }
 
@@ -245,9 +367,9 @@ class Dialogue {
 }
 
 class Cards {
-    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img, centerImg = null) {
+    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img , xantes = x, yantes = y, centerImg = null) {
         this.x = x;
-        this.y = y;
+        this.y = y;   
         this.width = width;
         this.height = height;
         this.number = number;  // The face value of the card (damage dealt, health restored)
@@ -260,6 +382,10 @@ class Cards {
         this.img = img;        // The suit image asset drawn on the card face
         this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
         this.wasHovered = false;
+        this.xantes = xantes; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+        this.yantes = yantes;
+        this.xantes2 = xantes; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+        this.yantes2 = yantes;
         
         if (centerImg == null) {
             let number = getRandomIntegerInclusive(0,3);
@@ -287,8 +413,9 @@ class Cards {
             this.y,
             this.width * this.scale,
             this.height * this.scale);
-        ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
+            ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
         ctx.fillStyle = "white";
+<<<<<<< HEAD
         ctx.font = `${20*this.scale}px Ethnocentric`;
         ctx.textAlign = "right";
         ctx.fillText(this.number, this.x + 125*this.scale, this.y + 52*this.scale);
@@ -316,18 +443,35 @@ class Cards {
             ctx.shadowBlur = 0;
         }
         
+=======
+            ctx.font = `${20*this.scale}px Ethnocentric`;
+            ctx.textAlign = "right";
+            ctx.fillText(this.number, this.x + 125*this.scale, this.y + 52*this.scale);
+            ctx.font = `${10*this.scale}px Arial`;
+            ctx.fillText(this.habilidad, this.x + 50*this.scale, this.y + 100*this.scale);
+            if (this.habilidad && this.habilidad !== "" && this.enemie && this.enemie()) {
+                const colores = {
+                    "absoluteDamage": "#ffd700",
+                    "cursedEnemy":    "#ff0040",
+                    "timeEater":      "#9b00ff",
+                    "goldStealer":    "#00ff99"
+                };
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = colores[this.habilidad] || "#ffffff";
+                ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
+                ctx.font = `${8*this.scale}px Ethnocentric`;
+                ctx.textAlign = "right";
+                ctx.fillText("★", (this.x + this.width / 2)*this.scale, (this.y + this.height - 8)*this.scale);
+                ctx.shadowBlur = 0;
+            }
+            
+>>>>>>> origin/pablo
     }
     contains(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
-
-    // Repositions the card to (x, y) without changing any other state 
-    // used when forcing a card to a specific slot (weapon zone, discard pile)
-    defx(x) {
-        this.x = x;
-    }
     update() {
-        if (this.isHovered) {
+        if (this.isHovered && !this.used) {
             if (!this.wasHovered) {
                 console.log(this.type + " is hovered"); // Debug log to verify hover detection
                 cardSound.playbackRate = 1.5 + getRandomIntegerInclusive(0,0.5); // Randomize pitch for variety
@@ -336,18 +480,45 @@ class Cards {
                 this.audioplayed = true;
             }
             this.scale = 1.2;
-        } else {
+            if(pantalla == "juego"){
+                this.x = this.xantes2 - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
+                this.y = this.yantes2 - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
+            }
+            if(pantalla == "seleccion_carta"){
+                this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
+                this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
+                console.log(1);
+            }
+        } 
+        else if(!this.isHovered && this.inboard) {
             // cardSound.playbackRate = 1; // Reset pitch to normal for the next hover
             this.audioplayed = false;
             this.scale = 1;
+            this.xantes2 = this.xantes; // Update the backup coordinates in case the card was moved while hovered
+            this.yantes2 = this.yantes;
+            this.x = this.xantes2; // Snap back to original coordinates when not hovered
+            this.y = this.yantes2;
+        }else if(!this.inboard && this.used){
+            this.x = this.xantes2; // Move off-screen to the right when removed from the board  
+            this.y = this.yantes2; // Move off-screen downwards when removed from the board
+            this.scale = 1; // Shrink to invisible when removed from the board
+        }
+        else if(!this.used && !this.inboard){
+            this.x = this.xantes2; // Move back to original coordinates if the card is unplayed but somehow ended up off-board (e.g. dragged out and released without selecting)
+            this.y = this.yantes2;
+            this.scale = 1; // Ensure the card is at normal scale if it's not being hovered, in case it was left in a scaled state after being dragged
+        }
+        if(this.used && this.inboard){
+            this.xantes2 = this.x;  // Update backup coordinates to the card's current position when it's played, in case it needs to snap back before being removed from the board
+            this.yantes2 = this.y;
         }
         this.wasHovered = this.isHovered;
     }
     click(x, y) {
         this.x = x;
         this.y = y;
-        this.used = true;
-
+        this.xantes2 = x; // Update backup coordinates to the card's new position when it's clicked, in case it needs to snap back
+        this.yantes2 = y;
     }
 
 }
