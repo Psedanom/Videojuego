@@ -48,3 +48,14 @@ const getRandomIntegerInclusive = (min, max) => {
 
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
+
+function addMoney(amount){
+    let pass = $("#password").val();
+    let email = $("#username").val();
+     $.post("http://127.0.0.1:3000/money", {
+            username: email,
+            password: pass
+        }).done(function (data){
+
+        });
+}
