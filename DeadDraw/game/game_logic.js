@@ -49,6 +49,7 @@ let lore = 0;
 let loreDialogueGenerated = false;
 
 
+
 class Game {
     constructor(canvas) {
         this.cartas = [];  // Master array of all card objects in the current deck
@@ -78,6 +79,7 @@ class Game {
         this.skipebutton = true;
         this.mouseX=0;
         this.mouseY=0;
+        
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -352,6 +354,8 @@ class Game {
     }
     initObjects() {
         pantalla = 'start';
+        
+
         for (let i = 1; i < 11; i++) {
             let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
             this.cartas.push(card);
@@ -449,8 +453,8 @@ class Game {
                                 this.dialogueDone = false;
                                 this.preDialogueGenerated = false;
                                 this.dialogue_pregame = false;
+                                this.seleccionando = false;
                                 pantalla = 'seleccion_de_pantalla';
-                                this.newLevel(true);
                                 break;
                         }
                     }
@@ -587,6 +591,9 @@ class Game {
                         this.skipebutton = false;
                     }
                 }
+                
+                
+
             }
             else if (pantalla === 'menu') {
                 if (this.play.isHovered) {
@@ -670,7 +677,13 @@ class Game {
         else{
             this.boss = false;
         }
-        this.pasarRonda.update();
+        if(this.ctab == 4 && this.skipebutton){
+            this.pasarRonda.update("red");
+        }
+        else
+        {
+            this.pasarRonda.update("#898989");
+        }
         this.usadas.update();
         this.armas.update();
         this.play.update();
@@ -772,7 +785,6 @@ class Game {
     draw(ctx) {
         ctx.shadowBlur = 0; // Reset glow to zero to prevent it from leaking into subsequent draw calls
         if (pantalla === 'start') {
-            
             // Neon blue glow
             neonText(65, '#00bfff', "DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
            
@@ -1174,7 +1186,7 @@ class Game {
 
             // Scale weapon and enemy card values by the current difficulty multiplier
             for (let card of this.cartas) {
-                if (card.arma || card.enemie) {
+                if (card.arma() || card.enemie()) {
                     card.number = Math.floor(card.number *= this.dificultad);
                 }
             }
@@ -1216,21 +1228,21 @@ class Game {
             }
 
     selectCard(card){
-                        console.log("[Selection] Deck size before adding card:", this.cartas.length);
-                        this.cartas.push(card); // Add the chosen card to the player's deck
-                        console.log("[Selection] Deck size after adding chosen card:", this.cartas.length);
-
-                        // Determine which cardPool entry corresponds to the selected card
-                        // so we can retrieve its side effects
-                        let cardIndex;
-                        if (card === this.cartaSeleccionada1) cardIndex = this.card1;
-                        else if (card === this.cartaSeleccionada2) cardIndex = this.card2;
-                        else cardIndex = this.card3;
-
-                        // Each card in the pool may come with penalty cards (side effects) added to the deck
-                        for (let sideCard of cardPool[cardIndex].sideEffects()) {
-                            this.cartas.push(sideCard);
-                        }
+        console.log("[Selection] Deck size before adding card:", this.cartas.length);
+        this.cartas.push(card); // Add the chosen card to the player's deck
+     
+        
+        console.log("[Selection] Deck size after adding chosen card:", this.cartas.length);
+        // Determine which cardPool entry corresponds to the selected card
+        // so we can retrieve its side effects
+        let cardIndex;
+        if (card === this.cartaSeleccionada1) cardIndex = this.card1;
+        else if (card === this.cartaSeleccionada2) cardIndex = this.card2;
+        else cardIndex = this.card3;
+        // Each card in the pool may come with penalty cards (side effects) added to the deck
+        for (let sideCard of cardPool[cardIndex].sideEffects()) {
+            this.cartas.push(sideCard);
+        }
     }
 
     buttonPressed()

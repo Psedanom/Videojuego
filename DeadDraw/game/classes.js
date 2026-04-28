@@ -128,8 +128,10 @@ class Botones {
         // return mx >= this.xantes && mx <= this.xantes + this.width && my >= this.yantes && my <= this.yantes + this.height;
         return mx >= this.x && mx <= this.x + this.width * this.scale && my >= this.y && my <= this.y + this.height * this.scale;
     }
-    update(){
+    update(newColor = this.color) {
 
+        // Updates a color boton if needed optional
+        this.color = newColor;
         //Sound playing fix provided by AI, the variable wasHovered is AI idea but the way to play the audio is ours
         if(this.isHovered){
             
@@ -151,6 +153,7 @@ class Botones {
         }
         this.wasHovered = this.isHovered;
     }
+
     click() {
         this.selectSound.currentTime = 0;
         this.selectSound.play();
@@ -379,6 +382,7 @@ class Cards {
         this.inboard = inboard; // True while the card is currently visible on the game board
         this.enMazo = enMazo;  // True while the card is still in the deck, waiting to be drawn
         this.habilidad = habilidad; // Special ability string (e.g. "enemieslos", "killhealth"). Empty string means no ability.
+        this.abilityIcon = blank
         this.img = img;        // The suit image asset drawn on the card face
         this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
         this.wasHovered = false;
@@ -387,7 +391,9 @@ class Cards {
         this.xantes2 = xantes; // Cache the card's original coordinates to allow it to snap back if the play is invalid
         this.yantes2 = yantes;
         
-        if (centerImg == null) {
+        if (centerImg != null) {
+            this.centerImg = centerImg;
+        } else {
             let number = getRandomIntegerInclusive(0,3);
             switch (type) {
                 case "diamantes":
@@ -402,18 +408,52 @@ class Cards {
                 case "corazones":
                     this.centerImg = imgMedkit;
                     break;
+                default:
+                    this.centerImg = centerWeaponImages[0];
+                    break;
             }
         }
+        
 
 
     }
     draw(ctx) {
         ctx.fillStyle = "black";
-        ctx.drawImage(this.img, this.x,
-            this.y,
-            this.width * this.scale,
-            this.height * this.scale);
-            ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
+        ctx.drawImage(this.img, this.x,this.y,this.width * this.scale,this.height * this.scale);
+        ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
+        if(this.habilidad != "")
+        {
+            switch (this.habilidad) {
+            case "cursedEnemy":
+                this.abilityIcon = imgCursedEnemie;
+                break;
+            case "enemieslos":
+                this.abilityIcon = imgEnemieslos;
+                break;
+            case "goldStealer":
+                this.abilityIcon = imgGoldStealer;
+                break;
+            case "absoluteDamage":
+                this.abilityIcon = absoluteDamage;
+                break;
+            case "healthpassEnemie":
+                this.abilityIcon = imgHealthpassEnemie;
+                break;
+            case "killHealth":
+                this.abilityIcon = imgKillHealth;
+                break;
+            case "passEnemie":
+                this.abilityIcon = imgPassEnemie;
+                break;
+            case "timeEater":
+                this.abilityIcon = imgTimeEater;
+                break;
+            default:
+                this.abilityIcon = blank;
+                break;
+            }
+            ctx.drawImage(this.abilityIcon, this.x + 15*this.scale, this.y + this.height*this.scale - 73*this.scale, 1080*0.08*this.scale, 1080*0.08*this.scale);
+        }
         ctx.fillStyle = "white";
             ctx.font = `${20*this.scale}px Ethnocentric`;
             ctx.textAlign = "right";
