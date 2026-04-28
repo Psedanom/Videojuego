@@ -193,6 +193,7 @@ class bossBar{
         ctx.restore();
     }
 }
+
 class lootbox {
     constructor(x, y, width, height, cost,scale = 1) {
         this.x = x;
