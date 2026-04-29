@@ -403,7 +403,7 @@ class Cards {
                     this.centerImg = imgMedkit;
                     break;
                 default:
-                    this.centerImg = centerWeaponImages[0];
+                    this.centerImg = blank;
                     break;
             }
         }
@@ -476,7 +476,7 @@ class Cards {
     }
     update() {
         if (this.isHovered && !this.used) {
-            if (!this.wasHovered) {
+            if (!this.wasHovered && this.inboard) {
                 console.log(this.type + " is hovered"); // Debug log to verify hover detection
                 cardSound.playbackRate = 1.5 + getRandomIntegerInclusive(0,0.5); // Randomize pitch for variety
                 cardSound.currentTime = 0;

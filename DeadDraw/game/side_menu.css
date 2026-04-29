@@ -1,0 +1,56 @@
+@font-face {
+    font-family: 'Ethnocentric';
+    src: url('assets/fonts/Ethnocentric-Regular.otf') format('opentype');
+}
+
+#side-menu {
+    position: fixed;
+    top: 50%;
+    left: 8px;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 12px;
+    background: rgba(8, 8, 8, 0.75);
+
+    --colorBorder: #a83331;
+    border: 2px solid var(--colorBorder);
+    box-shadow: 0 0 10px var(--colorBorder),
+                0 0 20px var(--colorBorder),
+                0 0 30px var(--colorBorder),
+                0 0 40px var(--colorBorder);
+}
+
+#side-menu a {
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+}
+
+#side-menu .btn {
+    width: 120px;
+    height: 38px;
+    background: #111;
+    border: 2px solid #e8002d;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#side-menu .btn:hover {
+    background: #e8002d;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #e8002d;
+}
+
+#side-menu .btn span {
+    font-family: 'Ethnocentric', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: white;
+}

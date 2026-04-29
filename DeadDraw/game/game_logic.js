@@ -364,13 +364,14 @@ class Game {
             this.cartas.push(card);
         }
 
-        for (let i = 1; i < 10; i++) {
+        for (let i = 1; i < 15; i++) {
             let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
             this.cartas.push(card);
         }
         
-        for (let i = 1; i < 10; i++) {
+        for (let i = 1; i < 15; i++) {
             let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
+            this.cartas.push(card);
         }
 
     
@@ -443,7 +444,8 @@ class Game {
                 // If the round has ended, decide what to do next based on how it ended
                 if (this.gameover) {
                     // First press after game over goes to the summary screen
-                    if (pantalla !== 'resumen') {
+                    this.gameover = false; // Reset gameover flag for the next run
+                    if (pantalla == 'juego') {
                         pantalla = 'resumen';
                     }
                     // Second press on the summary screen proceeds to restart or card selection
@@ -1352,12 +1354,16 @@ class Game {
         this.curacionUsada = false;
         this.skipebutton = true;
         this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
+        
 
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
+            this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
+            this.playerHealth.health = this.playerHealth.maxHealth;
+            this.contador = new Tiempo(this.contador.tiempomax);
             this.cartas = [];
             this.nivel = 0;
+            this.bossBar.roundsleft = 20;
             pantalla = 'menu';
-            this.roundsleft = 20;
             // Reset run stats on loss so they start fresh for the new run
             this.enemigosEliminados = 0;
             this.danoRecibido = 0;
@@ -1371,16 +1377,21 @@ class Game {
                 let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
                 this.cartas.push(card);
             }
-            for(let i = 1; i < 3; i++){
-                for (let i = 1; i < 10; i++) {
+            
+                for (let i = 1; i < 15; i++) {
                     let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
                     this.cartas.push(card);
                 }
-            }
+                for (let i = 1; i < 15; i++) {
+                    let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
+                    this.cartas.push(card);
+                }
+            
             for (let i = 1; i < 11; i++) {
                 let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
                 this.cartas.push(card);
             }
+            
         }
         else{
 

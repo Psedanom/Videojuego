@@ -7,15 +7,26 @@
     <link rel="stylesheet" href="inicioSesion_registro.css">
     <script src="inicioSesion_registro.js"></script>
     <script src="../game/matrix_background.js"></script>
-    <script  src="../game/game_logic.js"></script>
-    <title>Inicio de Sesión/ Registro</title>
+    <script src="../game/game_logic.js"></script>
+    <title>Inicio de Sesión / Registro</title>
 </head>
 <body>
     <canvas id='canvas2'></canvas>
-    <input type="text" id="username" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button id="loginBtn" onclick="login()">LOGIN</button>
-    <button id="registerBtn" onclick="register()">REGISTER</button>
+
+    <div class="contenido">
+        <h1>LOGIN</h1>
+        <div class="form-container">
+            <input type="text" id="username" placeholder="EMAIL">
+            <input type="password" id="password" placeholder="PASSWORD">
+            <button id="loginBtn" class="btn" onclick="login()">
+                <span>LOGIN</span>
+            </button>
+            <button id="registerBtn" class="btn" onclick="register()">
+                <span>REGISTER</span>
+            </button>
+        </div>
+    </div>
+
+    <script> matrixBackground(); </script>
 </body>
 </html>
-<script> matrixBackground(); </script>

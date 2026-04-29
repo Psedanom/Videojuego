@@ -27,21 +27,20 @@ body{
     justify-content:center;
 }
 
-/* ===== MATRIX (CAPA MEDIA) ===== */
 canvas{
     position:fixed;
     inset:0;
     width:100vw;
     height:100vh;
-    z-index:5;           /* 👈 entre fondo y UI */
+    z-index:5;           
     opacity:0.18;
     pointer-events:none;
 }
 
-/* ===== CONTENIDO ===== */
+
 #intro-wrapper{
     position:relative;
-    z-index:10;          /* 👈 encima del matrix */
+    z-index:10;          
     width:min(720px,90vw);
     display:flex;
     flex-direction:column;
@@ -60,7 +59,7 @@ canvas{
 /* título */
 #slide-label{
     font-family:'Oswald',sans-serif;
-    font-size:0.65rem;
+    font-size:1.2rem;
     font-weight:300;
     letter-spacing:6px;
     color:var(--cyan);
@@ -69,29 +68,41 @@ canvas{
 
 /* texto */
 #slide-text{
-    font-size:clamp(0.95rem,2vw,1.1rem);
+    font-size:clamp(1.3rem,2.5vw,1.6rem);
     line-height:1.8;
     min-height:3em;
 }
 
 
-#controls{
-    display:flex;
-    justify-content:flex-end;
+/* Contenedor de botones con espacio entre ellos */
+#controls {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: center;
 }
 
+/* estilo base del boton de introduccion */
+.btn-intro {
+    padding: 16px 32px;
+    background: #111;
+    border: 3px solid #e8002d;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Ethnocentric', monospace;
+    font-size: 16px;
+    letter-spacing: 8px;
+    color: white;
+}
 
-.btn-intro{
-    font-family:'Oswald',sans-serif;
-    font-size:0.75rem;
-    letter-spacing:4px;
-    text-transform:uppercase;
-    padding:10px 28px;
-    border:1px solid #333;
-    background:transparent;
-    color:#444;
-    cursor:pointer;
-    transition:0.2s;
+/* resalta el boton cuando se pasa el mouse por encima */
+.btn-intro:hover {
+    background: #e8002d;
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #e8002d;
 }
 
 #btn-skip:hover{
