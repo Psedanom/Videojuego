@@ -73,7 +73,7 @@ class Game {
         this.seleccionando = false; // True while the card selection screen is showing a new set of cards to pick from
         this.preDialogueGenerated = false; // Guards against regenerating the pre-level dialogue object every frame
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
-        this.nivel = 0;
+        this.nivel = 19;
         this.boss = false;
         this.enemigosEliminados = 0;  // counts every enemy defeated with a weapon during this run
         this.danoRecibido = 0;        // tracks total damage taken from enemies this run
@@ -380,6 +380,7 @@ class Game {
             let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
+        this.finish = new Botones(canvasWidth * 0.5 - 100, canvasHeight * 0.3 - 50, 200, 100,"Finish the run ");
         this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,160,190,"deck1");
         this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,160,190,"deck2");
         this.deck3 = new Botones(canvasWidth * 0.8 - 80,canvasHeight * 0.5 - 95,160,190,"deck3");
@@ -418,6 +419,16 @@ class Game {
                 if (this.habilidadEnemieProb >= 0) {
                     if (this.habilidadProb >= 0 && this.habilidadProb <= 3) {
                         card.habilidad = "absoluteDamage";
+
+
+
+
+
+
+
+
+
+
                     }
                     else if (this.habilidadProb >= 4 && this.habilidadProb <= 6) {
                         card.habilidad = "cursedEnemy";
@@ -455,6 +466,9 @@ class Game {
                     if (pantalla == 'juego') {
                         pantalla = 'resumen';
                     }
+                    else if(this.boss){
+                        pantalla = 'afterBoss';
+                    }
                     // Second press on the summary screen proceeds to restart or card selection
                     else {
                         switch (this.reason) {
@@ -485,6 +499,7 @@ class Game {
             }
         });
         canvas.addEventListener('mouseup', (event) => {
+            console.log(pantalla);
             if(event.button === 0){
 
                 if (this.clicked && this.card_clicked) {
@@ -596,7 +611,10 @@ class Game {
                 }
             }
             
-            
+            else if(pantalla == 'afterBoss'){
+                this.siguiente.isHovered = this.siguiente.tocando(this.mouseX, this.mouseY);
+                this.finish.isHovered = this.finish.tocando(this.mouseX, this.mouseY);
+            }
             else if(pantalla === 'seleccion_de_pantalla'){
                 this.sleccioncard.isHovered = this.sleccioncard.tocando(this.mouseX, this.mouseY);
                 this.selectionlootboxes.isHovered = this.selectionlootboxes.tocando(this.mouseX, this.mouseY);
@@ -760,10 +778,66 @@ class Game {
                     else if(this.lootbox4.isHovered){
                         this.lootbox4.click(this.playerHealth,this.contador,this.cartas);
                     }
-                    else if(this.siguiente.isHovered){
+                    else if(this.siguiente.isHovered && !this.boss){
                         this.siguiente.click();
                         this.newLevel(true); // Start next level with the updated deck
                         pantalla = 'juego';
+                    }
+                }
+                else if(pantalla == 'afterBoss'){
+                    if(this.finish.isHovered){
+                        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
+                        this.playerHealth.health = this.playerHealth.maxHealth;
+                        this.contador = new Tiempo(this.contador.tiempomax);
+                        this.cartas = [];
+                        this.nivel = 0;
+                        this.boss = false;
+                        this.bossBar.roundsleft = 20;
+                        pantalla = 'menu';
+                        // Reset run stats on loss so they start fresh for the new run
+                        this.enemigosEliminados = 0;
+                        this.danoRecibido = 0;
+                        // Reset card dialogues for the new run starting at level 0
+                        this.cartaDialogueDone = false;
+                        // Reset card type dialogues for new run starting at level 0
+                        this.dialogoArmaVisto = false;
+                        this.dialogoEnemieVisto = false;
+                        this.dialogoVidaVisto = false;
+                        for (let i = 1; i < 11; i++) {
+                            let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
+                            this.cartas.push(card);
+                        }
+                        
+                            for (let i = 1; i < 15; i++) {
+                                let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
+                                this.cartas.push(card);
+                            }
+                            for (let i = 1; i < 15; i++) {
+                                let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
+                                this.cartas.push(card);
+                            }
+                        
+                        for (let i = 1; i < 11; i++) {
+                            let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
+                            this.cartas.push(card);
+                        }
+
+                    }
+                    if(this.siguiente.isHovered){
+                        pantalla = 'resumen'
+                        this.nivel = 0;
+                        for (let card of this.cartas) {
+                            if (card.arma() || card.enemie()) {
+                                card.number = Math.floor(card.number *= this.dificultad);
+                            }
+                        }
+                        // Randomly assign a special ability to each weapon card.
+                        // probabilidadhabilidad is a 0-10 roll that acts as an ability-trigger gate
+                        // habilidadProb is a second 0-10 roll that selects which specific ability is assigned.
+                        for (let card of this.cartas) {
+                            this.abilityObtention(card);
+                        }
+                        this.boss = false;
                     }
                 }
                 else if (pantalla === 'dialogo' && !this.dialogueDone) {
@@ -827,9 +901,6 @@ class Game {
         if(this.nivel%20 == 0 && this.nivel != 0){
             this.boss = true;
         }
-        else{
-            this.boss = false;
-        }
         if(this.ctab == 4 && this.skipebutton){
             this.pasarRonda.update("red");
         }
@@ -861,6 +932,10 @@ class Game {
                 this.btn = this.rewardButtons[reward[i]];
                 this.btn.update();
             }
+        }
+        if(pantalla == 'afterBoss'){
+            this.finish.update();
+            this.siguiente.update();
         }
         else if(pantalla == 'deck'){
             this.deck1.update();
@@ -1165,7 +1240,7 @@ class Game {
                     cartas.draw(ctx);
                 }
             }
-            else {
+            else if (this.gameover) {
                 console.log("Round ended");
                 this.reason = this.gameOverReason();
                 switch (this.reason) {
@@ -1306,6 +1381,10 @@ class Game {
             ctx.strokeText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
             ctx.fillText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
         }
+        else if(pantalla == 'afterBoss'){
+            this.finish.draw(ctx);
+            this.siguiente.draw(ctx);
+        }
         else if (pantalla === 'resumen') {
             // Title color and text depend on how the run ended, reusing reason codes from gameOverReason()
             // reason 3 means victory (all cards used), anything else means loss
@@ -1421,8 +1500,6 @@ class Game {
         this.curacionUsada = false;
         this.skipebutton = true;
         this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
-        
-
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
             this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
             this.playerHealth.health = this.playerHealth.maxHealth;
@@ -1460,7 +1537,7 @@ class Game {
             }
             
         }
-        else{
+        else if(victory && !this.boss){
 
             // Scale weapon and enemy card values by the current difficulty multiplier
             for (let card of this.cartas) {
@@ -1498,12 +1575,15 @@ class Game {
                 this.dialogueDone = false; // Reset so the next pre-level dialogue is shown
                 this.preDialogueGenerated = false;
                 this.dialogue_pregame = false;
-                pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
+                if(!this.boss){
+                    pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
+
+                }
                 break;
 
-                    }
-                }
             }
+        }
+    }
 
     selectCard(card){
         console.log("[Selection] Deck size before adding card:", this.cartas.length);
