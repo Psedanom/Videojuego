@@ -60,7 +60,7 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal") {
+    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal", textSize = 20, textAlign = "center") {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -75,7 +75,8 @@ class Botones {
         this.wasHovered = false;
         this.buttonType = buttonType; // Different type of buttons have different sound effects
         this.selectSound = playingSelect; // Sound effect played when the button is clicked; defaults to the generic playingSelect sound but is overridden for menu buttons in the constructor
-
+        this.textSize = textSize;
+        this.textAlign = textAlign;
         switch (this.buttonType) {
             case "normal":
                 this.sound = hoverSound;
@@ -95,9 +96,6 @@ class Botones {
 
     }
     draw(ctx) {
-        
-        
-        
         ctx.beginPath();
         ctx.roundRect(this.x, this.y, this.width * this.scale, this.height * this.scale, 10);
         ctx.fillStyle = "black";
@@ -109,20 +107,27 @@ class Botones {
         ctx.stroke();
         ctx.shadowBlur = 0;
 
+        if(this.textAlign == "center"){
+            neonText(this.textSize*this.scale,this.color, this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2,2,30,this.textAlign);
+        }
+        else if(this.textAlign == "left"){
+            neonText(this.textSize*this.scale,this.color, this.text, this.x + 10, this.y + ((this.height-50) * this.scale) / 2,2,30,this.textAlign);
+        }
+        
 
-        ctx.fillStyle = this.color;
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 15;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2;
-        ctx.fillStyle = "white";
-        ctx.strokeText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
-        ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
-        ctx.textBaseline = "alphabetic";
-        ctx.shadowBlur = 0;
+        // ctx.fillStyle = this.color;
+        // ctx.font = `${this.textSize}px Ethnocentric`;
+        // ctx.textAlign = "center";
+        // ctx.textBaseline = "middle";
+        // ctx.shadowColor = this.color;
+        // ctx.shadowBlur = 15;
+        // ctx.strokeStyle = this.color;
+        // ctx.lineWidth = 2;
+        // ctx.fillStyle = "white";
+        // ctx.strokeText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        // ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        // ctx.textBaseline = "alphabetic";
+        // ctx.shadowBlur = 0;
         
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
@@ -448,29 +453,29 @@ class Cards {
         ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
         if(this.habilidad != "")
         {
-            switch (this.habilidad) {
-            case "cursedEnemy":
+            switch (this.habilidad.toLowerCase()) {
+            case "cursedenemy":
                 this.abilityIcon = imgCursedEnemie;
                 break;
             case "enemieslos":
                 this.abilityIcon = imgEnemieslos;
                 break;
-            case "goldStealer":
+            case "goldstealer":
                 this.abilityIcon = imgGoldStealer;
                 break;
-            case "absoluteDamage":
+            case "absolutedamage":
                 this.abilityIcon = absoluteDamage;
                 break;
-            case "healthpassEnemie":
+            case "healthpassenemie":
                 this.abilityIcon = imgHealthpassEnemie;
                 break;
-            case "killHealth":
+            case "killhealth":
                 this.abilityIcon = imgKillHealth;
                 break;
-            case "passEnemie":
+            case "passenemie":
                 this.abilityIcon = imgPassEnemie;
                 break;
-            case "timeEater":
+            case "timeeater":
                 this.abilityIcon = imgTimeEater;
                 break;
             default:
