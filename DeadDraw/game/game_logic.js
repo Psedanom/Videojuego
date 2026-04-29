@@ -34,6 +34,7 @@ let game;
 let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
+let reward = [];
 
 let playedMusic = false; // Flag to ensure the background music starts only once
 /*
@@ -51,6 +52,7 @@ let loreDialogueGenerated = false;
 
 class Game {
     constructor(canvas) {
+        this.rewardButtons;
         this.cartas = [];  // Master array of all card objects in the current deck
         this.dificultad = 1.1 // Difficulty multiplier applied to card numbers each time the player wins a level (10% increase per level)
         this.createEventListeners();
@@ -79,6 +81,7 @@ class Game {
         this.skipebutton = true;
         this.mouseX=0;
         this.mouseY=0;
+        this.btn;
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -92,9 +95,9 @@ class Game {
             }
             // "killhealth" restore half this card's number as health, capped at maxhealth
             else if (this.card_clicked.habilidad == "killhealth") {
-                if (this.playerHealth.health < 20) {
+                if (this.playerHealth.health < this.playerHealth.maxHealth) {
                     if (this.playerHealth.health + Math.floor(this.card_clicked.number / 2) > 20) {
-                        health = this.player.maxHealth;
+                        this.playerHealth.health = this.player.maxHealth;
                     }
                     else {
                         this.playerHealth.health += this.card_clicked.number / 2;
@@ -118,7 +121,7 @@ class Game {
                         break;
                     }
                 }
-                if (this.playerHealth.health < 20) {
+                if (this.playerHealth.health < this.playerHealth.maxHealth) {
                     if (this.playerHealth.health + Math.floor(this.card_clicked.number / 2) > 20) {
                         health = this.playerHealth.maxHealth;
                     }
@@ -367,12 +370,19 @@ class Game {
             let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
+
+        this.moreHealth = new Botones(0,0,160,190,"Your health is invcreased by 5");
+        this.moreTime = new Botones(0,0,160,190,"Time limit is increased by 5 seconds");
+        this.returnMoney = new Botones(0,0,160,190,"Returns the money you spend in this lootbox");
+        this.enemyImprove = new Botones(0,0,160,190,"Increases by 50% the number of a random enemy");
+        this.weaponUpgrade = new Botones(0,0,160,190,"Increses by one the number of a random weapon");
+        this.heartsUpgrade = new Botones(0,0,160,190,"Increses by one the number of a random heal");
         this.lootbox1 = new lootbox((canvasWidth - canvasWidth * 0.125) -75, canvasHeight - canvasHeight * 0.6, 150, 150,50);
         this.lootbox2 = new lootbox((canvasWidth - canvasWidth * 0.375) -75, canvasHeight - canvasHeight * 0.6, 150, 150,100);
         this.lootbox3 = new lootbox((canvasWidth - canvasWidth * 0.625) -75, canvasHeight - canvasHeight * 0.6, 150, 150,200);
         this.lootbox4 = new lootbox((canvasWidth - canvasWidth * 0.875) -75, canvasHeight - canvasHeight * 0.6, 150, 150,500);
         this.bossBar = new bossBar(canvasWidth -canvasWidth * 0.95, canvasHeight/2 - 200, 30, 400,20,20);
-        this.contador = new Tiempo();
+        this.contador = new Tiempo(150);
         this.siguiente = new Botones(canvasWidth * 0.42, canvasHeight * 0.7, 200, 100, "Continue");
         this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
         this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
@@ -548,6 +558,23 @@ class Game {
                 this.lootbox3.isHovered = this.lootbox3.tocando(this.mouseX, this.mouseY);
                 this.lootbox4.isHovered = this.lootbox4.tocando(this.mouseX, this.mouseY);
             }
+            else if(pantalla === 'reward'){
+                const spacing = 210;
+                const totalRewards = reward.length;
+                const totalWidth = totalRewards * cardWidth + (totalRewards - 1) * (spacing - cardWidth);
+                const startX = (canvasWidth - totalWidth) / 2;
+                
+                for(let i = 0; i < reward.length; i++){
+                    this.btn = this.rewardButtons[reward[i]];
+                    if(this.btn){
+                        this.btn.xantes = startX + i * spacing;
+                        this.btn.yantes = (canvasHeight - this.btn.height) / 2;
+                        this.btn.isHovered = this.btn.tocando(this.mouseX, this.mouseY);
+                    }
+                }
+            }
+            
+            
             else if(pantalla === 'seleccion_de_pantalla'){
                 this.sleccioncard.isHovered = this.sleccioncard.tocando(this.mouseX, this.mouseY);
                 this.selectionlootboxes.isHovered = this.selectionlootboxes.tocando(this.mouseX, this.mouseY);
@@ -591,6 +618,49 @@ class Game {
                                 this.cartas.splice(this.index,1);
                             }
                             this.skipebutton = false;
+                        }
+                    }
+                }
+                else if(pantalla == 'reward'){
+                    for(let i = 0; i < reward.length; i++){
+                        this.btn = this.rewardButtons[reward[i]];
+                        if(this.btn.isHovered){
+                            if(reward[i] == 1){
+                                this.playerHealth.maxHealth += 5;
+                            }
+                            else if(reward[i] == 2){
+                                console.log(this.contador.tiempomax);
+                                this.contador.tiempomax += 5;
+                                console.log(this.contador.tiempomax);
+
+                            }
+                            else if(reward[i] == 3){
+                                this.playerHealth.money += 100;
+                            }
+                            else if(reward[i] == 4){
+                                for(let carta of this.cartas){
+                                    if(carta.enemie()){
+                                        carta.number += Math.ceil(carta.number * 0.5);
+                                    }
+                                }
+                            }
+                            else if( reward[i] == 5){
+                                for(let carta of this.cartas){
+                                    if(carta.arma()){
+                                        carta.number += 1
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 6){
+                                for(let carta of this.cartas){
+                                    if(carta.esVida()){
+                                        carta.number += 1
+                                    }
+                                }
+                            }
+                            reward = [];
+                            pantalla = 'lootboxes';
+
                         }
                     }
                 }
@@ -690,7 +760,7 @@ class Game {
     }
     update(deltaTime) {
         this.fourth = 0;
-        if(this.nivel%5 == 0 && this.nivel != 0){
+        if(this.nivel%20 == 0 && this.nivel != 0){
             this.boss = true;
         }
         else{
@@ -706,11 +776,22 @@ class Game {
         this.skipInitialDialogue.update();
         this.sleccioncard.update();
         this.selectionlootboxes.update();
-        this.siguiente.update();
-        this.lootbox1.update();
-        this.lootbox2.update();
-        this.lootbox3.update();
-        this.lootbox4.update();
+        if(pantalla == 'lootboxes'){
+            this.siguiente.update();
+            this.lootbox1.update();
+            this.lootbox2.update();
+            this.lootbox3.update();
+            this.lootbox4.update();
+            this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
+            this.playerHealth.health = this.playerHealth.maxHealth;
+            this.contador = new Tiempo(this.contador.tiempomax);
+        }
+        if(pantalla == 'reward'){
+             for(let i = 0; i < reward.length; i++){
+                this.btn = this.rewardButtons[reward[i]];
+                this.btn.update();
+            }
+        }
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -766,23 +847,7 @@ class Game {
     // The round ends when: every card in the deck has been played (victory),
     // the player's health drops to 0 or below (loss), or the timer runs out (loss)
     isGameOver() {
-        for (let card of this.cartas) {
-            if (!card.used && card.enemie() && !card.inboard) {
-                this.win = false;
-                break;
-            }
-            else{
-                this.win =  true;
-            }
-        }
-        if(this.win){
-            this.cartas.forEach(card => {
-                if (!card.used) {
-                    card.used = true;
-                }
-            });
-        }
-        return (this.win || this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
+        return (this.cartas.length == 0 || this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
     }
     gameOverReason() {
         if (this.playerHealth.health <= 0) {
@@ -807,6 +872,38 @@ class Game {
             neonText(20, '#00bfff', "Presiona espacio para empezar", canvasWidth / 2, canvasHeight / 2 + 30);
             
 
+        }
+        else if(pantalla == 'reward'){
+            neonText(30, '#00bfff', "LOOTBOXES", canvasWidth / 2, 40);
+            this.siguiente.draw(ctx);
+            this.lootbox1.draw(ctx);
+            this.lootbox2.draw(ctx);
+            this.lootbox3.draw(ctx);
+            this.lootbox4.draw(ctx);
+            this.playerHealth.draw(ctx);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Negro con 60% de opacidad
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);    // (x, y, ancho, alto)
+            const totalRewards = reward.length;
+            const spacing = 210;
+            const totalWidth = totalRewards * cardWidth + (totalRewards - 1) * (spacing - cardWidth);
+            const startX = (canvasWidth - totalWidth) / 2;
+            this.rewardButtons = {
+                1: this.moreHealth,
+                2: this.moreTime,
+                3: this.returnMoney,
+                4: this.enemyImprove,
+                5: this.weaponUpgrade,
+                6: this.heartsUpgrade,
+            };
+
+            for(let i = 0; i < reward.length; i++){
+                this.btn = this.rewardButtons[reward[i]];
+                if(this.btn){ 
+                    this.btn.x = startX + i * spacing;
+                    this.btn.y = (canvasHeight - this.btn.height) / 2;
+                    this.btn.draw(ctx);
+                }
+            }
         }
         else if (pantalla === 'seleccion_de_pantalla') {
             // Neon text style for the screen title
@@ -1271,7 +1368,7 @@ class Game {
                 this.cartas.push(card);
             }
         }
-        else {
+        else{
 
             // Scale weapon and enemy card values by the current difficulty multiplier
             for (let card of this.cartas) {
@@ -1279,7 +1376,7 @@ class Game {
                     card.number = Math.floor(card.number *= this.dificultad);
                 }
             }
-            this.nivel++;
+            this.nivel += 1 ;
             this.bossBar.roundsleft = 20 - this.nivel;
             // Randomly assign a special ability to each weapon card.
             // probabilidadhabilidad is a 0-10 roll that acts as an ability-trigger gate
@@ -1288,11 +1385,6 @@ class Game {
                 this.abilityObtention(card);
             }
         }
-        this.contador = new Tiempo();
-        // this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight,"", undefined, undefined,"cardPlace");
-        // this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight,"",undefined, undefined,"cardPlace");
-        // Preserve the player's money across levels; everything else resets to defaults
-        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, 20, this.playerHealth.money);
 
         shuffle(this.cartas);
     }
