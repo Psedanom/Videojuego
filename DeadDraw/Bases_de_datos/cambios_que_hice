@@ -1,0 +1,29 @@
+Cambios hechos en la base de datos:
+
+* tuve que hacer los cambios por que no me dejaba correr la base de datos, segun yo no se rompio nada, pero aqui estan los cambios.
+* Se agregó `USE DeadDraw;` en los archivos SQL que no tenían base seleccionada.
+* Se corrigieron nombres de tablas por problemas de mayúsculas/minúsculas en WSL/Linux.
+
+Cambios de nombres:
+
+* `player` → `Player`
+* `matchgame` → `MatchGame`
+* `deck` → `Deck`
+* `effect` → `Effect`
+* `cardeffect` → `CardEffect`
+* `cardindeck` → `CardInDeck`
+* `playerlootbox` → `PlayerLootbox`
+* `lootbox` → `Lootbox`
+
+Las correcciones se hicieron en:
+
+* views
+* triggers
+* procedures
+
+Comandos usados:
+
+sudo mysql < Bases_de_datos/QuerysDeCreacionDeTables.sql
+sudo mysql < Bases_de_datos/QuerysDeDummyData.sql
+sudo mysql < Bases_de_datos/creacion_de_trigersProceduresViews.sql
+```

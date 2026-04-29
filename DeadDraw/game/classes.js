@@ -26,86 +26,218 @@ class Tiempo {
 }
 //Holds and renders all player stats: health bar, current health, and money
 class Player {
-    constructor(x, y, width, height, maxHealth, startingMoney = 0) {
+    constructor(x, y, width, height, maxHealth, money = 100) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.maxHealth = maxHealth;
         this.health = maxHealth;
-        this.money = startingMoney;
+        this.money = money;
     }
     draw(ctx) {
         ctx.fillStyle = "black";
         ctx.fillRect((this.x), (this.y), this.width, this.height);
         // healthli is the pixel width of the filled portion of the health bar,
         // proportional to (current health / max health)
-        let healthli = (this.health / this.maxHealth) * this.width;
-        ctx.fillStyle = "red";
-        ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.fillText(this.health, this.width - 35, this.height + 12);
-        ctx.fillStyle = "yellow";
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.fillText(this.money, canvasWidth / 2, this.height + 12);
+        if(pantalla == "juego"){
+            let healthli = (this.health / this.maxHealth) * this.width;
+            ctx.fillStyle = "red";
+            ctx.fillRect((this.x), (this.y + 1), healthli, this.height - 2);
+            ctx.fillStyle = "white";
+            ctx.font = "20px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText(this.health, this.width - 35, this.height + 12);
+        }
+        if(pantalla == "juego" || pantalla == "lootboxes"){
+            ctx.fillStyle = "yellow";
+            ctx.font = "20px Ethnocentric";
+            ctx.textAlign = "center";
+            ctx.fillText(`Money: ${this.money}$`, canvasWidth / 2,canvasHeight-20);
+        }
     }
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,text,scale = 1) {
+    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal") {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.scale = scale
+        this.defaultScale = scale;
         this.text = text;
         this.xantes = x;
         this.yantes = y;
+        this.color = color;
+        this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
+        this.wasHovered = false;
+        this.buttonType = buttonType; // Different type of buttons have different sound effects
+        this.selectSound = playingSelect; // Sound effect played when the button is clicked; defaults to the generic playingSelect sound but is overridden for menu buttons in the constructor
+
+        switch (this.buttonType) {
+            case "normal":
+                this.sound = hoverSound;
+                if (this.text === "Play") 
+                this.selectSound = menuSelect;
+                break;
+            case "skipButton":
+                this.sound = skipRound;
+                this.selectSound = playingSelect;
+                break;
+            case "cardPlace":
+                this.sound = cardPlaces;
+                this.selectSound = playingSelect;
+                break;
+        }
+
+
     }
     draw(ctx) {
         
-        ctx.fillStyle = "white";
-        ctx.fillRect((this.x), (this.y), this.width *this.scale, this.height * this.scale);
-        ctx.fillStyle = "yellow";
+        
+        
+        ctx.beginPath();
+        ctx.roundRect(this.x, this.y, this.width * this.scale, this.height * this.scale, 10);
+        ctx.fillStyle = "black";
+        ctx.fill();
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 100;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+
+        ctx.fillStyle = this.color;
         ctx.font = "20px Ethnocentric";
         ctx.textAlign = "center";
-        ctx.fillText(this.text, this.x + this.width / 2 * this.scale, this.y + this.height / 2 * this.scale);
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.fillStyle = "white";
+        ctx.strokeText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        ctx.textBaseline = "alphabetic";
+        ctx.shadowBlur = 0;
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
-        return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
+        // return mx >= this.xantes && mx <= this.xantes + this.width && my >= this.yantes && my <= this.yantes + this.height;
+        return mx >= this.x && mx <= this.x + this.width * this.scale && my >= this.y && my <= this.y + this.height * this.scale;
     }
-    update(){
+    update(newColor = this.color) {
+
+        // Updates a color boton if needed optional
+        this.color = newColor;
+        //Sound playing fix provided by AI, the variable wasHovered is AI idea but the way to play the audio is ours
         if(this.isHovered){
-            this.scale = 1.2;
+            
+            if (!this.wasHovered) {
+                this.sound.currentTime = 0;
+                this.sound.play();
+                this.audioplayed = true;
+                this.scale *= 1.2;
+            }
+            // this.scale = 1.2;
             this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the button centered while scaling
             this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the button centered while scaling
         }
         else{
-            this.scale = 1;
+            this.audioplayed = false;
+            this.scale = this.defaultScale;
             this.x = this.xantes;
             this.y = this.yantes;
         }
+        this.wasHovered = this.isHovered;
+    }
+
+    click() {
+        this.selectSound.currentTime = 0;
+        this.selectSound.play();
     }
 }
-
-class lootbox {
-    constructor(x, y, width, height, cost) {
+class bossBar{
+    constructor(x, y, width, height, roundsleft , totalRounds) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.roundsleft = roundsleft;
+        this.totalRounds = totalRounds;
     }
     draw(ctx) {
-        ctx.fillStyle = "purple";
-        ctx.fillRect((this.x), (this.y), this.width, this.height);
+        // Fondo negro
+        ctx.fillStyle = "black";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // Relleno rojo proporcional a rondas restantes
+        ctx.fillStyle = "red";
+        let fillWidth = this.height * (this.roundsleft / this.totalRounds);
+        ctx.fillRect(this.x, this.y, this.width, fillWidth);
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = "red";
+        ctx.shadowBlur = 15;
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+        ctx.shadowBlur = 0;
+
+        // Etiqueta de rondas restantes
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+        ctx.rotate(-Math.PI / 2);
         ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
+        ctx.font = "12px Ethnocentric";
         ctx.textAlign = "center";
-        ctx.fillText("Lootbox", this.x + this.width / 2, this.y + this.height / 2);
+        ctx.fillText("BOSS " + this.roundsleft + "/" + this.totalRounds, 0, 4);
+        ctx.restore();
+    }
+}
+class lootbox {
+    constructor(x, y, width, height, cost,scale = 1) {
+        this.x = x;
+        this.y = y;
+        this.xantes = x;
+        this.yantes = y;
+        this.width = width;
+        this.height = height;
+        this.cost = cost;
+        this.isHovered = false;
+        this.scale = scale;
+        
+        switch (this.cost) {
+            case 50:
+                this.sprite = lootboxGreen;
+                this.color = "#6eff78";
+                break;
+            case 100:
+                this.sprite = lootboxBlue;
+                this.color = "#6de7ff";
+                break;
+            case 200:
+                this.sprite = lootboxPurple;
+                this.color = "#b47aff";
+                break;
+            case 500:
+                this.sprite = lootboxYellow;
+                this.color = "#fdbc27";
+                break;
+            case true:
+                this.sprite = lootboxGreen;
+                this.color = "#6eff78";
+                break;
+        }
+    }
+    draw(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y, this.width * this.scale, this.height * this.scale);
+        ctx.font = "20px Ethnocentric";
+        ctx.textAlign = "center";
+        neonText(20,this.color, `${this.cost}$`,this.x + (this.width *this.scale) / 2, this.y +100+ (this.height * this.scale) / 2 );
+        // neonText(65, '#00bfff', "DEAD DRAW", canvasWidth / 2, canvasHeight / 2 - 20);
+        // ctx.fillText(this.cost, this.x + (this.width *this.scale) / 2, this.y +100+ (this.height * this.scale) / 2);
     }
     tocando(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
@@ -114,28 +246,81 @@ class lootbox {
     update() {
             if(this.isHovered){
                 this.scale = 1.2;
+                this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the lootbox centered while scaling
+                this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the lootbox centered while scaling
             }
             else{
                 this.scale = 1;
+                this.x = this.xantes;
+                this.y = this.yantes;   
             }
     }
+    click(player,contador,cartas) {
+        if (player.money >= this.cost) {
+            if(this.cost == 50){
+                player.money -= this.cost;
+                this.prob = getRandomIntegerInclusive(1,100);
+                if(this.prob <= 10){
+                    player.maxHealth += 5;
+                    console.log("max health increased to " + player.maxHealth);
+                }
+                else if(this.prob <= 20){
+                    player.money += 50;
+                    console.log("money increased to " + player.money);
+                }
+                else if(this.prob <= 30){
+                    contador.tiempoSegundos += 5;
+                    console.log("time increased to " + contador.tiempoSegundos);
+                }
+                else if(this.prob <= 50){
+                    for(let card of cartas){
+                        if(card.enemie()){
+                            card.number = Math.max(card.number + card.number * 0.5);
+                            console.log("enemy number increased to " + card.number);
+                            break;
+                        }
+                    }
+                }
+                else if(this.prob <= 75){
+                    for(let card of cartas){
+                        if(card.arma()){
+                            card.number = Math.max(card.number + 1);
+                            console.log("weapon damage increased to " + card.number);
+                            break;
+                        }
+                    }
+                }
+                else{
+                    for(let card of cartas){
+                        if(card.esVida()){
+                            card.number = Math.max(card.number + 1);
+                            console.log("health card increased to " + card.number);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            player.money = 0;
+        } 
+    }
 }
+
 class Dialogue {
    // sprite parameter allows overriding the default imgMaton character image.
     // If no sprite is passed, falls back to imgMaton to preserve existing behaviour.
     constructor(texto, sprite = imgMaton) {
         this.sprite = sprite;   
-        this.x = 0;
-        // Scale dialogue box height proportionally with canvas width so it doesn't stretch
-        this.dialogH = (canvasWidth / 800) * (canvasHeight / 4);
-        this.y = canvasHeight - this.dialogH;
+        this.x = canvasWidth / 2 - 400;
+        this.y = canvasHeight - canvasHeight / 4;
         this.texto = texto;
         this.caracteresVisibles = 0; // How many characters are currently visible (grows each frame)
-        this.velocidad = 0.2; // Characters revealed per frame (fractional to slow the scroll)
+        this.velocidad = 0.40; // Characters revealed per frame (fractional to slow the scroll)
         this.done = false; // True once the full text has been revealed
-        // Character is right-aligned; size derived from canvasHeight to preserve the original 4:3 aspect ratio
-        this.characterx = canvasWidth - canvasHeight * (4 / 7);
-        this.charactery = canvasHeight * 0.4;
+        //this.character = character; // Sprite to draw alongside the dialogue box defaults to the thug (imgMaton)
+        this.characterx = canvasWidth - 600;
+        this.charactery = canvasHeight - 420;
 
         // Prevents the scroll sound from being re-triggered every frame while text is scrolling
         this.soundDone = false; // True after the sound has been started for this dialogue instance
@@ -161,8 +346,8 @@ class Dialogue {
     }
     draw(ctx) {
         // Draw the character sprite; defaults to imgMaton if no override was provided
-        ctx.drawImage(this.sprite, this.characterx, this.charactery, canvasHeight * (4 / 7), canvasHeight * (3 / 7));
-        ctx.drawImage(imgDialogue, this.x, this.y, canvasWidth, this.dialogH);
+        ctx.drawImage(this.sprite, this.characterx, this.charactery, 400, 300);
+        ctx.drawImage(imgDialogue, this.x, this.y, 850, canvasHeight / 4);
         ctx.textAlign = "left";
         ctx.font = "15px Ethnocentric";
         ctx.fillStyle = "white";
@@ -176,7 +361,7 @@ class Dialogue {
         // Technique sourced from https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
         let words = textoMostrado.split('\n');
         for (let i = 0; i < words.length; i++) {
-            ctx.fillText(words[i], this.x + canvasWidth * 0.282, this.y + 80 + (i * lineheight));
+            ctx.fillText(words[i], this.x + 240, this.y + 70 + (i * lineheight));
 
         }
     }
@@ -185,9 +370,9 @@ class Dialogue {
 }
 
 class Cards {
-    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img) {
+    constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img , xantes = x, yantes = y, centerImg = null) {
         this.x = x;
-        this.y = y;
+        this.y = y;   
         this.width = width;
         this.height = height;
         this.number = number;  // The face value of the card (damage dealt, health restored)
@@ -197,58 +382,153 @@ class Cards {
         this.inboard = inboard; // True while the card is currently visible on the game board
         this.enMazo = enMazo;  // True while the card is still in the deck, waiting to be drawn
         this.habilidad = habilidad; // Special ability string (e.g. "enemieslos", "killhealth"). Empty string means no ability.
+        this.abilityIcon = blank
         this.img = img;        // The suit image asset drawn on the card face
+        this.audioplayed = false; // Tracks whether the hover sound has been played for the current hover state
+        this.wasHovered = false;
+        this.xantes = xantes; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+        this.yantes = yantes;
+        this.xantes2 = xantes; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+        this.yantes2 = yantes;
+        
+        if (centerImg != null) {
+            this.centerImg = centerImg;
+        } else {
+            let number = getRandomIntegerInclusive(0,3);
+            switch (type) {
+                case "diamantes":
+                    this.centerImg = centerWeaponImages[number];
+                    break;
+                case "treboles":
+                    this.centerImg = centerEnemyImages[number];
+                    break;
+                case "picas":
+                    this.centerImg = centerEnemyImages[number];
+                    break;
+                case "corazones":
+                    this.centerImg = imgMedkit;
+                    break;
+                default:
+                    this.centerImg = centerWeaponImages[0];
+                    break;
+            }
+        }
+        
+
+
     }
     draw(ctx) {
         ctx.fillStyle = "black";
-        ctx.drawImage(this.img, this.x,
-            this.y,
-            this.width * this.scale,
-            this.height * this.scale);
-        ctx.fillStyle = "white";
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.fillText(this.number, this.x + 90, this.y + 30);
-        ctx.font = "10px Arial";
-        ctx.fillText(this.habilidad, this.x + 50, this.y + 100);
-        if (this.habilidad && this.habilidad !== "" && this.enemie && this.enemie()) {
-            const colores = {
-                "absoluteDamage": "#ffd700",
-                "cursedEnemy":    "#ff0040",
-                "timeEater":      "#9b00ff",
-                "goldStealer":    "#00ff99"
-            };
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = colores[this.habilidad] || "#ffffff";
-            ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
-            ctx.font = "8px Ethnocentric";
-            ctx.textAlign = "center";
-            ctx.fillText("★", this.x + this.width / 2, this.y + this.height - 8);
-            ctx.shadowBlur = 0;
+        ctx.drawImage(this.img, this.x,this.y,this.width * this.scale,this.height * this.scale);
+        ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
+        if(this.habilidad != "")
+        {
+            switch (this.habilidad) {
+            case "cursedEnemy":
+                this.abilityIcon = imgCursedEnemie;
+                break;
+            case "enemieslos":
+                this.abilityIcon = imgEnemieslos;
+                break;
+            case "goldStealer":
+                this.abilityIcon = imgGoldStealer;
+                break;
+            case "absoluteDamage":
+                this.abilityIcon = absoluteDamage;
+                break;
+            case "healthpassEnemie":
+                this.abilityIcon = imgHealthpassEnemie;
+                break;
+            case "killHealth":
+                this.abilityIcon = imgKillHealth;
+                break;
+            case "passEnemie":
+                this.abilityIcon = imgPassEnemie;
+                break;
+            case "timeEater":
+                this.abilityIcon = imgTimeEater;
+                break;
+            default:
+                this.abilityIcon = blank;
+                break;
+            }
+            ctx.drawImage(this.abilityIcon, this.x + 15*this.scale, this.y + this.height*this.scale - 73*this.scale, 1080*0.08*this.scale, 1080*0.08*this.scale);
         }
-        
+        ctx.fillStyle = "white";
+            ctx.font = `${20*this.scale}px Ethnocentric`;
+            ctx.textAlign = "right";
+            ctx.fillText(this.number, this.x + 125*this.scale, this.y + 52*this.scale);
+            ctx.font = `${10*this.scale}px Arial`;
+            ctx.fillText(this.habilidad, this.x + 50*this.scale, this.y + 100*this.scale);
+            if (this.habilidad && this.habilidad !== "" && this.enemie && this.enemie()) {
+                const colores = {
+                    "absoluteDamage": "#ffd700",
+                    "cursedEnemy":    "#ff0040",
+                    "timeEater":      "#9b00ff",
+                    "goldStealer":    "#00ff99"
+                };
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = colores[this.habilidad] || "#ffffff";
+                ctx.fillStyle   = colores[this.habilidad] || "#ffffff";
+                ctx.font = `${8*this.scale}px Ethnocentric`;
+                ctx.textAlign = "right";
+                ctx.fillText("★", (this.x + this.width / 2)*this.scale, (this.y + this.height - 8)*this.scale);
+                ctx.shadowBlur = 0;
+            }
+            
     }
     contains(mx, my) {
         return mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height;
     }
-
-    // Repositions the card to (x, y) without changing any other state 
-    // used when forcing a card to a specific slot (weapon zone, discard pile)
-    defx(x) {
-        this.x = x;
-    }
     update() {
-        if (this.isHovered) {
+        if (this.isHovered && !this.used) {
+            if (!this.wasHovered) {
+                console.log(this.type + " is hovered"); // Debug log to verify hover detection
+                cardSound.playbackRate = 1.5 + getRandomIntegerInclusive(0,0.5); // Randomize pitch for variety
+                cardSound.currentTime = 0;
+                cardSound.play();
+                this.audioplayed = true;
+            }
             this.scale = 1.2;
-        } else {
+            if(pantalla == "juego"){
+                this.x = this.xantes2 - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
+                this.y = this.yantes2 - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
+            }
+            if(pantalla == "seleccion_carta"){
+                this.x = this.xantes - (this.width * 0.2) / 2; // Adjust x to keep the card centered while scaling
+                this.y = this.yantes - (this.height * 0.2) / 2; // Adjust y to keep the card centered while scaling
+                console.log(1);
+            }
+        } 
+        else if(!this.isHovered && this.inboard) {
+            // cardSound.playbackRate = 1; // Reset pitch to normal for the next hover
+            this.audioplayed = false;
             this.scale = 1;
+            this.xantes2 = this.xantes; // Update the backup coordinates in case the card was moved while hovered
+            this.yantes2 = this.yantes;
+            this.x = this.xantes2; // Snap back to original coordinates when not hovered
+            this.y = this.yantes2;
+        }else if(!this.inboard && this.used){
+            this.x = this.xantes2; // Move off-screen to the right when removed from the board  
+            this.y = this.yantes2; // Move off-screen downwards when removed from the board
+            this.scale = 1; // Shrink to invisible when removed from the board
         }
+        else if(!this.used && !this.inboard){
+            this.x = this.xantes2; // Move back to original coordinates if the card is unplayed but somehow ended up off-board (e.g. dragged out and released without selecting)
+            this.y = this.yantes2;
+            this.scale = 1; // Ensure the card is at normal scale if it's not being hovered, in case it was left in a scaled state after being dragged
+        }
+        if(this.used && this.inboard){
+            this.xantes2 = this.x;  // Update backup coordinates to the card's current position when it's played, in case it needs to snap back before being removed from the board
+            this.yantes2 = this.y;
+        }
+        this.wasHovered = this.isHovered;
     }
     click(x, y) {
         this.x = x;
         this.y = y;
-        this.used = true;
-
+        this.xantes2 = x; // Update backup coordinates to the card's new position when it's clicked, in case it needs to snap back
+        this.yantes2 = y;
     }
 
 }
