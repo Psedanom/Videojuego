@@ -221,3 +221,33 @@ app.get('/admin/jugadores', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
+
+
+app.get('/deck1', (req, res) => {
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'SELECT card.value,suit from deck inner join cardindeck using (idDeck) inner join card using (idCard) where idDeck = 1',
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});
+
+app.post('/guardar', (req, res) => {
+    const connection = conectar();
+    const carta = req.body.cartas;
+    const id = req.body.playerid;
+    console.log("carta recibida:", carta); // 👈 ¿qué propiedades tiene?
+    console.log("id recibido:", id);
+    console.log(typeof id);
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'insert into playercard (idPlayer,cardNumber,suit,used,inBoard) values (?,?,?,?,?)',[id,carta.number,carta.type,carta.used,carta.inboard],
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});

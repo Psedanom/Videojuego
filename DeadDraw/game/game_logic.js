@@ -10,7 +10,7 @@ the game state, player interactions, win/loss conditions, and screen transitions
 
 "use strict";
 
-
+let guardar = false;
 
 let font = "regular";
 
@@ -73,7 +73,7 @@ class Game {
         this.seleccionando = false; // True while the card selection screen is showing a new set of cards to pick from
         this.preDialogueGenerated = false; // Guards against regenerating the pre-level dialogue object every frame
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
-        this.nivel = 19;
+        this.nivel = 0;
         this.boss = false;
         this.enemigosEliminados = 0;  // counts every enemy defeated with a weapon during this run
         this.danoRecibido = 0;        // tracks total damage taken from enemies this run
@@ -858,6 +858,10 @@ class Game {
                 }
                 else if(pantalla == 'deck'){
                     if(this.deck1.isHovered){
+                        $.get("http://127.0.0.1:3000/deck1", {
+                        }).done(function (data){
+                            console.log(data);
+                        });
                         pantalla = 'menu';
                     }
                     else if(this.deck2.isHovered){
@@ -921,6 +925,23 @@ class Game {
         this.skipInitialDialogue.update();
         this.sleccioncard.update();
         this.selectionlootboxes.update();
+        
+        if(guardar){
+            let id = user.idPlayer
+            for(let card of this.cartas){
+                $.ajax({
+                    url: "http://127.0.0.1:3000/guardar",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ cartas: card,playerid: id })
+
+                }).done(function(data){
+                    console.log("posted", data);
+                });
+            }
+            guardar = false;
+            //window.location.href = "../index.html";
+        }
         if(pantalla == 'lootboxes'){
             this.siguiente.update();
             this.lootbox1.update();
