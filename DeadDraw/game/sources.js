@@ -7,6 +7,9 @@ This file contains the sources for the images and audios used in the game
 
 */
 
+// ===================== Blank image =====================
+const blank = new Image();
+blank.src = '../game/assets/blank.png';
 // ===================== Images =====================
 // Card images
 const imgCorazon = new Image();
@@ -41,6 +44,7 @@ imgHacker.src = '../game/assets/cardCenter/Hacker.png';
 
 const centerEnemyImages = [imgFemaleThug, imgMaleThug, imgHeavy, imgHacker];
 
+
 // Weapons
 const imgSMG = new Image();
 imgSMG.src = '../game/assets/cardCenter/SMG.png';
@@ -56,13 +60,38 @@ imgRifle.src = '../game/assets/cardCenter/Rifle.png';
 
 const centerWeaponImages = [imgSMG, imgCaster, imgSword, imgRifle];
 
-// Medikit
+// Medkit
 const imgMedkit = new Image();
 imgMedkit.src = '../game/assets/cardCenter/Medkit.png';
 
 const imgMaton = new Image();
 imgMaton.src = '../game/assets/maton.png';
 
+// ===================== Card Abilities =====================
+
+const imgCursedEnemie = new Image();
+imgCursedEnemie.src = '../game/assets/cardAbilities/cursedEnemie.png';
+
+const imgEnemieslos = new Image();
+imgEnemieslos.src = '../game/assets/cardAbilities/enemieslos.png';
+
+const imgGoldStealer = new Image();
+imgGoldStealer.src = '../game/assets/cardAbilities/goldStealer.png';
+
+const absoluteDamage = new Image();
+absoluteDamage.src = '../game/assets/cardAbilities/absoluteDamage.png';
+
+const imgHealthpassEnemie = new Image();
+imgHealthpassEnemie.src = '../game/assets/cardAbilities/healthpassEnemie.png';
+
+const imgKillHealth = new Image();
+imgKillHealth.src = '../game/assets/cardAbilities/killHealth.png';
+
+const imgPassEnemie = new Image();
+imgPassEnemie.src = '../game/assets/cardAbilities/passEnemie.png';
+
+const imgTimeEater = new Image();
+imgTimeEater.src = '../game/assets/cardAbilities/timeEater.png';
 
 // ===================== Sound effects =====================
 
