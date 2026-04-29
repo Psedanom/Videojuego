@@ -8,8 +8,9 @@ This file contains the class definitions needed for the game.
 */
 //Countdown timer displayed during gameplay
 class Tiempo {
-    constructor(tiempoSegundos = 100) {
+    constructor(tiempoSegundos) {
         this.tiempolim = tiempoSegundos * 1000; // Remaining time in milliseconds; converted from seconds
+        this.tiempomax = tiempoSegundos;
         this.time = 0;
     }
     // Subtracts the elapsed time since the last frame from the remaining limit
@@ -122,6 +123,7 @@ class Botones {
         ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
         ctx.textBaseline = "alphabetic";
         ctx.shadowBlur = 0;
+        
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
@@ -196,6 +198,7 @@ class bossBar{
         ctx.restore();
     }
 }
+
 class lootbox {
     constructor(x, y, width, height, cost,scale = 1) {
         this.x = x;
@@ -260,50 +263,41 @@ class lootbox {
             if(this.cost == 50){
                 player.money -= this.cost;
                 this.prob = getRandomIntegerInclusive(1,100);
-                if(this.prob <= 10){
-                    player.maxHealth += 5;
-                    console.log("max health increased to " + player.maxHealth);
-                }
-                else if(this.prob <= 20){
-                    player.money += 50;
-                    console.log("money increased to " + player.money);
-                }
-                else if(this.prob <= 30){
-                    contador.tiempoSegundos += 5;
-                    console.log("time increased to " + contador.tiempoSegundos);
-                }
-                else if(this.prob <= 50){
-                    for(let card of cartas){
-                        if(card.enemie()){
-                            card.number = Math.max(card.number + card.number * 0.5);
-                            console.log("enemy number increased to " + card.number);
-                            break;
-                        }
-                    }
-                }
-                else if(this.prob <= 75){
-                    for(let card of cartas){
-                        if(card.arma()){
-                            card.number = Math.max(card.number + 1);
-                            console.log("weapon damage increased to " + card.number);
-                            break;
-                        }
-                    }
-                }
-                else{
-                    for(let card of cartas){
-                        if(card.esVida()){
-                            card.number = Math.max(card.number + 1);
-                            console.log("health card increased to " + card.number);
-                            break;
-                        }
-                    }
+                this.rewards(player,contador,cartas);
+            }
+            if(this.cost == 100){
+                player.money -= this.cost;
+                this.times = getRandomIntegerInclusive(1,2);
+                for(let i = 0; i<this.times;i++){
+                    this.prob = getRandomIntegerInclusive(1,100);
+                    this.rewards(player,contador,cartas);
                 }
             }
+            pantalla = 'reward';
+            this.isHovered = false;
+            this.update(); 
         }
-        else {
-            player.money = 0;
-        } 
+    }
+
+    rewards(player,contador,cartas){
+        if(this.prob <= 10){
+           reward.push(1);
+        }
+        else if(this.prob <= 20){
+            reward.push(2);
+        }
+        else if(this.prob <= 30){
+            reward.push(3);
+        }
+        else if(this.prob <= 50){
+            reward.push(4);
+        }
+        else if(this.prob <= 75){
+            reward.push(5);
+        }
+        else{
+            reward.push(6);
+        }
     }
 }
 
@@ -561,9 +555,9 @@ class CardVida extends Cards {
     // Restores health by this card's number, capping at maxHealth (20).
     // Has no effect if the player is already at full health.
     actionUse(player) {
-        if (player.health < 20) {
-            if (player.health + this.number > 20) {
-                player.health = 20;
+        if (player.health < player.maxHealth) {
+            if (player.health + this.number > player.maxHealth) {
+                player.health = player.maxHealth;
             }
             else {
                 player.health += this.number;
