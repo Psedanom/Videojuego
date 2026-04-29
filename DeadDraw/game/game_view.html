@@ -17,7 +17,6 @@
     <script src="outside_functions.js"></script>
 
     <style>
-        /* ── Tutorial overlay backdrop ── */
         #tutorial {
             display: none;
             position: fixed;
@@ -28,7 +27,6 @@
             overflow-y: auto;
         }
 
-        /* ── Tutorial panel ── */
         #tutorial-panel {
             position: relative;
             margin: 40px auto;
@@ -42,7 +40,6 @@
             box-shadow: 0 0 30px rgba(232, 0, 45, 0.35);
         }
 
-        /* close button — top-right X */
         #tutorial-close {
             position: absolute;
             top: 14px;
@@ -57,7 +54,6 @@
         }
         #tutorial-close:hover { color: #ff4d6d; }
 
-        /* headings */
         #tutorial-panel h1 {
             text-align: center;
             font-size: 2rem;
@@ -79,7 +75,6 @@
             margin: 0 0 6px;
         }
 
-        /* keyboard key chip */
         .tecla {
             display: inline-block;
             background: #1a1a1a;
@@ -91,7 +86,6 @@
             white-space: nowrap;
         }
 
-        /* card-type badges */
         .carta-tipo {
             display: inline-block;
             font-size: 0.75rem;
@@ -104,7 +98,6 @@
         .enemigo { background:#2e1a1a; color:#ef9a9a; border:1px solid #ef5350; }
         .vida    { background:#1a2e1a; color:#a5d6a7; border:1px solid #66bb6a; }
 
-        /* ability / loot blocks */
         .habilidad-bloque, .loot-bloque {
             background: #111;
             border-left: 3px solid #e8002d;
@@ -118,21 +111,17 @@
             font-size: 0.72rem;
             margin-bottom: 4px;
         }
-        .loot-bloque .nombre    { color: #fff; font-weight: bold; margin-bottom: 4px; }
-        .loot-bloque .ventaja   { color: #66bb6a; }
+        .loot-bloque .nombre     { color: #fff; font-weight: bold; margin-bottom: 4px; }
+        .loot-bloque .ventaja    { color: #66bb6a; }
         .loot-bloque .desventaja { color: #ef5350; }
     </style>
 </head>
 
 <body>
-
-    <!-- Canvas del fondo Matrix (z-index 0, el más atrás) -->
     <canvas id='canvas2'></canvas>
-
-    <!-- Canvas del juego principal (z-index 1, al frente) -->
     <canvas id='canvas'></canvas>
 
-    <!-- ══════════════ TUTORIAL OVERLAY ══════════════ -->
+    <!-- Overlay del tutorial, se abre desde el menú lateral -->
     <div id="tutorial" onclick="if(event.target===this)this.style.display='none'">
         <div id="tutorial-panel">
             <button id="tutorial-close" title="Cerrar tutorial" onclick="document.getElementById('tutorial').style.display='none'">✕</button>
@@ -235,31 +224,28 @@
                 <strong style="color:#ffd700">Todas las cartas jugadas</strong> — Victoria. La dificultad escala y vas a selección de carta.
             </p>
 
-        </div><!-- /#tutorial-panel -->
-    </div><!-- /#tutorial -->
-    <!-- ════════════════════════════════════════════ -->
+        </div>
+    </div>
 
-    <!-- Menú lateral de navegación -->
     <nav id="side-menu">
         <div class="btn" onclick="confirmarMenu()"><span>MENU</span></div>
         <a href="../Menu/mecanicas.html" target="_blank"><div class="btn"><span>MECÁNICAS</span></div></a>
         <a href="../Menu/Historia.html"  target="_blank"><div class="btn"><span>HISTORIA</span></div></a>
-        <!-- TUTORIAL ahora abre el overlay en lugar de una pestaña nueva -->
+        <!-- El tutorial abre un overlay en lugar de una pestaña nueva -->
         <div class="btn" onclick="document.getElementById('tutorial').style.display='block'" style="cursor:pointer"><span>TUTORIAL</span></div>
     </nav>
 
-    <!-- Inicia el juego y el fondo Matrix -->
     <script> main(); </script>
     <script> matrixBackground(); </script>
     <script>
-        /* ── Menú principal ── */
+        /* Confirma antes de salir para no perder la partida */
         function confirmarMenu() {
             if (confirm("¡Cuidado! Estás por regresar al menú y perderás tu partida.")) {
                 window.location.href = "../index.html";
             }
         }
 
-        // Tecla Escape cierra el tutorial
+        /* Escape cierra el tutorial */
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') tutorial.style.display = 'none';
         });
