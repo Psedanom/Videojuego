@@ -25,6 +25,7 @@ const canvasHeight = 700;
 const cardWidth = 160;
 const cardHeight = 190;
 
+let killTime = false;
 let oldTime = 0;
 let ctx;
 let user = JSON.parse(localStorage.getItem("player")); // convert the string data into an object
@@ -227,7 +228,7 @@ class Game {
     //also if the player can play the enemie card this function is in charge of making the interaction correct like reducind the players health
     cardEnemiaCardWeaponInteraction(){
         if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
-
+            this.contador.tiempolim += 1000;
             //Sql data base API proof of concept.
             // $.post("http://127.0.0.1:3000/post").done(function (data) {
 
@@ -321,7 +322,7 @@ class Game {
         this.probabilidadhabilidad = getRandomIntegerInclusive(0,10);
         if (this.probabilidadhabilidad >= 9) {
             this.habilidadProb = getRandomIntegerInclusive(0,10);
-            if (card.arma()) {
+            if (card.arma() && card.habilidad == "") {
                 if (this.habilidadProb >= 0 && this.habilidadProb <= 4) {
                     card.habilidad = "enemieslos";
                 }
@@ -335,7 +336,7 @@ class Game {
                     card.habilidad = "healthpassEnemie";
                 }
             }
-            else if (card.enemie()) {
+            else if (card.enemie() && card.habilidad == "") {
                 this.habilidadEnemieProb = getRandomIntegerInclusive(0,10);
                 if (this.habilidadEnemieProb >= 9) {
                     this.habilidadEnemieProb = getRandomIntegerInclusive(0,10);
@@ -379,7 +380,13 @@ class Game {
             let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
             this.cartas.push(card);
         }
-
+        this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,160,190,"deck1");
+        this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,160,190,"deck2");
+        this.deck3 = new Botones(canvasWidth * 0.8 - 80,canvasHeight * 0.5 - 95,160,190,"deck3");
+        this.killTimeReward = new Botones(0,0,160,190,"Every time you kill an enemy you gain one more second");
+        this.armaHabilityUpgrade = new Botones(0,0,160,190,"A power up is upgraded in a random card");
+        this.enemieHability = new Botones(0,0,160,190,"A power up is given to a random enemy");
+        this.armaHability = new Botones(0,0,160,190,"A power up is given to a random weapon");
         this.moreHealth = new Botones(0,0,160,190,"Your health is invcreased by 5");
         this.moreTime = new Botones(0,0,160,190,"Time limit is increased by 5 seconds");
         this.returnMoney = new Botones(0,0,160,190,"Returns the money you spend in this lootbox");
@@ -473,7 +480,7 @@ class Game {
                     }
                 }
                 else if (pantalla === 'start') {
-                    pantalla = 'menu';
+                    pantalla = 'deck';
                 }
             }
         });
@@ -547,6 +554,11 @@ class Game {
                 this.pasarRonda.isHovered = this.pasarRonda.tocando(this.mouseX, this.mouseY);
                 this.usadas.isHovered = this.usadas.tocando(this.mouseX, this.mouseY);
                 
+            }
+            else if(pantalla == 'deck'){
+                this.deck1.isHovered = this.deck1.tocando(this.mouseX,this.mouseY);
+                this.deck2.isHovered = this.deck2.tocando(this.mouseX,this.mouseY);
+                this.deck3.isHovered = this.deck3.tocando(this.mouseX,this.mouseY);
             }
             else if (pantalla === 'menu') {
                 this.settings.isHovered = this.settings.tocando(this.mouseX, this.mouseY);
@@ -668,6 +680,37 @@ class Game {
                                     }
                                 }
                             }
+                            else if(reward[i] == 7){
+                                for(let carta of this.cartas){
+                                    if(carta.arma() && carta.habilidad == ""){
+                                        carta.habilidad == "passEnemie"
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 8){
+                                for(let carta of this.cartas){
+                                    if(carta.enemie() && carta.habilidad == ""){
+                                        carta.habilidad == "timeEater"
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 9){
+                                console.log(9);
+                                for(let carta of this.cartas){
+                                    if(carta.arma() && carta.habilidad == "enemieslos"){
+                                        carta.habilidad == "passEnemie"
+                                    }
+                                    else if(carta.arma() && carta.habilidad == "killhealth"){
+                                        carta.habilidad == "passEnemie";
+                                    }
+                                    else if(carta.arma() && carta.habilidad == "passEnemie"){
+                                        carta.habilidad == "healthpassEnemie";
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 10){
+                                this.killTime = true;
+                            }
                             reward = [];
                             pantalla = 'lootboxes';
 
@@ -735,7 +778,17 @@ class Game {
                     this.cardSelectionScreen();
                     
                 }
-    
+                else if(pantalla == 'deck'){
+                    if(this.deck1.isHovered){
+                        pantalla = 'menu';
+                    }
+                    else if(this.deck2.isHovered){
+                        pantalla = 'menu';
+                    }
+                    else if(this.deck3.isHovered){
+                        pantalla = 'menu';
+                    }
+                }
                 else if (pantalla === 'gameLore') {
                     if (this.skipInitialDialogue.isHovered) {
                         pantalla = 'juego';
@@ -808,6 +861,11 @@ class Game {
                 this.btn = this.rewardButtons[reward[i]];
                 this.btn.update();
             }
+        }
+        else if(pantalla == 'deck'){
+            this.deck1.update();
+            this.deck2.update();
+            this.deck3.update();
         }
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
@@ -889,6 +947,11 @@ class Game {
             
 
         }
+        else if(pantalla == 'deck'){
+            this.deck1.draw(ctx);
+            this.deck2.draw(ctx);
+            this.deck3.draw(ctx);
+        }
         else if(pantalla == 'reward'){
             neonText(30, '#00bfff', "LOOTBOXES", canvasWidth / 2, 40);
             this.siguiente.draw(ctx);
@@ -910,6 +973,10 @@ class Game {
                 4: this.enemyImprove,
                 5: this.weaponUpgrade,
                 6: this.heartsUpgrade,
+                7: this.armaHability,
+                8: this.enemieHability,
+                9: this.armaHabilityUpgrade,
+                10: this.killTimeReward,
             };
 
             for(let i = 0; i < reward.length; i++){

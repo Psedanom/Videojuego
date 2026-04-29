@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const app = express()
 const port = 3000
 
-const dbpassword = "Pablouno1";
+const dbpassword = "Habana_12345";
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -15,7 +15,7 @@ function conectar() {
     return mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: dbpassword,
         database: 'DeadDraw'
     });
 }

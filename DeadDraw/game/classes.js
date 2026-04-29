@@ -265,11 +265,27 @@ class lootbox {
                 this.prob = getRandomIntegerInclusive(1,100);
                 this.rewards(player,contador,cartas);
             }
-            if(this.cost == 100){
+            else if(this.cost == 100){
                 player.money -= this.cost;
                 this.times = getRandomIntegerInclusive(1,2);
                 for(let i = 0; i<this.times;i++){
                     this.prob = getRandomIntegerInclusive(1,100);
+                    this.rewards(player,contador,cartas);
+                }
+            }
+            else if(this.cost == 200){
+                player.money -= this.cost;
+                this.times = getRandomIntegerInclusive(1,4);
+                for(let i = 0; i<this.times;i++){
+                    this.prob = getRandomIntegerInclusive(1,200);
+                    this.rewards(player,contador,cartas);
+                }
+            }
+            else if(this.cost == 500){
+                player.money -= this.cost;
+                this.times = getRandomIntegerInclusive(1,6);
+                for(let i = 0; i<this.times;i++){
+                    this.prob = getRandomIntegerInclusive(1,205);
                     this.rewards(player,contador,cartas);
                 }
             }
@@ -280,23 +296,38 @@ class lootbox {
     }
 
     rewards(player,contador,cartas){
-        if(this.prob <= 10){
+        if(this.prob <= 10 && !reward.includes(1)){
            reward.push(1);
         }
-        else if(this.prob <= 20){
+        else if(this.prob <= 20 && !reward.includes(2)){
             reward.push(2);
         }
-        else if(this.prob <= 30){
+        else if(this.prob <= 30 && !reward.includes(3)){
             reward.push(3);
         }
-        else if(this.prob <= 50){
+        else if(this.prob <= 50 && !reward.includes(4)){
             reward.push(4);
         }
-        else if(this.prob <= 75){
+        else if(this.prob <= 75 && !reward.includes(5)){
             reward.push(5);
         }
-        else{
+        else if(this.prob <= 100 && !reward.includes(6)){
             reward.push(6);
+        }
+        else if(this.prob <= 130 && !reward.includes(7)){
+            reward.push(7);
+        }
+        else if(this.prob <= 170 && !reward.includes(8)){
+            reward.push(8);
+        }
+        else if(this.prob <= 200 && !reward.includes(9)){
+            reward.push(9);
+        }
+        else if(this.prob <= 205 && !reward.includes(10) ){
+            if(!killTime){
+
+                reward.push(10);
+            }
         }
     }
 }
