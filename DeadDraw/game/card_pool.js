@@ -26,56 +26,69 @@ template:
 
 
 
-*/ 
+*/
 
 
 const cardPool = [
     {
-        nombre: "Vial de Vida",
-        ventaja: "+20 de vida",
-        desventaja: "+2 enemigos",
+        nombre: "Life Saver",
+        ventaja: "+20 HP",
+        desventaja: "+2 enemies",
         makeCard() {
-            return new CardVida(0, 200, cardWidth, cardHeight, 20, "corazones", 1, false, false, true, "",imgCorazon)
+            return new CardVida(0, 200, cardWidth, cardHeight, 20, "corazones", 1, false, false, true, "", imgCorazon, undefined, undefined, imgMedkit)
         },
         sideEffects() {
 
             return [
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas)
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "picas", 1, false, false, true, "", imgPicas)
             ]
         }
     },
     {
-        nombre: "Gran Espada",
-        ventaja: "12 daño",
-        desventaja: "+3 enemigos",
+        nombre: "Biggie Sword",
+        ventaja: "12 DMG",
+        desventaja: "+3 Enemies",
         makeCard() {
-            return new CardEspada(0, 200, cardWidth, cardHeight, 12, "diamantes", 1, false, false, true, "", imgRombos)
+            return new CardEspada(0, 200, cardWidth, cardHeight, 12, "diamantes", 1, false, false, true, "", imgRombos, undefined, undefined, imgSword)
         },
         sideEffects() {
             return [
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "picas", 1, false, false, true, "", imgPicas),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles)
             ]
         }
 
     },
     {
-        nombre: "Gran Espada 2.0",
-        ventaja: "15 daño",
-        desventaja: "+5 enemigos",
+        nombre: "Big Biggie Sword",
+        ventaja: "15 DMG",
+        desventaja: "+5 Enemies",
         makeCard() {
-            return new CardEspada(0, 200, cardWidth, cardHeight, 15, "diamantes", 1, false, false, true, "", imgRombos)
-        },  
+            return new CardEspada(0, 200, cardWidth, cardHeight, 15, "diamantes", 1, false, false, true, "", imgRombos, undefined, undefined, imgSword)
+        },
         sideEffects() {
             return [
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "picas", 1, false, false, true, "", imgPicas),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles),
-                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "espadas", 1, false, false, true, "", imgPicas),
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "picas", 1, false, false, true, "", imgPicas),
                 new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "treboles", 1, false, false, true, "", imgTreboles)
+            ]
+        }
+    },
+    {
+        nombre: "The Big Mace",
+        ventaja: "Reduces all enemies HP to 1",
+        desventaja: "Adds a cursed enemy to the deck",
+        makeCard() {
+            return new CardEspada(0, 200, cardWidth, cardHeight, 1, "diamantes", 1, false, false, true, "enemieslos", imgRombos, undefined, undefined, imgSMG)
+        },
+        sideEffects() {
+            return [
+                new CardEnemie(0, 200, cardWidth, cardHeight, Math.floor(Math.random() * 10) + 1, "picas", 1, false, false, true, "cursedEnemy", imgPicas)
             ]
         }
     }
-];
+]

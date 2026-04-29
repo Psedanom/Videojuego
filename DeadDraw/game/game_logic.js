@@ -384,16 +384,20 @@ class Game {
         this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,160,190,"deck1");
         this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,160,190,"deck2");
         this.deck3 = new Botones(canvasWidth * 0.8 - 80,canvasHeight * 0.5 - 95,160,190,"deck3");
-        this.killTimeReward = new Botones(0,0,160,190,"Every time you kill an enemy you gain one more second");
-        this.armaHabilityUpgrade = new Botones(0,0,160,190,"A power up is upgraded in a random card");
-        this.enemieHability = new Botones(0,0,160,190,"A power up is given to a random enemy");
-        this.armaHability = new Botones(0,0,160,190,"A power up is given to a random weapon");
-        this.moreHealth = new Botones(0,0,160,190,"Your health is invcreased by 5");
-        this.moreTime = new Botones(0,0,160,190,"Time limit is increased by 5 seconds");
-        this.returnMoney = new Botones(0,0,160,190,"Returns the money you spend in this lootbox");
-        this.enemyImprove = new Botones(0,0,160,190,"Increases by 50% the number of a random enemy");
-        this.weaponUpgrade = new Botones(0,0,160,190,"Increses by one the number of a random weapon");
-        this.heartsUpgrade = new Botones(0,0,160,190,"Increses by one the number of a random heal");
+        this.killTimeReward = new Botones(0,0,160,190,"Every time\nyou kill a\nenemy you\ngain one\nmore \nsecond",1,"#fdbc27", undefined, 15, "left");
+
+        this.armaHabilityUpgrade = new Botones(0,0,160,190,"A power up\nis upgraded\nin a random\ncard",1, "#b47aff", undefined, 15, "left");
+        this.armaHability = new Botones(0,0,160,190,"A power up\nis given to\na random\nweapon",1, "#b47aff", undefined, 15, "left");
+        
+        this.moreHealth = new Botones(0,0,160,190,"Your health\nis increased\nby 5",1,"#6de7ff", undefined, 15, "left");
+        this.moreTime = new Botones(0,0,160,190,"Time limit\nis increased\nby 5 seconds",1,"#6de7ff", undefined, 15, "left");
+        this.returnMoney = new Botones(0,0,160,190,"Returns the\nmoney you\nspend in\nthis lootbox",1,"#6de7ff", undefined, 15, "left");
+        
+        this.enemieHability = new Botones(0,0,160,190,"A power up\nis given to\na random\nenemy", 1, "red", undefined, 15, "left"); //mala
+        this.enemyImprove = new Botones(0,0,160,190,"Increases\nby 50% the\nnumber of a\nrandom \nenemy", 1, "red", undefined, 15, "left"); //mala
+        
+        this.weaponUpgrade = new Botones(0,0,160,190,"Increses by\none the\nnumber of a\nrandom \nweapon",1, "#1ed22a", undefined, 15, "left");
+        this.heartsUpgrade = new Botones(0,0,160,190,"Increses by\none the\nnumber of a\nrandom \nheal",1, "#1ed22a", undefined, 15, "left");
         this.lootbox1 = new lootbox((canvasWidth - canvasWidth * 0.125) -75, canvasHeight - canvasHeight * 0.6, 150, 150,50);
         this.lootbox2 = new lootbox((canvasWidth - canvasWidth * 0.375) -75, canvasHeight - canvasHeight * 0.6, 150, 150,100);
         this.lootbox3 = new lootbox((canvasWidth - canvasWidth * 0.625) -75, canvasHeight - canvasHeight * 0.6, 150, 150,200);
