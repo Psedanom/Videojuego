@@ -1079,6 +1079,7 @@ class Game {
             let savedHealth = Math.floor(this.playerHealth.health);
             let savedTime = Math.floor(this.contador.tiempolim / 1000);
             let nivel = this.nivel;
+
             $.ajax({
                 url: "http://127.0.0.1:3000/saveProgress",
                 type: "POST",
@@ -1102,7 +1103,8 @@ class Game {
                 });
             }
             guardar = false;
-            //window.location.href = "../index.html";
+            // window.location.href = "../index.html";
+            pantalla = 'menu';
         }
         if(pantalla == 'lootboxes'){
             this.siguiente.update();
