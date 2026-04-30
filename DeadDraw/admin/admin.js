@@ -5,10 +5,7 @@ let grafica_frecuencia = null;
 let grafica_resultados = null;
 let grafica_actividad  = null;
 
-// al inicio de admin.js
-if (player.role !== 'admin') {
-    window.location.href = '../index.html'; // o donde sea tu página principal
-}
+
 
 /* fetches the four metric cards from the API and updates the HTML */
 async function cargar_metricas() {
