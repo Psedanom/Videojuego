@@ -836,6 +836,15 @@ class Game {
                         this.settings.click();
                         pantalla = "settings";
                     }
+                    if (this.statistics.isHovered) {
+                        this.statistics.click();
+                        if(user.role == "admin"){
+                            window.location.href = "../admin/admin.html";
+                        }
+                        else if(user.role == "player"){
+                            window.location.href = "../admin/stats.html";
+                        }
+                    }
                 }
                 else if (pantalla === 'settings') {
                     if (this.settingsBack.isHovered) {
