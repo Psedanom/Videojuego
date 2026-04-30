@@ -137,7 +137,7 @@ menuSelect.volume = 0.7;
 // Looping music
 const menuMusic = document.createElement("audio");
 menuMusic.src = "../game/assets/sound/music.mp3";
-menuMusic.volume = 0.5;
+menuMusic.volume = 0;
 menuMusic.loop = true;
 
 // ===================== LootBoxes =====================
