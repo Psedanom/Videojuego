@@ -343,7 +343,7 @@ app.get('/player', (req, res) => {
     const connection = conectar();
     connection.connect((err) => { if (err) throw err; });
     connection.query(
-        'SELECT * from playercard',
+        'SELECT * from playercard where idPlayer = ?',[req.query.idPlayer],
         (err, results) => {
             res.send(results);
         }
