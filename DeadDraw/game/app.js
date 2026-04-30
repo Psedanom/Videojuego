@@ -282,6 +282,25 @@ app.get('/admin/jugadores', (req, res) => {
     connection.end();
 });
 
+app.post('/saveMatch', (req, res) => {
+    const idPlayer = req.body.idPlayer;
+    const idDeck   = req.body.idDeck;
+    const score    = req.body.score;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query(
+            'INSERT INTO MatchGame (idPlayer, idDeck, score, result, endDate) VALUES (?, ?, ?, \'victory\', NOW())',
+            [idPlayer, idDeck, score],
+            (err, results) => {
+                connection.end();
+                if (err) return res.status(500).send(err);
+                res.json({ idMatchGame: results.insertId });
+            }
+        );
+    });
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });

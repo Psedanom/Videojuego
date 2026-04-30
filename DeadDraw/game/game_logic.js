@@ -36,7 +36,6 @@ let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
 let reward = [];
-
 let playedMusic = false; // Flag to ensure the background music starts only once
 /*
 Possible values for `pantalla`:
@@ -86,6 +85,8 @@ class Game {
         this.btn;
         this.deck = [];
         this.primer = false;
+        this.selectedDeck = 1;
+        this.victorySaved = false;
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -393,6 +394,18 @@ class Game {
         this.logout = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.3, 200, 100,"Logout");
         this.settings = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.5, 200, 100,"Settings");
         this.statistics = new Botones(canvasWidth/2 - 100, 0 + canvasHeight*0.7, 200, 100,"Statistics");
+        this.settingsBack = new Botones(canvasWidth/2 - 100, canvasHeight * 0.85, 200, 60, "Back");
+        this.globalVolume = 1.0;
+        this.effectsVolume = 1.0;
+        this.musicVolume = 0.0;
+        this.sliderGlobal  = { x: canvasWidth/2 - 200, y: canvasHeight * 0.28, width: 400, value: 1.0, dragging: false };
+        this.sliderEffects = { x: canvasWidth/2 - 200, y: canvasHeight * 0.48, width: 400, value: 1.0, dragging: false };
+        this.sliderMusic   = { x: canvasWidth/2 - 200, y: canvasHeight * 0.68, width: 400, value: 0.0, dragging: false };
+        this.baseVolumes = {
+            dialogueSound: 1.0, cardSelected: 0.5, hoverSound: 0.3,
+            skipRound: 0.5, cardPlaces: 0.5, cardSound: 0.5,
+            playingHover: 0.3, playingSelect: 0.3, menuSelect: 0.7, menuMusic: 0.5
+        };
         this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, user.baseHealth,user.money);
         this.selectionlootboxes = new Botones(canvasWidth - canvasWidth* 0.9, canvasHeight - canvasHeight * 0.5, 300, 50, "Buy a lootbox");
         this.sleccioncard = new Botones(canvasWidth - canvasWidth* 0.3, canvasHeight - canvasHeight * 0.5, 300, 50, "Select a card");
@@ -538,6 +551,9 @@ class Game {
                 }
             }
         }
+        this.sliderGlobal.dragging = false;
+        this.sliderEffects.dragging = false;
+        this.sliderMusic.dragging = false;
         if(event.button === 2){
             this.showability = false;
             this.cardShow = null;
@@ -615,6 +631,18 @@ class Game {
             }
             else if (pantalla === 'gameLore') {
                 this.skipInitialDialogue.isHovered = this.skipInitialDialogue.tocando(this.mouseX, this.mouseY);
+            }
+            else if (pantalla === 'settings') {
+                this.settingsBack.isHovered = this.settingsBack.tocando(this.mouseX, this.mouseY);
+                for (const slider of [this.sliderGlobal, this.sliderEffects, this.sliderMusic]) {
+                    if (slider.dragging) {
+                        slider.value = Math.max(0, Math.min(1, (this.mouseX - slider.x) / slider.width));
+                        if (slider === this.sliderGlobal)  this.globalVolume  = slider.value;
+                        else if (slider === this.sliderEffects) this.effectsVolume = slider.value;
+                        else if (slider === this.sliderMusic)   this.musicVolume   = slider.value;
+                        this.applyVolumes();
+                    }
+                }
             }
 
         });
@@ -806,7 +834,25 @@ class Game {
                     }   
                     if (this.settings.isHovered) {
                         this.settings.click();
-                        this.pantalla = "settings";
+                        pantalla = "settings";
+                    }
+                }
+                else if (pantalla === 'settings') {
+                    if (this.settingsBack.isHovered) {
+                        this.settingsBack.click();
+                        pantalla = 'menu';
+                    }
+                    for (const slider of [this.sliderGlobal, this.sliderEffects, this.sliderMusic]) {
+                        const trackHit = this.mouseX >= slider.x && this.mouseX <= slider.x + slider.width
+                                      && Math.abs(this.mouseY - slider.y) < 20;
+                        if (trackHit) {
+                            slider.dragging = true;
+                            slider.value = Math.max(0, Math.min(1, (this.mouseX - slider.x) / slider.width));
+                            if (slider === this.sliderGlobal)  this.globalVolume  = slider.value;
+                            else if (slider === this.sliderEffects) this.effectsVolume = slider.value;
+                            else if (slider === this.sliderMusic)   this.musicVolume   = slider.value;
+                            this.applyVolumes();
+                        }
                     }
                 }
                 else if (pantalla === 'seleccion_de_pantalla') {
@@ -905,58 +951,61 @@ class Game {
                         $.get("http://127.0.0.1:3000/deck1", {
                         }).done(function (data){
                             console.log(data);
-                            this.deck = data;  
+                            this.deck = data;
                             for(let carta of this.deck){
                                 $.ajax({
                                     url: "http://127.0.0.1:3000/guardar",
                                     type: "POST",
                                     contentType: "application/json",
                                     data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
-        
+
                                 }).done(function(data){
                                     console.log("posted", data);
 
                                 });
                             }
                         });
+                        this.selectedDeck = 1;
                         pantalla = 'menu';
                     }
                     else if(this.deck2.isHovered){
                         $.get("http://127.0.0.1:3000/deck2", {
                         }).done(function (data){
                             console.log(data);
-                            this.deck = data;  
+                            this.deck = data;
                             for(let carta of this.deck){
                                 $.ajax({
                                     url: "http://127.0.0.1:3000/guardar",
                                     type: "POST",
                                     contentType: "application/json",
                                     data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
-        
+
                                 }).done(function(data){
                                     console.log("posted", data);
                                 });
                             }
                         });
+                        this.selectedDeck = 2;
                         pantalla = 'menu';
                     }
                     else if(this.deck3.isHovered){
                         $.get("http://127.0.0.1:3000/deck3", {
                         }).done(function (data){
                             console.log(data);
-                            this.deck = data;  
+                            this.deck = data;
                             for(let carta of this.deck){
                                 $.ajax({
                                     url: "http://127.0.0.1:3000/guardar",
                                     type: "POST",
                                     contentType: "application/json",
                                     data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
-        
+
                                 }).done(function(data){
                                     console.log("posted", data);
                                 });
                             }
                         });
+                        this.selectedDeck = 3;
                         pantalla = 'menu';
                     }
                 }
@@ -1014,6 +1063,7 @@ class Game {
         this.skipInitialDialogue.update();
         this.sleccioncard.update();
         this.selectionlootboxes.update();
+        this.settingsBack.update();
         
         if(guardar){
             let id = user.idPlayer
@@ -1064,6 +1114,19 @@ class Game {
         if(pantalla == 'afterBoss'){
             this.finish.update();
             this.siguiente.update();
+            if (!this.victorySaved) {
+                this.victorySaved = true;
+                $.ajax({
+                    url: "http://127.0.0.1:3000/saveMatch",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        idPlayer: user.idPlayer,
+                        idDeck: this.selectedDeck,
+                        score: this.playerHealth.money
+                    })
+                });
+            }
         }
         else if(pantalla == 'deck'){
             this.deck1.update();
@@ -1138,6 +1201,63 @@ class Game {
         else if (this.cartas.every(card => card.used)&& this.cartas.every(card => !card.inboard)) {
             return 3; // Player won by using all cards
         }
+    }
+
+    applyVolumes() {
+        const g = this.globalVolume;
+        const e = this.effectsVolume;
+        const m = this.musicVolume;
+        const b = this.baseVolumes;
+        dialogueSound.volume  = Math.min(1, b.dialogueSound  * g * e);
+        cardSelected.volume   = Math.min(1, b.cardSelected   * g * e);
+        hoverSound.volume     = Math.min(1, b.hoverSound     * g * e);
+        skipRound.volume      = Math.min(1, b.skipRound      * g * e);
+        cardPlaces.volume     = Math.min(1, b.cardPlaces     * g * e);
+        cardSound.volume      = Math.min(1, b.cardSound      * g * e);
+        playingHover.volume   = Math.min(1, b.playingHover   * g * e);
+        playingSelect.volume  = Math.min(1, b.playingSelect  * g * e);
+        menuSelect.volume     = Math.min(1, b.menuSelect     * g * e);
+        menuMusic.volume      = Math.min(1, b.menuMusic      * g * m);
+    }
+
+    drawSlider(ctx, slider, label) {
+        const trackH = 10;
+        const thumbR = 12;
+        const thumbX = slider.x + slider.value * slider.width;
+
+        ctx.textAlign = "center";
+        ctx.font = "20px Ethnocentric";
+        ctx.shadowColor = '#00bfff';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(label, canvasWidth / 2, slider.y - 28);
+        ctx.font = "16px Ethnocentric";
+        ctx.fillText(Math.round(slider.value * 100) + "%", slider.x + slider.width + 50, slider.y + 6);
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.roundRect(slider.x, slider.y - trackH / 2, slider.width, trackH, trackH / 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#00bfff';
+        ctx.shadowColor = '#00bfff';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.roundRect(slider.x, slider.y - trackH / 2, slider.value * slider.width, trackH, trackH / 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.beginPath();
+        ctx.arc(thumbX, slider.y, thumbR, 0, Math.PI * 2);
+        ctx.fillStyle = slider.dragging ? '#ffffff' : '#00bfff';
+        ctx.shadowColor = '#00bfff';
+        ctx.shadowBlur = 20;
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
     }
 
     draw(ctx) {
@@ -1231,6 +1351,13 @@ class Game {
             this.logout.draw(ctx);
             this.settings.draw(ctx);
             this.statistics.draw(ctx);
+        }
+        else if (pantalla === 'settings') {
+            neonText(40, '#00bfff', "SETTINGS", canvasWidth / 2, 80);
+            this.drawSlider(ctx, this.sliderGlobal,  "Global Sound");
+            this.drawSlider(ctx, this.sliderEffects, "Effects Sound");
+            this.drawSlider(ctx, this.sliderMusic,   "Music");
+            this.settingsBack.draw(ctx);
         }
         else if (pantalla === 'lootboxes') {
             // Neon text style for the screen title
