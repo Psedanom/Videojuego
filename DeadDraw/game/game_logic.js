@@ -362,9 +362,9 @@ class Game {
         pantalla = 'start';
         this.cartas.push(new CardEnemie(0,0,0,0,1,"treboles",1,false,false,false,""));
         this.finish = new Botones(canvasWidth * 0.5 - 100, canvasHeight * 0.3 - 50, 200, 100,"Finish the run ");
-        this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,160,190,"deck1");
-        this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,160,190,"deck2");
-        this.deck3 = new Botones(canvasWidth * 0.8 - 80,canvasHeight * 0.5 - 95,160,190,"deck3");
+        this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,190,300," ",undefined, undefined, undefined, undefined, undefined,classicDeck);
+        this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,190,300," ",undefined, undefined, undefined, undefined, undefined,difficultDeck);
+        this.deck3 = new Botones(canvasWidth * 0.8 - 80,canvasHeight * 0.5 - 95,190,300," ",undefined, undefined, undefined, undefined, undefined,noviceDeck);
         this.killTimeReward = new Botones(0,0,160,190,"Every time\nyou kill a\nenemy you\ngain one\nmore \nsecond",1,"#fdbc27", undefined, 15, "left");
 
         this.armaHabilityUpgrade = new Botones(0,0,160,190,"A power up\nis upgraded\nin a random\ncard",1, "#b47aff", undefined, 15, "left");
@@ -1124,7 +1124,8 @@ class Game {
     // The round ends when: every card in the deck has been played (victory),
     // the player's health drops to 0 or below (loss), or the timer runs out (loss)
     isGameOver() {
-        return (this.cartas.length == 0 || this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
+    
+        return (this.cartas.every(card => card.used)&& this.cartas.every(card => !card.inboard))  || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
     }
     gameOverReason() {
         if (this.playerHealth.health <= 0) {
@@ -1133,7 +1134,7 @@ class Game {
         else if (this.contador.tiempolim <= 0) {
             return 2; // Player ran out of time
         }
-        else if (this.cartas.every(card => card.used)) {
+        else if (this.cartas.every(card => card.used)&& this.cartas.every(card => !card.inboard)) {
             return 3; // Player won by using all cards
         }
     }

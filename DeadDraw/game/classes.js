@@ -60,7 +60,7 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal", textSize = 20, textAlign = "center") {
+    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal", textSize = 20, textAlign = "center", img = blank) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -77,6 +77,7 @@ class Botones {
         this.selectSound = playingSelect; // Sound effect played when the button is clicked; defaults to the generic playingSelect sound but is overridden for menu buttons in the constructor
         this.textSize = textSize;
         this.textAlign = textAlign;
+        this.img = img;
         switch (this.buttonType) {
             case "normal":
                 this.sound = hoverSound;
@@ -96,6 +97,11 @@ class Botones {
 
     }
     draw(ctx) {
+        if(this.img != blank){
+            ctx.drawImage(this.img,this.x-285*this.scale, this.y-230*this.scale, 1080*0.7*this.scale, 1080*0.7*this.scale);
+            // ctx.drawImage(this.img,this.x-(this.width*this.scale*4)/2,this.y-(this.height*this.scale*4)/2,this.width*this.scale*4,this.height*this.scale*4);
+        }
+        else{
         ctx.beginPath();
         ctx.roundRect(this.x, this.y, this.width * this.scale, this.height * this.scale, 10);
         ctx.fillStyle = "black";
@@ -106,7 +112,7 @@ class Botones {
         ctx.shadowBlur = 100;
         ctx.stroke();
         ctx.shadowBlur = 0;
-
+        }
         if(this.textAlign == "center"){
             neonText(this.textSize*this.scale,this.color, this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2,2,30,this.textAlign);
         }

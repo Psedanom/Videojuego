@@ -93,6 +93,20 @@ imgPassEnemie.src = '../game/assets/cardAbilities/passEnemie.png';
 const imgTimeEater = new Image();
 imgTimeEater.src = '../game/assets/cardAbilities/timeEater.png';
 
+// ===================== Decks =====================
+
+const classicDeck = new Image();
+classicDeck.src = '../game/assets/decks/classicDeck.png';
+
+const difficultDeck = new Image();
+difficultDeck.src = '../game/assets/decks/difficultDeck.png';
+
+const hardDeck = new Image();
+hardDeck.src = '../game/assets/decks/hardDeck.png';
+
+const noviceDeck = new Image();
+noviceDeck.src = '../game/assets/decks/noviceDeck.png';
+
 // ===================== Sound effects =====================
 
 // Looping audio element played while dialogue text is scrolling onto screen
