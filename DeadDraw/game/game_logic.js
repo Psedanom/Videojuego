@@ -73,7 +73,7 @@ class Game {
         this.seleccionando = false; // True while the card selection screen is showing a new set of cards to pick from
         this.preDialogueGenerated = false; // Guards against regenerating the pre-level dialogue object every frame
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
-        this.nivel = 0;
+        this.nivel = user.level || 0;      // Tracks the current level number, which increases each time the player wins and is used to scale difficulty
         this.boss = false;
         this.enemigosEliminados = 0;  // counts every enemy defeated with a weapon during this run
         this.danoRecibido = 0;        // tracks total damage taken from enemies this run
@@ -731,6 +731,8 @@ class Game {
                 else if (pantalla === 'menu') {
                     if (this.play.isHovered) {
                         let th = this;
+                        this.bossBar.roundsleft = 20 - this.nivel;
+                        this.bossBar.draw(ctx);
                         $.get("http://127.0.0.1:3000/player", {
                         }).done(function (data){
                             th.cartas = [];
@@ -777,6 +779,13 @@ class Game {
                                 // No cards were on board when saved; start a fresh board turn.
                                 th.cantidadCartasTablero = usedCards.length + 4;
                                 th.ctab = 4;
+                            }
+
+                            if(user.healthLeft > 0){
+                                th.playerHealth.health = user.healthLeft;
+                            }
+                            if(user.timeLeft > 0){
+                                th.contador.tiempolim = user.timeLeft * 1000;
                             }
 
                             th.play.click();
@@ -830,6 +839,18 @@ class Game {
                 }
                 else if(pantalla == 'afterBoss'){
                     if(this.finish.isHovered){
+                        let saveId = user.idPlayer;
+                        let newMaxHealth = this.playerHealth.maxHealth;
+                        let newMaxTime = this.contador.tiempomax;
+                        $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: newMaxHealth }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: newMaxTime }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: newMaxHealth, timeLeft: newMaxTime, level: 0 }) });
+                        user.baseHealth = newMaxHealth;
+                        user.baseTime = newMaxTime;
+                        user.healthLeft = newMaxHealth;
+                        user.timeLeft = newMaxTime;
+                        user.level = 0;
+                        localStorage.setItem("player", JSON.stringify(user));
                         this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
                         this.playerHealth.health = this.playerHealth.maxHealth;
                         this.contador = new Tiempo(this.contador.tiempomax);
@@ -1013,10 +1034,23 @@ class Game {
         
         if(guardar){
             let id = user.idPlayer
+            let savedHealth = Math.floor(this.playerHealth.health);
+            let savedTime = Math.floor(this.contador.tiempolim / 1000);
+            let nivel = this.nivel;
+            $.ajax({
+                url: "http://127.0.0.1:3000/saveProgress",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ id: id, healthLeft: savedHealth, timeLeft: savedTime, level: nivel })
+            });
+            user.healthLeft = savedHealth;
+            user.timeLeft = savedTime;
+            user.level = nivel;
+            localStorage.setItem("player", JSON.stringify(user));
             $.post("http://127.0.0.1:3000/delete", {
-                
+
             }).done(function (data){
-                
+
             });
             for(let card of this.cartas){
                 $.ajax({
@@ -1309,6 +1343,7 @@ class Game {
             }
             //ROUND IN PROGRESS
             if (!this.gameover) {
+                
                 this.bossBar.draw(ctx);
                 this.armas.draw(ctx);
                 this.usadas.draw(ctx);
@@ -1621,6 +1656,18 @@ class Game {
         this.skipebutton = true;
         this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
         if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
+            let saveId = user.idPlayer;
+            let newMaxHealth = this.playerHealth.maxHealth;
+            let newMaxTime = this.contador.tiempomax;
+            $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: newMaxHealth }) });
+            $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: newMaxTime }) });
+            $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: newMaxHealth, timeLeft: newMaxTime, level: 0 }) });
+            user.baseHealth = newMaxHealth;
+            user.baseTime = newMaxTime;
+            user.healthLeft = newMaxHealth;
+            user.timeLeft = newMaxTime;
+            user.level = 0;
+            localStorage.setItem("player", JSON.stringify(user));
             this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
             this.playerHealth.health = this.playerHealth.maxHealth;
             this.contador = new Tiempo(this.contador.tiempomax);

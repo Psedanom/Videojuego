@@ -21,27 +21,39 @@ function conectar() {
 }
 
 app.post('/passHealth', (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    const money = req.body.money;
+    const id = req.body.id;
+    const baseHealth = req.body.baseHealth;
     const connection = conectar();
     connection.connect((err) => {
         if (err) throw err;
-        connection.query('update player set baseHealth = ? where email = ? and password = ?',[baseHealth,username,password], (err, results) => {
+        connection.query('update Player set baseHealth = ? where idPlayer = ?', [baseHealth, id], (err, results) => {
             res.send("Health updated");
         });
         connection.end();
     });
 });
 app.post('/passTime', (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    const money = req.body.money;
+    const id = req.body.id;
+    const baseTime = req.body.baseTime;
     const connection = conectar();
     connection.connect((err) => {
         if (err) throw err;
-        connection.query('update player set baseTime = ? where email = ? and password = ?',[baseHealth,username,password], (err, results) => {
-            res.send("Health updated");
+        connection.query('update Player set baseTime = ? where idPlayer = ?', [baseTime, id], (err, results) => {
+            res.send("Time updated");
+        });
+        connection.end();
+    });
+});
+app.post('/saveProgress', (req, res) => {
+    const id = req.body.id;
+    const healthLeft = req.body.healthLeft;
+    const timeLeft = req.body.timeLeft;
+    const level = req.body.level;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('update Player set healthLeft = ?, timeLeft = ?, level = ? where idPlayer = ?', [healthLeft, timeLeft,level, id], (err, results) => {
+            res.send("Progress saved");
         });
         connection.end();
     });

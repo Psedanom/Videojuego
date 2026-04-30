@@ -202,6 +202,7 @@ class bossBar{
         ctx.fillText("BOSS " + this.roundsleft + "/" + this.totalRounds, 0, 4);
         ctx.restore();
     }
+    
 }
 
 class lootbox {

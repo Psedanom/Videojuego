@@ -11,12 +11,15 @@ CREATE TABLE Player(
     idPlayer INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(255) not NULL default 'player',
     baseHealth INT NOT NULL DEFAULT 20,
+    healthLeft INT NOT NULL DEFAULT 20,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     registrationDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     baseTime INT NOT NULL DEFAULT 100,
+    timeLeft INT NOT NULL DEFAULT 100,
     money INT NOT NULL DEFAULT 0,
     role VARCHAR(255) NOT NULL DEFAULT 'player',
+    level INT NOT NULL DEFAULT 0,
     lastUpdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -489,3 +492,4 @@ INSERT INTO RewardUpgrade (idEffect, quality) VALUES
 (5, 4),   -- healthpassEnemie  epic upgrade
 (5, 5);   -- healthpassEnemie  legendary version
  desc playercard;
+
