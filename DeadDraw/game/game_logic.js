@@ -10,10 +10,9 @@ the game state, player interactions, win/loss conditions, and screen transitions
 
 "use strict";
 
-
+let guardar = false;
 
 let font = "regular";
-
 // "regular" for ethnocentric font
 // "OpenDyslexic" for the OpenDyslexic font
 
@@ -25,15 +24,18 @@ const canvasHeight = 700;
 const cardWidth = 160;
 const cardHeight = 190;
 
+let killTime = false;
 let oldTime = 0;
 let ctx;
 let user = JSON.parse(localStorage.getItem("player")); // convert the string data into an object
 let baseHealth = user.baseHealth;
 let game;
+let id = user.idPlayer
 // Guards the board repopulation logic so it only runs once per empty-board event
 let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
 let pantalla = 'start';
+let reward = [];
 
 let playedMusic = false; // Flag to ensure the background music starts only once
 /*
@@ -52,10 +54,12 @@ let loreDialogueGenerated = false;
 
 class Game {
     constructor(canvas) {
+        this.rewardButtons;
         this.cartas = [];  // Master array of all card objects in the current deck
         this.dificultad = 1.1 // Difficulty multiplier applied to card numbers each time the player wins a level (10% increase per level)
         this.createEventListeners();
         this.initObjects();
+        this.firstrun = true; // Guards against showing the initial lore dialogue on the very first run, allowing the player to skip it if they want to.
         this.canvas = canvas;
         this.clicked = false;       // True when a card has been selected but not yet placed in a slot
         this.tablaVacia = false;    // True when all board slots have been used, triggering a board refill
@@ -69,7 +73,7 @@ class Game {
         this.seleccionando = false; // True while the card selection screen is showing a new set of cards to pick from
         this.preDialogueGenerated = false; // Guards against regenerating the pre-level dialogue object every frame
         this.dialogueDone = false;  // True after the player dismisses the pre-level dialogue
-        this.nivel = 0;
+        this.nivel = user.level || 0;      // Tracks the current level number, which increases each time the player wins and is used to scale difficulty
         this.boss = false;
         this.enemigosEliminados = 0;  // counts every enemy defeated with a weapon during this run
         this.danoRecibido = 0;        // tracks total damage taken from enemies this run
@@ -79,7 +83,9 @@ class Game {
         this.skipebutton = true;
         this.mouseX=0;
         this.mouseY=0;
-        
+        this.btn;
+        this.deck = [];
+        this.primer = false;
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -93,9 +99,9 @@ class Game {
             }
             // "killhealth" restore half this card's number as health, capped at maxhealth
             else if (this.card_clicked.habilidad == "killhealth") {
-                if (this.playerHealth.health < 20) {
+                if (this.playerHealth.health < this.playerHealth.maxHealth) {
                     if (this.playerHealth.health + Math.floor(this.card_clicked.number / 2) > 20) {
-                        health = this.player.maxHealth;
+                        this.playerHealth.health = this.player.maxHealth;
                     }
                     else {
                         this.playerHealth.health += this.card_clicked.number / 2;
@@ -105,7 +111,7 @@ class Game {
             // "passEnemie" discard the first enemy found on the board without dealing damage
             else if (this.card_clicked.habilidad == "passEnemie") {
                 for (let card of this.cartas) {
-                    if (card.enemie && card.inboard && this.ctab > 1) {
+                    if (card.enemie() && card.inboard && this.ctab > 1) {
                         this.discardEnemy(card);
                         break;// Only skips one enemy per use
                     }
@@ -114,12 +120,12 @@ class Game {
             //"healthpassEnemie" discard the first board enemy AND restore health equal to this card's full number
             else if (this.card_clicked.habilidad == "healthpassEnemie") {
                 for (let card of this.cartas) {
-                    if (card.enemie && card.inboard && this.ctab > 1) {
+                    if (card.enemie() && card.inboard && this.ctab > 1) {
                         this.discardEnemy(card);
                         break;
                     }
                 }
-                if (this.playerHealth.health < 20) {
+                if (this.playerHealth.health < this.playerHealth.maxHealth) {
                     if (this.playerHealth.health + Math.floor(this.card_clicked.number / 2) > 20) {
                         health = this.playerHealth.maxHealth;
                     }
@@ -224,7 +230,7 @@ class Game {
     //also if the player can play the enemie card this function is in charge of making the interaction correct like reducind the players health
     cardEnemiaCardWeaponInteraction(){
         if (this.numeroAnterior > this.card_clicked.number || this.cartasArma.length < 2) {
-
+            this.contador.tiempolim += 1000;
             //Sql data base API proof of concept.
             // $.post("http://127.0.0.1:3000/post").done(function (data) {
 
@@ -318,7 +324,7 @@ class Game {
         this.probabilidadhabilidad = getRandomIntegerInclusive(0,10);
         if (this.probabilidadhabilidad >= 9) {
             this.habilidadProb = getRandomIntegerInclusive(0,10);
-            if (card.arma()) {
+            if (card.arma() && card.habilidad == "") {
                 if (this.habilidadProb >= 0 && this.habilidadProb <= 4) {
                     card.habilidad = "enemieslos";
                 }
@@ -332,7 +338,7 @@ class Game {
                     card.habilidad = "healthpassEnemie";
                 }
             }
-            else if (card.enemie()) {
+            else if (card.enemie() && card.habilidad == "") {
                 this.habilidadEnemieProb = getRandomIntegerInclusive(0,10);
                 if (this.habilidadEnemieProb >= 9) {
                     this.habilidadEnemieProb = getRandomIntegerInclusive(0,10);
@@ -354,33 +360,32 @@ class Game {
     }
     initObjects() {
         pantalla = 'start';
+        this.cartas.push(new CardEnemie(0,0,0,0,1,"treboles",1,false,false,false,""));
+        this.finish = new Botones(canvasWidth * 0.5 - 100, canvasHeight * 0.3 - 50, 200, 100,"Finish the run ");
+        this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,190,300," ",undefined, undefined, undefined, undefined, undefined,classicDeck);
+        this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,190,300," ",undefined, undefined, undefined, undefined, undefined,difficultDeck);
+        this.deck3 = new Botones(canvasWidth * 0.8 - 80,canvasHeight * 0.5 - 95,190,300," ",undefined, undefined, undefined, undefined, undefined,noviceDeck);
+        this.killTimeReward = new Botones(0,0,160,190,"Every time\nyou kill a\nenemy you\ngain one\nmore \nsecond",1,"#fdbc27", undefined, 15, "left");
+
+        this.armaHabilityUpgrade = new Botones(0,0,160,190,"A power up\nis upgraded\nin a random\ncard",1, "#b47aff", undefined, 15, "left");
+        this.armaHability = new Botones(0,0,160,190,"A power up\nis given to\na random\nweapon",1, "#b47aff", undefined, 15, "left");
         
-
-        for (let i = 1; i < 11; i++) {
-            let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
-            this.cartas.push(card);
-        }
-
-        for (let i = 1; i < 10; i++) {
-            let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
-            this.cartas.push(card);
-        }
+        this.moreHealth = new Botones(0,0,160,190,"Your health\nis increased\nby 5",1,"#6de7ff", undefined, 15, "left");
+        this.moreTime = new Botones(0,0,160,190,"Time limit\nis increased\nby 5 seconds",1,"#6de7ff", undefined, 15, "left");
+        this.returnMoney = new Botones(0,0,160,190,"Returns the\nmoney you\nspend in\nthis lootbox",1,"#6de7ff", undefined, 15, "left");
         
-        for (let i = 1; i < 10; i++) {
-            let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
-        }
-
-    
-        for (let i = 1; i < 11; i++) {
-            let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
-            this.cartas.push(card);
-        }
+        this.enemieHability = new Botones(0,0,160,190,"A power up\nis given to\na random\nenemy", 1, "red", undefined, 15, "left"); //mala
+        this.enemyImprove = new Botones(0,0,160,190,"Increases\nby 50% the\nnumber of a\nrandom \nenemy", 1, "red", undefined, 15, "left"); //mala
+        
+        this.weaponUpgrade = new Botones(0,0,160,190,"Increses by\none the\nnumber of a\nrandom \nweapon",1, "#1ed22a", undefined, 15, "left");
+        this.heartsUpgrade = new Botones(0,0,160,190,"Increses by\none the\nnumber of a\nrandom \nheal",1, "#1ed22a", undefined, 15, "left");
         this.lootbox1 = new lootbox((canvasWidth - canvasWidth * 0.125) -75, canvasHeight - canvasHeight * 0.6, 150, 150,50);
         this.lootbox2 = new lootbox((canvasWidth - canvasWidth * 0.375) -75, canvasHeight - canvasHeight * 0.6, 150, 150,100);
         this.lootbox3 = new lootbox((canvasWidth - canvasWidth * 0.625) -75, canvasHeight - canvasHeight * 0.6, 150, 150,200);
         this.lootbox4 = new lootbox((canvasWidth - canvasWidth * 0.875) -75, canvasHeight - canvasHeight * 0.6, 150, 150,500);
         this.bossBar = new bossBar(canvasWidth -canvasWidth * 0.95, canvasHeight/2 - 200, 30, 400,20,20);
-        this.contador = new Tiempo();
+        this.contador = new Tiempo(150);
+        this.siguiente = new Botones(canvasWidth * 0.42, canvasHeight * 0.7, 200, 100, "Continue");
         this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
         this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
         this.pasarRonda = new Botones(canvasWidth * 0.75, canvasHeight * 0.143, canvasWidth * 0.2, canvasHeight * 0.071, "Skip Round",undefined, undefined,"skipButton");
@@ -399,6 +404,16 @@ class Game {
                 if (this.habilidadEnemieProb >= 0) {
                     if (this.habilidadProb >= 0 && this.habilidadProb <= 3) {
                         card.habilidad = "absoluteDamage";
+
+
+
+
+
+
+
+
+
+
                     }
                     else if (this.habilidadProb >= 4 && this.habilidadProb <= 6) {
                         card.habilidad = "cursedEnemy";
@@ -416,11 +431,12 @@ class Game {
 
     }
     createEventListeners() {
-        document.addEventListener('keydown', (event) => {
+        document.addEventListener('keydown', async (event) => {
             if (event.key === 'p') {
                 //makes all cards used to test new level victory
                 for (let card of this.cartas) {
                     card.used = true;
+                    card.inboard = false;
                 }
                 console.log("new level victory");
             }
@@ -432,8 +448,12 @@ class Game {
                 // If the round has ended, decide what to do next based on how it ended
                 if (this.gameover) {
                     // First press after game over goes to the summary screen
-                    if (pantalla !== 'resumen') {
+                    this.gameover = false; // Reset gameover flag for the next run
+                    if (pantalla == 'juego') {
                         pantalla = 'resumen';
+                    }
+                    else if(this.boss){
+                        pantalla = 'afterBoss';
                     }
                     // Second press on the summary screen proceeds to restart or card selection
                     else {
@@ -460,53 +480,68 @@ class Game {
                     }
                 }
                 else if (pantalla === 'start') {
-                    pantalla = 'menu';
+                    $.get("http://127.0.0.1:3000/player", {
+                        }).done(function (data){
+                            if(data.length > 0){
+                                pantalla = 'menu';
+                            }
+                            else{
+                                pantalla = 'deck';
+                            }
+                        });
                 }
             }
         });
         canvas.addEventListener('mouseup', (event) => {
-            if (this.clicked && this.card_clicked) {
-                if (this.armas.isHovered && this.clicked) {
-                    this.armas.click();
-                    if (this.card_clicked.arma()) {
-                        this.cardIntroductionInArmas();
-                        this.posicion = 20;
-                    }
-                    // A weapon card is already in the slot and the player is playing an enemy card against it.
-                    // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
-                    // OR be the first enemy played against this weapon (cartasArma.length < 2).
-                    else if (this.hayArma && this.card_clicked.enemie()) {
-                        this.cardEnemiaCardWeaponInteraction();
-                    }
-                    else{
-                        this.clicked = false;
-                        this.card_clicked.inboard = true; // Return the card to the board if it's not a weapon or valid enemy play
-                        this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
-                        this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
-                        this.card_clicked.xantes2 = this.card_clicked.x;
-                        this.card_clicked.yantes2 = this.card_clicked.y;
-                        this.card_clicked.x = this.card_clicked.xantes;
-                        this.card_clicked.y = this.card_clicked.yantes;
-                        this.card_clicked.update();
-                    }
-                     //break;
-            }
-            else if (this.usadas.isHovered && this.clicked) {
-                this.usadas.click();
-                this.checkingCardTypeUsed();
-            }
-            else{
-                this.clicked = false;
-                this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
-                this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
-                this.card_clicked.xantes2 = this.card_clicked.x;
-                this.card_clicked.yantes2 = this.card_clicked.y;
-                this.card_clicked.x = this.card_clicked.xantes;
-                this.card_clicked.y = this.card_clicked.yantes;
-                this.card_clicked.update();
+            console.log(pantalla);
+            if(event.button === 0){
+
+                if (this.clicked && this.card_clicked) {
+                    if (this.armas.isHovered && this.clicked) {
+                        this.armas.click();
+                        if (this.card_clicked.arma()) {
+                            this.cardIntroductionInArmas();
+                            this.posicion = 20;
+                        }
+                        // A weapon card is already in the slot and the player is playing an enemy card against it.
+                        // The enemy card must have a lower number than the previously played enemy (descending sequence rule),
+                        // OR be the first enemy played against this weapon (cartasArma.length < 2).
+                        else if (this.hayArma && this.card_clicked.enemie()) {
+                            this.cardEnemiaCardWeaponInteraction();
+                        }
+                        else{
+                            this.clicked = false;
+                            this.card_clicked.inboard = true; // Return the card to the board if it's not a weapon or valid enemy play
+                            this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
+                            this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
+                            this.card_clicked.xantes2 = this.card_clicked.x;
+                            this.card_clicked.yantes2 = this.card_clicked.y;
+                            this.card_clicked.x = this.card_clicked.xantes;
+                            this.card_clicked.y = this.card_clicked.yantes;
+                            this.card_clicked.update();
+                        }
+                         //break;
+                }
+                else if (this.usadas.isHovered && this.clicked) {
+                    this.usadas.click();
+                    this.checkingCardTypeUsed();
+                }
+                else{
+                    this.clicked = false;
+                    this.card_clicked.isHovered = false; // Ensure the card is no longer considered hovered after being released
+                    this.card_clicked.used = false; // Reset the card's used status so it can be interacted with again
+                    this.card_clicked.xantes2 = this.card_clicked.x;
+                    this.card_clicked.yantes2 = this.card_clicked.y;
+                    this.card_clicked.x = this.card_clicked.xantes;
+                    this.card_clicked.y = this.card_clicked.yantes;
+                    this.card_clicked.update();
+                }
             }
         }
-
+        if(event.button === 2){
+            this.showability = false;
+            this.cardShow = null;
+        }
         });
         canvas.addEventListener('mousemove', (event) => {
             const rect = this.canvas.getBoundingClientRect();
@@ -529,6 +564,11 @@ class Game {
                 this.usadas.isHovered = this.usadas.tocando(this.mouseX, this.mouseY);
                 
             }
+            else if(pantalla == 'deck'){
+                this.deck1.isHovered = this.deck1.tocando(this.mouseX,this.mouseY);
+                this.deck2.isHovered = this.deck2.tocando(this.mouseX,this.mouseY);
+                this.deck3.isHovered = this.deck3.tocando(this.mouseX,this.mouseY);
+            }
             else if (pantalla === 'menu') {
                 this.settings.isHovered = this.settings.tocando(this.mouseX, this.mouseY);
                 this.statistics.isHovered = this.statistics.tocando(this.mouseX, this.mouseY);
@@ -543,10 +583,31 @@ class Game {
                 }
             }
             else if(pantalla === 'lootboxes'){
+                this.siguiente.isHovered = this.siguiente.tocando(this.mouseX, this.mouseY);
                 this.lootbox1.isHovered = this.lootbox1.tocando(this.mouseX, this.mouseY);
                 this.lootbox2.isHovered = this.lootbox2.tocando(this.mouseX, this.mouseY);
                 this.lootbox3.isHovered = this.lootbox3.tocando(this.mouseX, this.mouseY);
                 this.lootbox4.isHovered = this.lootbox4.tocando(this.mouseX, this.mouseY);
+            }
+            else if(pantalla === 'reward'){
+                const spacing = 210;
+                const totalRewards = reward.length;
+                const totalWidth = totalRewards * cardWidth + (totalRewards - 1) * (spacing - cardWidth);
+                const startX = (canvasWidth - totalWidth) / 2;
+                
+                for(let i = 0; i < reward.length; i++){
+                    this.btn = this.rewardButtons[reward[i]];
+                    if(this.btn){
+                        this.btn.xantes = startX + i * spacing;
+                        this.btn.yantes = (canvasHeight - this.btn.height) / 2;
+                        this.btn.isHovered = this.btn.tocando(this.mouseX, this.mouseY);
+                    }
+                }
+            }
+            
+            else if(pantalla == 'afterBoss'){
+                this.siguiente.isHovered = this.siguiente.tocando(this.mouseX, this.mouseY);
+                this.finish.isHovered = this.finish.tocando(this.mouseX, this.mouseY);
             }
             else if(pantalla === 'seleccion_de_pantalla'){
                 this.sleccioncard.isHovered = this.sleccioncard.tocando(this.mouseX, this.mouseY);
@@ -557,111 +618,374 @@ class Game {
             }
 
         });
-        canvas.addEventListener('mousedown', (event) => {
-            // Card dialogue screen: any click dismisses the dialogue and returns to gameplay.
-            // cartaDialogueDone is set to true so cardsClickedIntercations does not reopen it on the same click.
-            if (pantalla === 'dialogo_carta') {
-       
-                dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
-                dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
-                pantalla = 'juego';
-                return; // Prevent any further click handling this frame
-            }
-            else if (pantalla === 'juego') {
-                console.log(this.ctab);
-                this.cardsClickedIntercations();
-                if(this.pasarRonda.isHovered && this.ctab == 4){
-                    if(this.skipebutton){
-                        this.pasarRonda.click();
-                        if(this.boss){
-                            this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
-                        }
-                        for(let i = 0; i<4; i++){
-                            for(let card of this.cartas){
-                                if (card.inboard){
-                                    card.inboard = false;
-                                    
-                                    this.cartas.push(card);
-                                    this.index = this.cartas.indexOf(card);
-                                    break;
-                                }
+        canvas.addEventListener('mousedown', async (event) => {
+            if(event.button === 0){
+
+                // Card dialogue screen: any click dismisses the dialogue and returns to gameplay.
+                // cartaDialogueDone is set to true so cardsClickedIntercations does not reopen it on the same click.
+                if (pantalla === 'dialogo_carta') {
+           
+                    dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
+                    dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
+                    pantalla = 'juego';
+                    return; // Prevent any further click handling this frame
+                }
+                else if (pantalla === 'juego') {
+                    console.log(this.ctab);
+                    this.cardsClickedIntercations();
+                    if(this.pasarRonda.isHovered && this.ctab == 4){
+                        if(this.skipebutton){
+                            this.pasarRonda.click();
+                            if(this.boss){
+                                this.playerHealth.health -= this.playerHealth.maxHealth * 0.1
                             }
-                            this.cartas.splice(this.index,1);
+                            for(let i = 0; i<4; i++){
+                                for(let card of this.cartas){
+                                    if (card.inboard){
+                                        card.inboard = false;
+                                        
+                                        this.cartas.push(card);
+                                        this.index = this.cartas.indexOf(card);
+                                        break;
+                                    }
+                                }
+                                this.cartas.splice(this.index,1);
+                            }
+                            this.skipebutton = false;
                         }
-                        this.skipebutton = false;
                     }
                 }
-                
-                
+                else if(pantalla == 'reward'){
+                    for(let i = 0; i < reward.length; i++){
+                        this.btn = this.rewardButtons[reward[i]];
+                        if(this.btn.isHovered){
+                            if(reward[i] == 1){
+                                this.playerHealth.maxHealth += 5;
+                            }
+                            else if(reward[i] == 2){
+                                console.log(this.contador.tiempomax);
+                                this.contador.tiempomax += 5;
+                                console.log(this.contador.tiempomax);
 
-            }
-            else if (pantalla === 'menu') {
-                if (this.play.isHovered) {
-                    this.play.click();
-                    pantalla = 'gameLore';
-                }
-                if (this.logout.isHovered) {
-                    this.logout.click();
-                    localStorage.removeItem("player");
-                    window.location.href = "../menu/inicioSesion_registro.html";
-                }   
-                if (this.settings.isHovered) {
-                    this.settings.click();
-                    this.pantalla = "settings";
-                }
-            }
-            else if (pantalla === 'seleccion_de_pantalla') {
-                if (this.sleccioncard.isHovered) {
-                    this.sleccioncard.click();
-                    pantalla = 'seleccion_carta';
-                }
-                else if (this.selectionlootboxes.isHovered) {
-                    this.selectionlootboxes.click();
-                    pantalla = "lootboxes";
-                }
-            }
-            else if(pantalla === 'lootboxes'){
-                if(this.lootbox1.isHovered){
-                    this.lootbox1.click(this.playerHealth,this.contador,this.cartas);
-                }
-                else if(this.lootbox2.isHovered){
-                    this.lootbox2.click(this.playerHealth,this.contador,this.cartas);
-                }
-                else if(this.lootbox3.isHovered){
-                    this.lootbox3.click(this.playerHealth,this.contador ,this.cartas);
-                }
-                else if(this.lootbox4.isHovered){
-                    this.lootbox4.click(this.playerHealth,this.contador,this.cartas);
-                }
-            }
-            else if (pantalla === 'dialogo' && !this.dialogueDone) {
-                this.dialogueDone = !this.dialogueDone;     // Any click skips the rest of the dialogue and jumps straight to gameplay
-                dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
-                dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
-                pantalla = 'juego';
-            }
+                            }
+                            else if(reward[i] == 3){
+                                this.playerHealth.money += 100;
+                            }
+                            else if(reward[i] == 4){
+                                for(let carta of this.cartas){
+                                    if(carta.enemie()){
+                                        carta.number += Math.ceil(carta.number * 0.5);
+                                    }
+                                }
+                            }
+                            else if( reward[i] == 5){
+                                for(let carta of this.cartas){
+                                    if(carta.arma()){
+                                        carta.number += 1
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 6){
+                                for(let carta of this.cartas){
+                                    if(carta.esVida()){
+                                        carta.number += 1
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 7){
+                                for(let carta of this.cartas){
+                                    if(carta.arma() && carta.habilidad == ""){
+                                        carta.habilidad == "passEnemie"
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 8){
+                                for(let carta of this.cartas){
+                                    if(carta.enemie() && carta.habilidad == ""){
+                                        carta.habilidad == "timeEater"
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 9){
+                                console.log(9);
+                                for(let carta of this.cartas){
+                                    if(carta.arma() && carta.habilidad == "enemieslos"){
+                                        carta.habilidad == "passEnemie"
+                                    }
+                                    else if(carta.arma() && carta.habilidad == "killhealth"){
+                                        carta.habilidad == "passEnemie";
+                                    }
+                                    else if(carta.arma() && carta.habilidad == "passEnemie"){
+                                        carta.habilidad == "healthpassEnemie";
+                                    }
+                                }
+                            }
+                            else if(reward[i] == 10){
+                                this.killTime = true;
+                            }
+                            reward = [];
+                            pantalla = 'lootboxes';
 
-            // Card-selection screen detect which offered card the player clicked and add it to the deck
-            else if (pantalla === 'seleccion_carta') {
-                this.cardSelectionScreen();
-                
-            }
-
-            else if (pantalla === 'gameLore') {
-                if (this.skipInitialDialogue.isHovered) {
-                    pantalla = 'juego';
-                    dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
-                    dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
+                        }
+                    }
                 }
-                else {
-                    
-                    dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
-                    dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
-                    lore += 1;
-                    console.log("lore: " + lore);
-                    loreDialogueGenerated = false; // Allow the next dialogue to be generated on the following frame
-                    if (lore >= preRunDialogue.length) {
+                else if (pantalla === 'menu') {
+                    if (this.play.isHovered) {
+                        let th = this;
+                        this.bossBar.roundsleft = 20 - this.nivel;
+                        this.bossBar.draw(ctx);
+                        $.get("http://127.0.0.1:3000/player", {
+                        }).done(function (data){
+                            th.cartas = [];
+                            let usedCards = [];
+                            let inboardCards = [];
+                            let deckCards = [];
+
+                            for(let carta of data){
+                                let newCard;
+                                if(carta.type == "treboles"){
+                                    newCard = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, false, true, "", imgTreboles);
+                                }
+                                else if(carta.type == "diamantes"){
+                                    newCard = new CardEspada(2000, 200, cardWidth, cardHeight, carta.number, "diamantes", 1, carta.used, false, true, "", imgRombos);
+                                }
+                                else if(carta.type == "corazones"){
+                                    newCard = new CardVida(2000, 200, cardWidth, cardHeight, carta.number, "corazones", 1, carta.used, false, true, "", imgCorazon);
+                                }
+                                else{
+                                    newCard = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, false, true, "", imgPicas);
+                                }
+
+                                if(carta.used){
+                                    usedCards.push(newCard);
+                                } else if(carta.inboard){
+                                    inboardCards.push(newCard);
+                                } else {
+                                    deckCards.push(newCard);
+                                }
+                            }
+
+                            // Order: used first so the draw loop skips them, inboard next so they
+                            // get placed on the board, deck last (shuffled) for future draws.
+                            shuffle(deckCards);
+                            th.cartas = [...usedCards, ...inboardCards, ...deckCards];
+
+                            let inboardCount = inboardCards.length;
+                            if(inboardCount > 0){
+                                // Resume mid-turn: expose exactly the used+inboard cards and
+                                // set the remaining-plays counter to match the saved board.
+                                th.cantidadCartasTablero = usedCards.length + inboardCount;
+                                th.ctab = inboardCount;
+                            } else {
+                                // No cards were on board when saved; start a fresh board turn.
+                                th.cantidadCartasTablero = usedCards.length + 4;
+                                th.ctab = 4;
+                            }
+
+                            if(user.healthLeft > 0){
+                                th.playerHealth.health = user.healthLeft;
+                            }
+                            if(user.timeLeft > 0){
+                                th.contador.tiempolim = user.timeLeft * 1000;
+                            }
+
+                            th.play.click();
+                            if(th.firstrun){
+                                pantalla = 'gameLore';
+                            }
+                            else{
+                                pantalla = 'juego';
+                            }
+                            th.primer = true;
+                        });
+                    }
+                    if (this.logout.isHovered) {
+                        this.logout.click();
+                        localStorage.removeItem("player");
+                        window.location.href = "../menu/inicioSesion_registro.html";
+                    }   
+                    if (this.settings.isHovered) {
+                        this.settings.click();
+                        this.pantalla = "settings";
+                    }
+                }
+                else if (pantalla === 'seleccion_de_pantalla') {
+                    if (this.sleccioncard.isHovered) {
+                        this.sleccioncard.click();
+                        pantalla = 'seleccion_carta';
+                    }
+                    else if (this.selectionlootboxes.isHovered) {
+                        this.selectionlootboxes.click();
+                        pantalla = "lootboxes";
+                    }
+                }
+                else if(pantalla === 'lootboxes'){
+                    if(this.lootbox1.isHovered){
+                        this.lootbox1.click(this.playerHealth,this.contador,this.cartas);
+                    }
+                    else if(this.lootbox2.isHovered){
+                        this.lootbox2.click(this.playerHealth,this.contador,this.cartas);
+                    }
+                    else if(this.lootbox3.isHovered){
+                        this.lootbox3.click(this.playerHealth,this.contador ,this.cartas);
+                    }
+                    else if(this.lootbox4.isHovered){
+                        this.lootbox4.click(this.playerHealth,this.contador,this.cartas);
+                    }
+                    else if(this.siguiente.isHovered && !this.boss){
+                        this.siguiente.click();
+                        this.newLevel(true); // Start next level with the updated deck
                         pantalla = 'juego';
+                    }
+                }
+                else if(pantalla == 'afterBoss'){
+                    if(this.finish.isHovered){
+                        let saveId = user.idPlayer;
+                        let newMaxHealth = this.playerHealth.maxHealth;
+                        let newMaxTime = this.contador.tiempomax;
+                        let money = this.playerHealth.money;
+                        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, newMaxHealth, money);
+                        this.playerHealth.health = newMaxHealth;
+                        this.contador = new Tiempo(newMaxTime);
+                        this.cartas = [];
+                        this.nivel = 0;
+                        this.boss = false;
+                        this.bossBar.roundsleft = 20;
+                        pantalla = 'deck';
+                        this.enemigosEliminados = 0;
+                        this.danoRecibido = 0;
+                        this.cartaDialogueDone = false;
+                        this.dialogoArmaVisto = false;
+                        this.dialogoEnemieVisto = false;
+                        this.dialogoVidaVisto = false;
+                        user.baseHealth = newMaxHealth;
+                        user.baseTime = newMaxTime;
+                        user.healthLeft = newMaxHealth;
+                        user.timeLeft = newMaxTime;
+                        user.level = 0;
+                        user.money = money;
+                        localStorage.setItem("player", JSON.stringify(user));
+                        $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: newMaxHealth }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: newMaxTime }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: newMaxHealth, timeLeft: newMaxTime, level: 0 }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/saveMoney", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, money: money }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/delete", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId }) });
+                    }
+                    if(this.siguiente.isHovered){
+                        pantalla = 'resumen'
+                        this.nivel = 0;
+                        for (let card of this.cartas) {
+                            if (card.arma() || card.enemie()) {
+                                card.number = Math.floor(card.number *= this.dificultad);
+                            }
+                        }
+                        // Randomly assign a special ability to each weapon card.
+                        // probabilidadhabilidad is a 0-10 roll that acts as an ability-trigger gate
+                        // habilidadProb is a second 0-10 roll that selects which specific ability is assigned.
+                        for (let card of this.cartas) {
+                            this.abilityObtention(card);
+                        }
+                        this.boss = false;
+                    }
+                }
+                else if (pantalla === 'dialogo' && !this.dialogueDone) {
+                    this.dialogueDone = !this.dialogueDone;     // Any click skips the rest of the dialogue and jumps straight to gameplay
+                    dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
+                    dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
+                    pantalla = 'juego';
+                }
+    
+                // Card-selection screen detect which offered card the player clicked and add it to the deck
+                else if (pantalla === 'seleccion_carta') {
+                    this.cardSelectionScreen();
+                    
+                }
+                else if(pantalla == 'deck'){
+                    if(this.deck1.isHovered){
+                        $.get("http://127.0.0.1:3000/deck1", {
+                        }).done(function (data){
+                            console.log(data);
+                            this.deck = data;  
+                            for(let carta of this.deck){
+                                $.ajax({
+                                    url: "http://127.0.0.1:3000/guardar",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
+        
+                                }).done(function(data){
+                                    console.log("posted", data);
+
+                                });
+                            }
+                        });
+                        pantalla = 'menu';
+                    }
+                    else if(this.deck2.isHovered){
+                        $.get("http://127.0.0.1:3000/deck2", {
+                        }).done(function (data){
+                            console.log(data);
+                            this.deck = data;  
+                            for(let carta of this.deck){
+                                $.ajax({
+                                    url: "http://127.0.0.1:3000/guardar",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
+        
+                                }).done(function(data){
+                                    console.log("posted", data);
+                                });
+                            }
+                        });
+                        pantalla = 'menu';
+                    }
+                    else if(this.deck3.isHovered){
+                        $.get("http://127.0.0.1:3000/deck3", {
+                        }).done(function (data){
+                            console.log(data);
+                            this.deck = data;  
+                            for(let carta of this.deck){
+                                $.ajax({
+                                    url: "http://127.0.0.1:3000/guardar",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
+        
+                                }).done(function(data){
+                                    console.log("posted", data);
+                                });
+                            }
+                        });
+                        pantalla = 'menu';
+                    }
+                }
+                else if (pantalla === 'gameLore') {
+                    if (this.skipInitialDialogue.isHovered) {
+                        pantalla = 'juego';
+                        dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
+                        dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
+                    }
+                    else {
+                        
+                        dialogueSound.pause(); // Stop the scroll sound if the player clicks before the text finishes
+                        dialogueSound.currentTime = 0; // Reset playback position so the sound is ready for the next dialogue
+                        lore += 1;
+                        console.log("lore: " + lore);
+                        loreDialogueGenerated = false; // Allow the next dialogue to be generated on the following frame
+                        if (lore >= preRunDialogue.length) {
+                            pantalla = 'juego';
+                        }
+                    }
+                }
+            }
+            else if(event.button === 2){
+                for (let card of this.cartas) {
+                    if (card.isHovered && !card.used) {
+                        if(card.habilidad != ""){
+                            this.showability = true;
+                            this.cardShow = card;
+                        }
                     }
                 }
             }
@@ -671,11 +995,8 @@ class Game {
     }
     update(deltaTime) {
         this.fourth = 0;
-        if(this.nivel%5 == 0 && this.nivel != 0){
+        if(this.nivel%20 == 0 && this.nivel != 0){
             this.boss = true;
-        }
-        else{
-            this.boss = false;
         }
         if(this.ctab == 4 && this.skipebutton){
             this.pasarRonda.update("red");
@@ -693,10 +1014,62 @@ class Game {
         this.skipInitialDialogue.update();
         this.sleccioncard.update();
         this.selectionlootboxes.update();
-        this.lootbox1.update();
-        this.lootbox2.update();
-        this.lootbox3.update();
-        this.lootbox4.update();
+        
+        if(guardar){
+            let id = user.idPlayer
+            let savedHealth = Math.floor(this.playerHealth.health);
+            let savedTime = Math.floor(this.contador.tiempolim / 1000);
+            let nivel = this.nivel;
+            $.ajax({
+                url: "http://127.0.0.1:3000/saveProgress",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ id: id, healthLeft: savedHealth, timeLeft: savedTime, level: nivel })
+            });
+            user.healthLeft = savedHealth;
+            user.timeLeft = savedTime;
+            user.level = nivel;
+            localStorage.setItem("player", JSON.stringify(user));
+            $.ajax({ url: "http://127.0.0.1:3000/delete", type: "POST", contentType: "application/json", data: JSON.stringify({ id: id }) });
+            for(let card of this.cartas){
+                $.ajax({
+                    url: "http://127.0.0.1:3000/guardar",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ cartas: card,playerid: id })
+
+                }).done(function(data){
+                    console.log("posted", data);
+                });
+            }
+            guardar = false;
+            //window.location.href = "../index.html";
+        }
+        if(pantalla == 'lootboxes'){
+            this.siguiente.update();
+            this.lootbox1.update();
+            this.lootbox2.update();
+            this.lootbox3.update();
+            this.lootbox4.update();
+            this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
+            this.playerHealth.health = this.playerHealth.maxHealth;
+            this.contador = new Tiempo(this.contador.tiempomax);
+        }
+        if(pantalla == 'reward'){
+             for(let i = 0; i < reward.length; i++){
+                this.btn = this.rewardButtons[reward[i]];
+                this.btn.update();
+            }
+        }
+        if(pantalla == 'afterBoss'){
+            this.finish.update();
+            this.siguiente.update();
+        }
+        else if(pantalla == 'deck'){
+            this.deck1.update();
+            this.deck2.update();
+            this.deck3.update();
+        }
         // When ctab reaches 1 or below, the player has used all allowed plays for this board turn.
         // Any card still on the board that is unused but marked inboard gets pushed back to position 100
         // and tablaVacia is set so the draw() method will refill the board next frame.
@@ -752,23 +1125,8 @@ class Game {
     // The round ends when: every card in the deck has been played (victory),
     // the player's health drops to 0 or below (loss), or the timer runs out (loss)
     isGameOver() {
-        for (let card of this.cartas) {
-            if (!card.used && card.enemie() && !card.inboard) {
-                this.win = false;
-                break;
-            }
-            else{
-                this.win =  true;
-            }
-        }
-        if(this.win){
-            this.cartas.forEach(card => {
-                if (!card.used) {
-                    card.used = true;
-                }
-            });
-        }
-        return (this.win || this.cartas.every(card => card.used)) || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
+    
+        return (this.cartas.every(card => card.used)&& this.cartas.every(card => !card.inboard))  || this.playerHealth.health <= 0 || this.contador.tiempolim <= 0;
     }
     gameOverReason() {
         if (this.playerHealth.health <= 0) {
@@ -777,7 +1135,7 @@ class Game {
         else if (this.contador.tiempolim <= 0) {
             return 2; // Player ran out of time
         }
-        else if (this.cartas.every(card => card.used)) {
+        else if (this.cartas.every(card => card.used)&& this.cartas.every(card => !card.inboard)) {
             return 3; // Player won by using all cards
         }
     }
@@ -793,11 +1151,53 @@ class Game {
             
 
         }
+        else if(pantalla == 'deck'){
+            this.deck1.draw(ctx);
+            this.deck2.draw(ctx);
+            this.deck3.draw(ctx);
+        }
+        else if(pantalla == 'reward'){
+            neonText(30, '#00bfff', "LOOTBOXES", canvasWidth / 2, 40);
+            this.siguiente.draw(ctx);
+            this.lootbox1.draw(ctx);
+            this.lootbox2.draw(ctx);
+            this.lootbox3.draw(ctx);
+            this.lootbox4.draw(ctx);
+            this.playerHealth.draw(ctx);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Negro con 60% de opacidad
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);    // (x, y, ancho, alto)
+            const totalRewards = reward.length;
+            const spacing = 210;
+            const totalWidth = totalRewards * cardWidth + (totalRewards - 1) * (spacing - cardWidth);
+            const startX = (canvasWidth - totalWidth) / 2;
+            this.rewardButtons = {
+                1: this.moreHealth,
+                2: this.moreTime,
+                3: this.returnMoney,
+                4: this.enemyImprove,
+                5: this.weaponUpgrade,
+                6: this.heartsUpgrade,
+                7: this.armaHability,
+                8: this.enemieHability,
+                9: this.armaHabilityUpgrade,
+                10: this.killTimeReward,
+            };
+
+            for(let i = 0; i < reward.length; i++){
+                this.btn = this.rewardButtons[reward[i]];
+                if(this.btn){ 
+                    this.btn.x = startX + i * spacing;
+                    this.btn.y = (canvasHeight - this.btn.height) / 2;
+                    this.btn.draw(ctx);
+                }
+            }
+        }
         else if (pantalla === 'seleccion_de_pantalla') {
             // Neon text style for the screen title
             neonText(30, '#00bfff', "SELECCIONA UN NIVEL", canvasWidth / 2, 40);
             this.sleccioncard.draw(ctx);
             this.selectionlootboxes.draw(ctx);
+            
 
         }
         else if (pantalla === 'gameLore'){
@@ -834,7 +1234,8 @@ class Game {
         }
         else if (pantalla === 'lootboxes') {
             // Neon text style for the screen title
-            neonText(30, '#00bfff', "LOOTBOXES", canvasWidth / 2, 40);      
+            neonText(30, '#00bfff', "LOOTBOXES", canvasWidth / 2, 40);
+            this.siguiente.draw(ctx);
             this.lootbox1.draw(ctx);
             this.lootbox2.draw(ctx);
             this.lootbox3.draw(ctx);
@@ -855,15 +1256,86 @@ class Game {
                 ctx.textAlign = "left";
                 ctx.fillText("El jefe ha llegado", canvasWidth/2,50);
             }
+            if(this.showability){
+                ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Negro con 60% de opacidad
+                ctx.fillRect(this.cardShow.xantes2, this.cardShow.yantes2 - 150, 154, 150);    // (x, y, ancho, alto)
+
+                // Dibujar un borde (opcional para que resalte)
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"; 
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.cardShow.xantes2, this.cardShow.yantes2 - 150, 154, 150);
+
+                // Escribir el texto encima (el texto suele ser opaco para legibilidad)
+                if(this.cardShow.habilidad == "enemieslos"){
+                    // ctx.fillStyle = "white";
+                    // ctx.textAlign = "left";
+                    // ctx.font = "5px ethnocentric";
+                    // ctx.fillText("This power up redusces in\n one the number of every enemies card in board", this.cardShow.x, this.cardShow.y - 150);
+                    neonText(12,"white","This power up\nreduces in one\nthe number of\nevery enemies\ncard in board", this.cardShow.xantes+5, this.cardShow.yantes - 130, 0.2, 1, "left")
+
+                }
+                else if (this.cardShow.habilidad == 'killhealth'){
+                    // ctx.fillStyle = "white";
+                    // ctx.font = "5px ethnocentric";
+                    // ctx.textAlign = "left";
+                    // ctx.fillText("this power up heals yo \nhalf of the number of the card", this.cardShow.x, this.cardShow.y - 150);
+                    neonText(12,"white","this power up\nheals you\nhalf of the\nnumber of the\ncard", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")
+
+                }
+                else if (this.cardShow.habilidad == 'passEnemie'){
+                    ctx.fillStyle = "white";
+                    ctx.font = "5px ethnocentric";
+                    ctx.textAlign = "left";
+                    neonText(12,"white","this power up\nkills an enemy\nwhen a weapon\nis draggedinto\nthe weapons\nspace ", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")                }
+                else if(this.cardShow.habilidad == 'healthpassEnemie'){
+                    ctx.fillStyle = "white";
+                    ctx.font = "5px ethnocentric";
+                    ctx.textAlign = "left";
+                    neonText(12,"white","this power up\nheals you half\nof the weapon\nnumber", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")
+                }
+                else if(this.cardShow.habilidad == 'absoluteDamage'){
+                    ctx.fillStyle = "white";
+                    ctx.font = "5px ethnocentric";
+                    ctx.textAlign = "left";
+                    neonText(12,"white","this enemy\nhas a chance\nthat it will\nhalf your gold\nwhen killed\nwith a weapon", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")
+                }
+                else if(this.cardShow.habilidad == 'cursedEnemy'){
+                    ctx.fillStyle = "white";
+                    ctx.font = "5px ethnocentric";
+                    ctx.textAlign = "left";
+                    neonText(12,"white","this enemy\ndeals 1 extra\ndamage and\nalso has a\nchance to half\nyour gold when\nkilled with a\nweapon", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")
+                    
+                }
+                else if(this.cardShow.habilidad == 'timeEater'){
+                    ctx.fillStyle = "white";
+                    ctx.font = "5px ethnocentric";
+                    ctx.textAlign = "left";
+                    neonText(12,"white","When you kill\nthis enemy\nwhithout a\nweapon it\nsteals your\ntime", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")
+                    
+                }
+                else if(this.cardShow.habilidad == 'goldStealer'){
+                    ctx.fillStyle = "white";
+                    ctx.font = "5px ethnocentric";
+                    ctx.textAlign = "left";
+                    neonText(12,"white","This enemy\nadds to your\nmoney half of\nhis number", this.cardShow.xantes+5, this.cardShow.yantes - 130,0.2, 3, "left")
+                    
+                }
+            }
             //ROUND IN PROGRESS
             if (!this.gameover) {
+                
                 this.bossBar.draw(ctx);
                 this.armas.draw(ctx);
                 this.usadas.draw(ctx);
                 this.playerHealth.draw(ctx);
-                this.pasarRonda.draw(ctx);
-                this.contador.draw(ctx);
+                if(this.showability && this.cardShow.x > 800){
 
+                }
+                else{
+                    this.pasarRonda.draw(ctx);
+                }
+                this.contador.draw(ctx);
+                
                 this.num = 0;
                 let posicion = canvasWidth * 0.125;
                 // tablaVacia is true at the start of a new board turn; expand the visible card count by 3
@@ -873,22 +1345,27 @@ class Game {
                     posicion = canvasWidth * 0.328;
                     this.curacionUsada = false;
                 }
+               
+                
 
-                for (let card of this.cartas) {
-                    if (this.num < this.cantidadCartasTablero) {
-                        if (!card.used && !card.inboard) {
-                            card.x = posicion;
-                            posicion += canvasWidth * 0.203; //DEBUGEAR DEFAULT 0.203
-                            card.inboard = true;
-                            card.xantes2 = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
-                            card.yantes2 = card.y;
-                            card.xantes = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
-                            card.yantes = card.y;
+                    for (let card of this.cartas) {
+                        if (this.num < this.cantidadCartasTablero) {
+                            if (!card.used && !card.inboard) {
+                                card.x = posicion;
+                                posicion += canvasWidth * 0.203; //DEBUGEAR DEFAULT 0.203
+                                card.inboard = true;
+                                card.xantes2 = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+                                card.yantes2 = card.y;
+                                card.xantes = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+                                card.yantes = card.y;
+                                card.enMazo = false;
+                            }
+                            card.draw(ctx);
+                            this.num += 1;
                         }
-                        card.draw(ctx);
-                        this.num += 1;
                     }
-                }
+                
+
                 this.tablaVacia = false;
                 terminado = true; // Prevent the board-refill branch from running again until ctab resets
                 for (let cartas of this.cartasArma) {
@@ -898,7 +1375,7 @@ class Game {
                     cartas.draw(ctx);
                 }
             }
-            else {
+            else if (this.gameover) {
                 console.log("Round ended");
                 this.reason = this.gameOverReason();
                 switch (this.reason) {
@@ -1039,6 +1516,10 @@ class Game {
             ctx.strokeText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
             ctx.fillText(cardPool[this.card3].desventaja, this.cartaSeleccionada3.x, this.cartaSeleccionada3.y + 240);
         }
+        else if(pantalla == 'afterBoss'){
+            this.finish.draw(ctx);
+            this.siguiente.draw(ctx);
+        }
         else if (pantalla === 'resumen') {
             // Title color and text depend on how the run ended, reusing reason codes from gameOverReason()
             // reason 3 means victory (all cards used), anything else means loss
@@ -1119,8 +1600,8 @@ class Game {
     // at base values with no difficulty increase.
     // `victory` (boolean): true if the player cleared the level, false if they lost.
     newLevel(victory) {
+        this.firstrun = false; // Used to disable the "first run" dialogue on subsequent levels
         if (victory) {
-            this.bossBar.roundsleft = 20 - this.nivel;
             this.dificultad = 1.1; // Compound difficulty increase of 10% per won level
             // Disable card dialogues permanently after level 0 is cleared
             this.cartaDialogueDone = true; // permanente desde nivel 1 en adelante
@@ -1154,35 +1635,39 @@ class Game {
         this.curacionUsada = false;
         this.skipebutton = true;
         this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
-
-        if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
+        if (!victory) { // On a loss, reset to base values and send player to pick a new deck
+            let saveId = user.idPlayer;
+            let baseHealth = this.playerHealth.maxHealth;
+            let baseTime = this.contador.tiempomax;
+            let money = this.playerHealth.money;
+            this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, baseHealth, money);
+            this.playerHealth.health = baseHealth;
+            this.contador = new Tiempo(baseTime);
             this.cartas = [];
             this.nivel = 0;
-            // Reset run stats on loss so they start fresh for the new run
+            this.boss = false;
+            this.bossBar.roundsleft = 20;
+            pantalla = 'deck';
             this.enemigosEliminados = 0;
             this.danoRecibido = 0;
-            // Reset card dialogues for the new run starting at level 0
             this.cartaDialogueDone = false;
-            // Reset card type dialogues for new run starting at level 0
             this.dialogoArmaVisto = false;
             this.dialogoEnemieVisto = false;
             this.dialogoVidaVisto = false;
-            for (let i = 1; i < 11; i++) {
-                let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
-                this.cartas.push(card);
-            }
-            for(let i = 1; i < 3; i++){
-                for (let i = 1; i < 10; i++) {
-                    let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
-                    this.cartas.push(card);
-                }
-            }
-            for (let i = 1; i < 11; i++) {
-                let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
-                this.cartas.push(card);
-            }
+            user.baseHealth = baseHealth;
+            user.baseTime = baseTime;
+            user.healthLeft = baseHealth;
+            user.timeLeft = baseTime;
+            user.level = 0;
+            user.money = money;
+            localStorage.setItem("player", JSON.stringify(user));
+            $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: baseHealth }) });
+            $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: baseTime }) });
+            $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: baseHealth, timeLeft: baseTime, level: 0 }) });
+            $.ajax({ url: "http://127.0.0.1:3000/saveMoney", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, money: money }) });
+            $.ajax({ url: "http://127.0.0.1:3000/delete", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId }) });
         }
-        else {
+        else if(victory && !this.boss){
 
             // Scale weapon and enemy card values by the current difficulty multiplier
             for (let card of this.cartas) {
@@ -1190,7 +1675,8 @@ class Game {
                     card.number = Math.floor(card.number *= this.dificultad);
                 }
             }
-            this.nivel++;
+            this.nivel += 1 ;
+            this.bossBar.roundsleft = 20 - this.nivel;
             // Randomly assign a special ability to each weapon card.
             // probabilidadhabilidad is a 0-10 roll that acts as an ability-trigger gate
             // habilidadProb is a second 0-10 roll that selects which specific ability is assigned.
@@ -1198,16 +1684,15 @@ class Game {
                 this.abilityObtention(card);
             }
         }
-        this.contador = new Tiempo();
-        // this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight,"", undefined, undefined,"cardPlace");
-        // this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.571, cardWidth, cardHeight,"",undefined, undefined,"cardPlace");
-        // Preserve the player's money across levels; everything else resets to defaults
-        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, 20, this.playerHealth.money);
 
         shuffle(this.cartas);
+        
     }
 
     cardSelectionScreen() {
+        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
+            this.playerHealth.health = this.playerHealth.maxHealth;
+            this.contador = new Tiempo(this.contador.tiempomax);
         for (let card of this.arregloCartas) {
             if (card.isHovered) {
                 this.selectCard(card);
@@ -1220,12 +1705,15 @@ class Game {
                 this.dialogueDone = false; // Reset so the next pre-level dialogue is shown
                 this.preDialogueGenerated = false;
                 this.dialogue_pregame = false;
-                pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
+                if(!this.boss){
+                    pantalla = 'dialogo'; // Go to the dialogue screen before gameplay begins
+
+                }
                 break;
 
-                    }
-                }
             }
+        }
+    }
 
     selectCard(card){
         console.log("[Selection] Deck size before adding card:", this.cartas.length);

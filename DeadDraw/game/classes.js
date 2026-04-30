@@ -8,8 +8,9 @@ This file contains the class definitions needed for the game.
 */
 //Countdown timer displayed during gameplay
 class Tiempo {
-    constructor(tiempoSegundos = 100) {
+    constructor(tiempoSegundos) {
         this.tiempolim = tiempoSegundos * 1000; // Remaining time in milliseconds; converted from seconds
+        this.tiempomax = tiempoSegundos;
         this.time = 0;
     }
     // Subtracts the elapsed time since the last frame from the remaining limit
@@ -59,7 +60,7 @@ class Player {
 }
 //Clickable rectangular button, used for the weapon slot and the discard pile
 class Botones {
-    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal") {
+    constructor(x, y, width, height,text,scale = 1, color = "red", buttonType = "normal", textSize = 20, textAlign = "center", img = blank) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -74,7 +75,9 @@ class Botones {
         this.wasHovered = false;
         this.buttonType = buttonType; // Different type of buttons have different sound effects
         this.selectSound = playingSelect; // Sound effect played when the button is clicked; defaults to the generic playingSelect sound but is overridden for menu buttons in the constructor
-
+        this.textSize = textSize;
+        this.textAlign = textAlign;
+        this.img = img;
         switch (this.buttonType) {
             case "normal":
                 this.sound = hoverSound;
@@ -94,9 +97,11 @@ class Botones {
 
     }
     draw(ctx) {
-        
-        
-        
+        if(this.img != blank){
+            ctx.drawImage(this.img,this.x-285*this.scale, this.y-230*this.scale, 1080*0.7*this.scale, 1080*0.7*this.scale);
+            // ctx.drawImage(this.img,this.x-(this.width*this.scale*4)/2,this.y-(this.height*this.scale*4)/2,this.width*this.scale*4,this.height*this.scale*4);
+        }
+        else{
         ctx.beginPath();
         ctx.roundRect(this.x, this.y, this.width * this.scale, this.height * this.scale, 10);
         ctx.fillStyle = "black";
@@ -107,21 +112,29 @@ class Botones {
         ctx.shadowBlur = 100;
         ctx.stroke();
         ctx.shadowBlur = 0;
+        }
+        if(this.textAlign == "center"){
+            neonText(this.textSize*this.scale,this.color, this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2,2,30,this.textAlign);
+        }
+        else if(this.textAlign == "left"){
+            neonText(this.textSize*this.scale,this.color, this.text, this.x + 10, this.y + ((this.height-50) * this.scale) / 2,2,30,this.textAlign);
+        }
+        
 
-
-        ctx.fillStyle = this.color;
-        ctx.font = "20px Ethnocentric";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 15;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2;
-        ctx.fillStyle = "white";
-        ctx.strokeText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
-        ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
-        ctx.textBaseline = "alphabetic";
-        ctx.shadowBlur = 0;
+        // ctx.fillStyle = this.color;
+        // ctx.font = `${this.textSize}px Ethnocentric`;
+        // ctx.textAlign = "center";
+        // ctx.textBaseline = "middle";
+        // ctx.shadowColor = this.color;
+        // ctx.shadowBlur = 15;
+        // ctx.strokeStyle = this.color;
+        // ctx.lineWidth = 2;
+        // ctx.fillStyle = "white";
+        // ctx.strokeText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        // ctx.fillText(this.text, this.x + (this.width * this.scale) / 2, this.y + (this.height * this.scale) / 2);
+        // ctx.textBaseline = "alphabetic";
+        // ctx.shadowBlur = 0;
+        
     }
     // Returns true if the mouse cursor at (mx, my) is inside this button's bounds
     tocando(mx, my) {
@@ -195,7 +208,9 @@ class bossBar{
         ctx.fillText("BOSS " + this.roundsleft + "/" + this.totalRounds, 0, 4);
         ctx.restore();
     }
+    
 }
+
 class lootbox {
     constructor(x, y, width, height, cost,scale = 1) {
         this.x = x;
@@ -260,50 +275,72 @@ class lootbox {
             if(this.cost == 50){
                 player.money -= this.cost;
                 this.prob = getRandomIntegerInclusive(1,100);
-                if(this.prob <= 10){
-                    player.maxHealth += 5;
-                    console.log("max health increased to " + player.maxHealth);
-                }
-                else if(this.prob <= 20){
-                    player.money += 50;
-                    console.log("money increased to " + player.money);
-                }
-                else if(this.prob <= 30){
-                    contador.tiempoSegundos += 5;
-                    console.log("time increased to " + contador.tiempoSegundos);
-                }
-                else if(this.prob <= 50){
-                    for(let card of cartas){
-                        if(card.enemie()){
-                            card.number = Math.max(card.number + card.number * 0.5);
-                            console.log("enemy number increased to " + card.number);
-                            break;
-                        }
-                    }
-                }
-                else if(this.prob <= 75){
-                    for(let card of cartas){
-                        if(card.arma()){
-                            card.number = Math.max(card.number + 1);
-                            console.log("weapon damage increased to " + card.number);
-                            break;
-                        }
-                    }
-                }
-                else{
-                    for(let card of cartas){
-                        if(card.esVida()){
-                            card.number = Math.max(card.number + 1);
-                            console.log("health card increased to " + card.number);
-                            break;
-                        }
-                    }
+                this.rewards(player,contador,cartas);
+            }
+            else if(this.cost == 100){
+                player.money -= this.cost;
+                this.times = getRandomIntegerInclusive(1,2);
+                for(let i = 0; i<this.times;i++){
+                    this.prob = getRandomIntegerInclusive(1,100);
+                    this.rewards(player,contador,cartas);
                 }
             }
+            else if(this.cost == 200){
+                player.money -= this.cost;
+                this.times = getRandomIntegerInclusive(1,4);
+                for(let i = 0; i<this.times;i++){
+                    this.prob = getRandomIntegerInclusive(1,200);
+                    this.rewards(player,contador,cartas);
+                }
+            }
+            else if(this.cost == 500){
+                player.money -= this.cost;
+                this.times = getRandomIntegerInclusive(1,6);
+                for(let i = 0; i<this.times;i++){
+                    this.prob = getRandomIntegerInclusive(1,205);
+                    this.rewards(player,contador,cartas);
+                }
+            }
+            pantalla = 'reward';
+            this.isHovered = false;
+            this.update(); 
         }
-        else {
-            player.money = 0;
-        } 
+    }
+
+    rewards(player,contador,cartas){
+        if(this.prob <= 10 && !reward.includes(1)){
+           reward.push(1);
+        }
+        else if(this.prob <= 20 && !reward.includes(2)){
+            reward.push(2);
+        }
+        else if(this.prob <= 30 && !reward.includes(3)){
+            reward.push(3);
+        }
+        else if(this.prob <= 50 && !reward.includes(4)){
+            reward.push(4);
+        }
+        else if(this.prob <= 75 && !reward.includes(5)){
+            reward.push(5);
+        }
+        else if(this.prob <= 100 && !reward.includes(6)){
+            reward.push(6);
+        }
+        else if(this.prob <= 130 && !reward.includes(7)){
+            reward.push(7);
+        }
+        else if(this.prob <= 170 && !reward.includes(8)){
+            reward.push(8);
+        }
+        else if(this.prob <= 200 && !reward.includes(9)){
+            reward.push(9);
+        }
+        else if(this.prob <= 205 && !reward.includes(10) ){
+            if(!killTime){
+
+                reward.push(10);
+            }
+        }
     }
 }
 
@@ -372,7 +409,8 @@ class Dialogue {
 class Cards {
     constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img , xantes = x, yantes = y, centerImg = null) {
         this.x = x;
-        this.y = y;   
+        this.y = y;
+        this.db = false;   
         this.width = width;
         this.height = height;
         this.number = number;  // The face value of the card (damage dealt, health restored)
@@ -409,7 +447,7 @@ class Cards {
                     this.centerImg = imgMedkit;
                     break;
                 default:
-                    this.centerImg = centerWeaponImages[0];
+                    this.centerImg = blank;
                     break;
             }
         }
@@ -418,34 +456,35 @@ class Cards {
 
     }
     draw(ctx) {
+        if (!this.img || !this.centerImg) return;
         ctx.fillStyle = "black";
         ctx.drawImage(this.img, this.x,this.y,this.width * this.scale,this.height * this.scale);
         ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);
         if(this.habilidad != "")
         {
-            switch (this.habilidad) {
-            case "cursedEnemy":
+            switch (this.habilidad.toLowerCase()) {
+            case "cursedenemy":
                 this.abilityIcon = imgCursedEnemie;
                 break;
             case "enemieslos":
                 this.abilityIcon = imgEnemieslos;
                 break;
-            case "goldStealer":
+            case "goldstealer":
                 this.abilityIcon = imgGoldStealer;
                 break;
-            case "absoluteDamage":
+            case "absolutedamage":
                 this.abilityIcon = absoluteDamage;
                 break;
-            case "healthpassEnemie":
+            case "healthpassenemie":
                 this.abilityIcon = imgHealthpassEnemie;
                 break;
-            case "killHealth":
+            case "killhealth":
                 this.abilityIcon = imgKillHealth;
                 break;
-            case "passEnemie":
+            case "passenemie":
                 this.abilityIcon = imgPassEnemie;
                 break;
-            case "timeEater":
+            case "timeeater":
                 this.abilityIcon = imgTimeEater;
                 break;
             default:
@@ -482,7 +521,7 @@ class Cards {
     }
     update() {
         if (this.isHovered && !this.used) {
-            if (!this.wasHovered) {
+            if (!this.wasHovered && this.inboard) {
                 console.log(this.type + " is hovered"); // Debug log to verify hover detection
                 cardSound.playbackRate = 1.5 + getRandomIntegerInclusive(0,0.5); // Randomize pitch for variety
                 cardSound.currentTime = 0;
@@ -561,9 +600,9 @@ class CardVida extends Cards {
     // Restores health by this card's number, capping at maxHealth (20).
     // Has no effect if the player is already at full health.
     actionUse(player) {
-        if (player.health < 20) {
-            if (player.health + this.number > 20) {
-                player.health = 20;
+        if (player.health < player.maxHealth) {
+            if (player.health + this.number > player.maxHealth) {
+                player.health = player.maxHealth;
             }
             else {
                 player.health += this.number;

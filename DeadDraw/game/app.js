@@ -15,10 +15,74 @@ function conectar() {
     return mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
-        password: 'Pablouno1',
+        password: dbpassword,
         database: 'DeadDraw'
     });
 }
+
+app.post('/resetDefault', (req, res) => {
+    const id = req.body.id;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('SELECT baseHealth, baseTime FROM Player WHERE idPlayer = ?', [id], (err, results) => {
+            if (err || results.length === 0) {
+                connection.end();
+                return res.status(400).send("Player not found");
+            }
+            const { baseHealth, baseTime } = results[0];
+            connection.query(
+                'UPDATE Player SET healthLeft = ?, timeLeft = ?, level = 0 WHERE idPlayer = ?',
+                [baseHealth, baseTime, id],
+                (err) => {
+                    connection.query('DELETE FROM playercard WHERE idPlayer = ?', [id], () => {
+                        connection.end();
+                        res.json({ baseHealth, baseTime });
+                    });
+                }
+            );
+        });
+    });
+});
+
+app.post('/passHealth', (req, res) => {
+    const id = req.body.id;
+    const baseHealth = req.body.baseHealth;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('update Player set baseHealth = ? where idPlayer = ?', [baseHealth, id], (err, results) => {
+            res.send("Health updated");
+        });
+        connection.end();
+    });
+});
+app.post('/passTime', (req, res) => {
+    const id = req.body.id;
+    const baseTime = req.body.baseTime;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('update Player set baseTime = ? where idPlayer = ?', [baseTime, id], (err, results) => {
+            res.send("Time updated");
+        });
+        connection.end();
+    });
+});
+app.post('/saveProgress', (req, res) => {
+    const id = req.body.id;
+    const healthLeft = req.body.healthLeft;
+    const timeLeft = req.body.timeLeft;
+    const level = req.body.level;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('update Player set healthLeft = ?, timeLeft = ?, level = ? where idPlayer = ?', [healthLeft, timeLeft,level, id], (err, results) => {
+            res.send("Progress saved");
+        });
+        connection.end();
+    });
+});
 
 app.post('/money', (req, res) => {
     const username = req.body.username;
@@ -220,4 +284,83 @@ app.get('/admin/jugadores', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
+});
+
+
+app.get('/deck1', (req, res) => {
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'SELECT card.number,type,used,inboard from deck inner join cardindeck using (idDeck) inner join card using (idCard) where idDeck = 1',
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});
+app.get('/deck2', (req, res) => {
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'SELECT card.number,type,used,inboard from deck inner join cardindeck using (idDeck) inner join card using (idCard) where idDeck = 2',
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});
+app.get('/deck3', (req, res) => {
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'SELECT card.number,type,used,inboard from deck inner join cardindeck using (idDeck) inner join card using (idCard) where idDeck = 3',
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});
+app.get('/player', (req, res) => {
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'SELECT * from playercard',
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});
+
+app.post('/guardar', (req, res) => {
+    const connection = conectar();
+    const carta = req.body.cartas;
+    const id = req.body.playerid;
+    connection.connect((err) => { if (err) throw err; });
+    connection.query(
+        'insert into playercard (idPlayer,number,type,used,inboard) values (?,?,?,?,?)',[id,carta.number,carta.type,carta.used,carta.inboard],
+        (err, results) => {
+            res.send(results);
+        }
+    );
+    connection.end();
+});
+app.post('/delete', (req, res) => {
+    const id = req.body.id;
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query('DELETE FROM playercard WHERE idPlayer = ?', [id], (err, results) => {
+        res.send(results);
+    });
+    connection.end();
+});
+app.post('/saveMoney', (req, res) => {
+    const id = req.body.id;
+    const money = req.body.money;
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query('UPDATE Player SET money = ? WHERE idPlayer = ?', [money, id], (err, results) => {
+        res.send(results);
+    });
+    connection.end();
 });

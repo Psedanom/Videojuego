@@ -93,6 +93,20 @@ imgPassEnemie.src = '../game/assets/cardAbilities/passEnemie.png';
 const imgTimeEater = new Image();
 imgTimeEater.src = '../game/assets/cardAbilities/timeEater.png';
 
+// ===================== Decks =====================
+
+const classicDeck = new Image();
+classicDeck.src = '../game/assets/decks/classicDeck.png';
+
+const difficultDeck = new Image();
+difficultDeck.src = '../game/assets/decks/difficultDeck.png';
+
+const hardDeck = new Image();
+hardDeck.src = '../game/assets/decks/hardDeck.png';
+
+const noviceDeck = new Image();
+noviceDeck.src = '../game/assets/decks/noviceDeck.png';
+
 // ===================== Sound effects =====================
 
 // Looping audio element played while dialogue text is scrolling onto screen
@@ -137,7 +151,7 @@ menuSelect.volume = 0.7;
 // Looping music
 const menuMusic = document.createElement("audio");
 menuMusic.src = "../game/assets/sound/music.mp3";
-menuMusic.volume = 0.5;
+menuMusic.volume = 0;
 menuMusic.loop = true;
 
 // ===================== LootBoxes =====================

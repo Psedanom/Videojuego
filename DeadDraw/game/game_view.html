@@ -17,7 +17,6 @@
     <script src="outside_functions.js"></script>
     
 </head>
-
 <body oncontextmenu="return false">
     <canvas id='canvas2'></canvas>
     <canvas id='canvas'></canvas>
@@ -141,9 +140,8 @@
     <script>
         /* Confirma antes de salir para no perder la partida */
         function confirmarMenu() {
-            if (confirm("¡Cuidado! Estás por regresar al menú y perderás tu partida.")) {
-                window.location.href = "../index.html";
-            }
+            guardar = true;
+            
         }
 
         /* Escape cierra el tutorial */

@@ -8,7 +8,7 @@ This file contains the background matrix effect on the main html file
 */
 
 // Utility function to draw neon-styled text with a colored glow.
-function neonText(size, color, text, x, y, line = 2, blur = 30, align = "center",) {
+function neonText(size, color, text, x, y, line = 2, blur = 30, align = "center") {
     // Texto con color neon
     ctx.textAlign = align;
     ctx.font = `${size}px Ethnocentric`;
@@ -17,10 +17,17 @@ function neonText(size, color, text, x, y, line = 2, blur = 30, align = "center"
     ctx.strokeStyle = color;
     ctx.lineWidth = line;
     ctx.fillStyle = '#ffffff';
-    ctx.strokeText(text, x, y);
-    ctx.fillText(text, x, y);
+    // ctx.strokeText(text, x, y);
+    // ctx.fillText(text, x, y);
+    let lineheight = 20;
+    let words = text.split('\n');
+    for (let i = 0; i < words.length; i++) {
+        ctx.strokeText(words[i], x, y + (i * lineheight));
+        ctx.fillText(words[i], x , y+ (i * lineheight));
+        
+    }
+    
     ctx.shadowBlur = 0;
-
 
 }
 // In-place Fisher-Yates shuffle taken from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
