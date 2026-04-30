@@ -3,7 +3,7 @@ Emiliano Alighieri Targiano
 Jonathan Uriel Anzures García
 Pablo Sedano Morlett
 
-Estilos del panel de administración de Dead Draw.
+Estilos de Top Players de Dead Draw.
 */
 
 #canvas2 {
@@ -15,6 +15,12 @@ Estilos del panel de administración de Dead Draw.
     pointer-events: none;
 }
 
+body {
+    background: #080808;
+    margin: 0;
+    min-height: 100vh;
+}
+
 .contenedor_principal {
     position: relative;
     z-index: 1;
@@ -22,6 +28,8 @@ Estilos del panel de administración de Dead Draw.
     margin: 0 auto;
     padding: 60px 32px 80px;
 }
+
+/* ENCABEZADO */
 
 .encabezado_panel {
     display: flex;
@@ -34,7 +42,7 @@ Estilos del panel de administración de Dead Draw.
 
 h1 {
     font-family: 'Ethnocentric', monospace;
-    font-size: 28px;
+    font-size: 40px;
     color: white;
     letter-spacing: 8px;
     text-shadow: 0 0 20px #e8002d, 0 0 60px #e8002d;
@@ -46,116 +54,69 @@ h1 span {
 
 .etiqueta_seccion {
     font-family: monospace;
-    font-size: 10px;
+    font-size: 15px;
     letter-spacing: 4px;
-    color: #e8002d;
-    border: 1px solid #a83331;
-    padding: 4px 12px;
-}
-
-.cuadricula_metricas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-}
-
-.tarjeta_metrica {
-    background: #111;
-    border: 1px solid #1e1e1e;
-    border-left: 2px solid #e8002d;
-    padding: 20px;
-}
-
-.etiqueta_metrica {
-    font-family: monospace;
-    font-size: 12px;
-    letter-spacing: 4px;
-    color: #555;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-}
-
-.valor_metrica {
-    font-family: 'Ethnocentric', monospace;
-    font-size: 32px;
     color: white;
-    letter-spacing: 2px;
+    border: 1px solid #a83331;
+    padding: 8px 14px;
 }
 
-.subtexto_metrica {
-    font-family: monospace;
-    font-size: 9px;
-    color: #00eaff;
-    letter-spacing: 2px;
-    margin-top: 6px;
-}
-
-.cuadricula_graficas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.tarjeta_grafica {
-    background: #111;
-    border: 1px solid #1e1e1e;
-    padding: 20px;
-}
-
-.tarjeta_grafica.ancho_completo {
-    grid-column: 1 / -1;
-}
-
-.etiqueta_grafica {
-    font-family: monospace;
-    font-size: 9px;
-    letter-spacing: 4px;
-    color: #555;
-    text-transform: uppercase;
-    border-bottom: 1px solid #1a1a1a;
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-}
+/* TARJETA TABLA */
 
 .tarjeta_tabla {
     background: #111;
     border: 1px solid #1e1e1e;
-    padding: 20px;
+    border-left: 2px solid #e8002d;
+    padding: 24px;
     margin-bottom: 16px;
 }
+
+.etiqueta_grafica {
+    font-family: monospace;
+    font-size: 15px;
+    letter-spacing: 4px;
+    color: white;
+    text-transform: uppercase;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* TABLA */
 
 #tabla_jugadores {
     width: 100%;
     border-collapse: collapse;
     font-family: monospace;
-    font-size: 11px;
+    font-size: 16px;
     letter-spacing: 2px;
-    color: #555;
+    color: white;
 }
 
 #tabla_jugadores th {
     text-align: left;
-    font-size: 9px;
+    font-size: 14px;
     letter-spacing: 3px;
-    color: #444;
+    color: white;
     text-transform: uppercase;
-    padding: 6px 8px;
+    padding: 10px 12px;
     border-bottom: 1px solid #1a1a1a;
 }
 
 #tabla_jugadores td {
-    padding: 8px;
+    padding: 14px 12px;
     border-bottom: 1px solid #111;
-    color: #888;
+    color: white;
 }
 
 #tabla_jugadores tr:hover td {
     color: white;
     text-shadow: 0 0 5px #e8002d;
+    background: rgba(232, 0, 45, 0.05);
     transition: 0.3s;
 }
+
+/* FOOTER */
 
 .barra_pie {
     display: flex;
@@ -164,9 +125,9 @@ h1 span {
     border-top: 1px solid #1a1a1a;
     padding-top: 12px;
     font-family: monospace;
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 3px;
-    color: #333;
+    color: white;
     text-transform: uppercase;
 }
 
@@ -180,17 +141,16 @@ h1 span {
     animation: pulso 2s infinite;
 }
 
-body {
-    background: #080808;
-    margin: 0;
-    min-height: 100vh;
-}
-
-.tarjeta_grafica canvas {
-    min-height: 200px;
-}
+/* ANIMACIÓN */
 
 @keyframes pulso {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
+
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
 }
