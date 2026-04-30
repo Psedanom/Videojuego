@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAD DRAW - Top Players</title>
+
+    <link rel="stylesheet" href="stats.css">
+  
+    <script src="../game/matrix_background.js"></script>
+</head>
+
+<body>
+
+    <!-- Canvas del fondo Matrix -->
+    <canvas id="canvas2"></canvas>
+
+    <div class="contenedor_principal">
+
+        <!-- Encabezado -->
+        <div class="encabezado_panel">
+
+            <h1>DEAD<span>DRAW</span> // TOP PLAYERS</h1>
+
+            <div class="etiqueta_seccion">
+                TOP 10 JUGADORES
+            </div>
+
+        </div>
+
+        <!-- Tabla -->
+        <div class="tarjeta_tabla">
+
+            <div class="etiqueta_grafica">
+                // ESTADÍSTICAS DE JUGADORES
+            </div>
+
+            <table id="tabla_jugadores">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Usuario</th>
+                        <th>Victorias</th>
+                        <th>Partidas</th>
+
+                    </tr>
+                </thead>
+                    <tbody>
+                        
+                    </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- Pie -->
+        <div class="barra_pie">
+
+            <div>
+                <span class="punto_estado"></span>
+                Conectado al backend
+            </div>
+
+            <div>
+                Actualización:
+                <span id="ultima_actualizacion">--</span>
+            </div>
+
+            <div>
+                Dead Draw Top Players v1.0
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        matrixBackground();
+    </script>
+
+    
+    <script src="stats.js"></script>
+
+</body>
+</html>

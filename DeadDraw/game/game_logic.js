@@ -385,7 +385,7 @@ class Game {
         this.lootbox3 = new lootbox((canvasWidth - canvasWidth * 0.625) -75, canvasHeight - canvasHeight * 0.6, 150, 150,200);
         this.lootbox4 = new lootbox((canvasWidth - canvasWidth * 0.875) -75, canvasHeight - canvasHeight * 0.6, 150, 150,500);
         this.bossBar = new bossBar(canvasWidth -canvasWidth * 0.95, canvasHeight/2 - 200, 30, 400,20,20);
-        this.contador = new Tiempo(150);
+        this.contador = new Tiempo(user.baseTime);
         this.siguiente = new Botones(canvasWidth * 0.42, canvasHeight * 0.7, 200, 100, "Continue");
         this.armas = new Botones(canvasWidth * 0.125, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
         this.usadas = new Botones(canvasWidth * 0.813, canvasHeight * 0.671, cardWidth, cardHeight, " ",undefined, undefined,"cardPlace");
@@ -494,6 +494,7 @@ class Game {
                 }
                 else if (pantalla === 'start') {
                     $.get("http://127.0.0.1:3000/player", {
+                            idPlayer: user.idPlayer
                         }).done(function (data){
                             if(data.length > 0){
                                 pantalla = 'menu';
@@ -763,12 +764,14 @@ class Game {
                         this.bossBar.roundsleft = 20 - this.nivel;
                         this.bossBar.draw(ctx);
                         $.get("http://127.0.0.1:3000/player", {
+                            idPlayer: user.idPlayer
                         }).done(function (data){
                             th.cartas = [];
+
                             let usedCards = [];
                             let inboardCards = [];
                             let deckCards = [];
-
+                            let idPlayer = user.idPlayer;
                             for(let carta of data){
                                 let newCard;
                                 if(carta.type == "treboles"){
@@ -835,6 +838,15 @@ class Game {
                     if (this.settings.isHovered) {
                         this.settings.click();
                         pantalla = "settings";
+                    }
+                    if (this.statistics.isHovered) {
+                        this.statistics.click();
+                        if(user.role == "admin"){
+                            window.location.href = "../admin/admin.html";
+                        }
+                        else if(user.role == "player"){
+                            window.location.href = "../admin/stats.html";
+                        }
                     }
                 }
                 else if (pantalla === 'settings') {
@@ -1070,6 +1082,7 @@ class Game {
             let savedHealth = Math.floor(this.playerHealth.health);
             let savedTime = Math.floor(this.contador.tiempolim / 1000);
             let nivel = this.nivel;
+
             $.ajax({
                 url: "http://127.0.0.1:3000/saveProgress",
                 type: "POST",
@@ -1093,7 +1106,8 @@ class Game {
                 });
             }
             guardar = false;
-            //window.location.href = "../index.html";
+            // window.location.href = "../index.html";
+            pantalla = 'menu';
         }
         if(pantalla == 'lootboxes'){
             this.siguiente.update();

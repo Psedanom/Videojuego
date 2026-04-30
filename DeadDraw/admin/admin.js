@@ -5,6 +5,8 @@ let grafica_frecuencia = null;
 let grafica_resultados = null;
 let grafica_actividad  = null;
 
+
+
 /* fetches the four metric cards from the API and updates the HTML */
 async function cargar_metricas() {
     const [activos, partidas, duracion, abandono] = await Promise.all([
@@ -109,6 +111,7 @@ async function cargar_actividad() {
     });
 }
 
+
 /* fetches player data and fills the table rows */
 async function cargar_jugadores() {
     const datos = await fetch(`${API}/admin/jugadores`).then(r => r.json());
@@ -153,8 +156,6 @@ async function inicializar() {
     ]);
     actualizar_hora();
 }
-
 inicializar();
-
 /* refreshes all data every 30 seconds */
 setInterval(inicializar, 30000);
