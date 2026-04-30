@@ -1,59 +1,59 @@
-/*
-    TOP PLAYERS - DEAD DRAW
-    Obtiene los 10 mejores jugadores desde la API
-*/
-
 const API = 'http://localhost:3000';
 
-/*
-    Obtiene los jugadores desde la API
-    y llena la tabla
-*/
-
+/* fetches player data and fills the table rows */
 async function cargar_jugadores() {
 
-    const datos = await fetch(`${API}/topPlayers`)
-        .then(respuesta => respuesta.json());
+    /*
+        Obtiene jugadores desde la API
+    */
+    const jugadores = await fetch(`${API}/admin/jugadores`)
+        .then(r => r.json());
+
+    /*
+        Obtiene resultados de partidas
+    */
+    const resultados = await fetch(`${API}/admin/resultados`)
+        .then(r => r.json());
 
     const cuerpo_tabla =
         document.querySelector('#tabla_jugadores tbody');
 
     cuerpo_tabla.innerHTML = '';
 
-    /*
-        Solo toma los primeros 10 jugadores
-    */
 
-    datos.slice(0, 10).forEach((jugador, indice) => {
+    jugadores
+        .slice(0, 10)
+        .forEach((j, indice) => {
 
-        cuerpo_tabla.innerHTML += `
-        
-            <tr>
+     
+            const victorias = resultados.filter(r =>
+                r.username === j.username &&
+                r.result === 'victory'
+            ).length;
 
-                <td>${indice + 1}</td>
+            const derrotas = resultados.filter(r =>
+                r.username === j.username &&
+                r.result === 'defeat'
+            ).length;
 
-                <td>${jugador.username ?? '--'}</td>
+     
+            const partidas = victorias + derrotas;
+            cuerpo_tabla.innerHTML += `
+                <tr>
 
-                <td>${jugador.victorias ?? '--'}</td>
+                    <td>${indice + 1}</td>
 
-                <td>${jugador.partidas ?? '--'}</td>
+                    <td>${j.username ?? '--'}</td>
 
-                <td>${jugador.kills ?? '--'}</td>
+                    <td>${victorias}</td>
 
-                <td>${jugador.kd ?? '--'}</td>
-
-            </tr>
-
-        `;
-
-    });
-
+                    <td>${partidas}</td>
+                </tr>
+            `;
+        });
 }
 
-/*
-    Actualiza la hora del footer
-*/
-
+/* updates the last refresh timestamp in the footer */
 function actualizar_hora() {
 
     document.getElementById('ultima_actualizacion')
@@ -61,10 +61,7 @@ function actualizar_hora() {
 
 }
 
-/*
-    Inicializa todo
-*/
-
+/* initializes everything */
 async function inicializar() {
 
     await cargar_jugadores();
@@ -73,14 +70,8 @@ async function inicializar() {
 
 }
 
-/*
-    Primera carga
-*/
-
+/* first load */
 inicializar();
 
-/*
-    Refresca cada 30 segundos
-*/
-
+/* refresh every 30 seconds */
 setInterval(inicializar, 30000);
