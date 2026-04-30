@@ -436,6 +436,7 @@ class Game {
                 //makes all cards used to test new level victory
                 for (let card of this.cartas) {
                     card.used = true;
+                    card.inboard = false;
                 }
                 console.log("new level victory");
             }
