@@ -402,7 +402,8 @@ class Dialogue {
 class Cards {
     constructor(x, y, width, height, number, type, scale, used, inboard, enMazo, habilidad,img , xantes = x, yantes = y, centerImg = null) {
         this.x = x;
-        this.y = y;   
+        this.y = y;
+        this.db = false;   
         this.width = width;
         this.height = height;
         this.number = number;  // The face value of the card (damage dealt, health restored)
@@ -448,6 +449,7 @@ class Cards {
 
     }
     draw(ctx) {
+        if (!this.img || !this.centerImg) return;
         ctx.fillStyle = "black";
         ctx.drawImage(this.img, this.x,this.y,this.width * this.scale,this.height * this.scale);
         ctx.drawImage(this.centerImg, this.x - 30*this.scale, this.y - 40*this.scale, 733*0.3*this.scale, 910*0.3*this.scale);

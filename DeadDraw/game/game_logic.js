@@ -13,7 +13,6 @@ the game state, player interactions, win/loss conditions, and screen transitions
 let guardar = false;
 
 let font = "regular";
-
 // "regular" for ethnocentric font
 // "OpenDyslexic" for the OpenDyslexic font
 
@@ -31,6 +30,7 @@ let ctx;
 let user = JSON.parse(localStorage.getItem("player")); // convert the string data into an object
 let baseHealth = user.baseHealth;
 let game;
+let id = user.idPlayer
 // Guards the board repopulation logic so it only runs once per empty-board event
 let terminado = false;
 // Controls which screen is currently rendered and which event handlers are active
@@ -84,6 +84,8 @@ class Game {
         this.mouseX=0;
         this.mouseY=0;
         this.btn;
+        this.deck = [];
+        this.primer = false;
     }
     // checks the special ability of the currently selected card based on its habilidad tag
     poolAbilities(){
@@ -358,28 +360,7 @@ class Game {
     }
     initObjects() {
         pantalla = 'start';
-        
-
-        for (let i = 1; i < 11; i++) {
-            let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
-            this.cartas.push(card);
-        }
-
-        for (let i = 1; i < 15; i++) {
-            let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
-            this.cartas.push(card);
-        }
-        
-        for (let i = 1; i < 15; i++) {
-            let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
-            this.cartas.push(card);
-        }
-
-    
-        for (let i = 1; i < 11; i++) {
-            let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
-            this.cartas.push(card);
-        }
+        this.cartas.push(new CardEnemie(0,0,0,0,1,"treboles",1,false,false,false,""));
         this.finish = new Botones(canvasWidth * 0.5 - 100, canvasHeight * 0.3 - 50, 200, 100,"Finish the run ");
         this.deck1 = new Botones(canvasWidth * 0.2 - 80,canvasHeight * 0.5 - 95,160,190,"deck1");
         this.deck2 = new Botones(canvasWidth * 0.5 - 80,canvasHeight * 0.5 - 95,160,190,"deck2");
@@ -450,7 +431,7 @@ class Game {
 
     }
     createEventListeners() {
-        document.addEventListener('keydown', (event) => {
+        document.addEventListener('keydown', async (event) => {
             if (event.key === 'p') {
                 //makes all cards used to test new level victory
                 for (let card of this.cartas) {
@@ -498,7 +479,15 @@ class Game {
                     }
                 }
                 else if (pantalla === 'start') {
-                    pantalla = 'deck';
+                    $.get("http://127.0.0.1:3000/player", {
+                        }).done(function (data){
+                            if(data.length > 0){
+                                pantalla = 'menu';
+                            }
+                            else{
+                                pantalla = 'deck';
+                            }
+                        });
                 }
             }
         });
@@ -628,7 +617,7 @@ class Game {
             }
 
         });
-        canvas.addEventListener('mousedown', (event) => {
+        canvas.addEventListener('mousedown', async (event) => {
             if(event.button === 0){
 
                 // Card dialogue screen: any click dismisses the dialogue and returns to gameplay.
@@ -741,13 +730,37 @@ class Game {
                 }
                 else if (pantalla === 'menu') {
                     if (this.play.isHovered) {
-                        this.play.click();
-                        if(this.firstrun){
-                            pantalla = 'gameLore';
-                        }
-                        else{
-                            pantalla = 'juego';
-                        }
+                        let th = this;
+                        $.get("http://127.0.0.1:3000/player", {
+                        }).done(function (data){
+                            for(let carta of data){
+                                if(carta.type == "treboles"){
+                                    let carta1 = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, carta.inboard, true, "",imgTreboles);
+                                    th.cartas.push(carta1);
+                                }
+                                else if(carta.type == "diamantes"){
+                                    let carta1 = new CardEspada(2000, 200, cardWidth, cardHeight, carta.number, "diamantes", 1, carta.used, carta.inboard, true, "",imgRombos);
+                                    th.cartas.push(carta1);
+                                }
+                                else if(carta.type == "corazones"){
+                                    let carta1 = new CardVida(2000, 200, cardWidth, cardHeight, carta.number, "corazones", 1, carta.used, carta.inboard, true, "",imgCorazon);
+                                    th.cartas.push(carta1);
+                                }
+                                else{
+                                    let carta1 = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, carta.inboard, true, "",imgPicas);
+                                    th.cartas.push(carta1);
+                                }
+                            }
+                            th.play.click();
+                            if(th.firstrun){
+                                pantalla = 'gameLore';
+                            }
+                            else{
+                                pantalla = 'juego';
+                            }
+                            th.primer = true;
+                            shuffle(th.cartas);
+                        });
                     }
                     if (this.logout.isHovered) {
                         this.logout.click();
@@ -861,13 +874,58 @@ class Game {
                         $.get("http://127.0.0.1:3000/deck1", {
                         }).done(function (data){
                             console.log(data);
+                            this.deck = data;  
+                            for(let carta of this.deck){
+                                $.ajax({
+                                    url: "http://127.0.0.1:3000/guardar",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
+        
+                                }).done(function(data){
+                                    console.log("posted", data);
+
+                                });
+                            }
                         });
                         pantalla = 'menu';
                     }
                     else if(this.deck2.isHovered){
+                        $.get("http://127.0.0.1:3000/deck2", {
+                        }).done(function (data){
+                            console.log(data);
+                            this.deck = data;  
+                            for(let carta of this.deck){
+                                $.ajax({
+                                    url: "http://127.0.0.1:3000/guardar",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
+        
+                                }).done(function(data){
+                                    console.log("posted", data);
+                                });
+                            }
+                        });
                         pantalla = 'menu';
                     }
                     else if(this.deck3.isHovered){
+                        $.get("http://127.0.0.1:3000/deck3", {
+                        }).done(function (data){
+                            console.log(data);
+                            this.deck = data;  
+                            for(let carta of this.deck){
+                                $.ajax({
+                                    url: "http://127.0.0.1:3000/guardar",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify({ cartas: carta, playerid: user.idPlayer })
+        
+                                }).done(function(data){
+                                    console.log("posted", data);
+                                });
+                            }
+                        });
                         pantalla = 'menu';
                     }
                 }
@@ -928,6 +986,11 @@ class Game {
         
         if(guardar){
             let id = user.idPlayer
+            $.post("http://127.0.0.1:3000/delete", {
+                
+            }).done(function (data){
+                
+            });
             for(let card of this.cartas){
                 $.ajax({
                     url: "http://127.0.0.1:3000/guardar",
@@ -1230,7 +1293,7 @@ class Game {
                     this.pasarRonda.draw(ctx);
                 }
                 this.contador.draw(ctx);
-
+                
                 this.num = 0;
                 let posicion = canvasWidth * 0.125;
                 // tablaVacia is true at the start of a new board turn; expand the visible card count by 3
@@ -1240,22 +1303,33 @@ class Game {
                     posicion = canvasWidth * 0.328;
                     this.curacionUsada = false;
                 }
-
-                for (let card of this.cartas) {
-                    if (this.num < this.cantidadCartasTablero) {
-                        if (!card.used && !card.inboard) {
-                            card.x = posicion;
-                            posicion += canvasWidth * 0.203; //DEBUGEAR DEFAULT 0.203
-                            card.inboard = true;
-                            card.xantes2 = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
-                            card.yantes2 = card.y;
-                            card.xantes = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
-                            card.yantes = card.y;
+                if(this.primer){
+                    for(let card of this.cartas){
+                        if(card.inboard){
+                            card.db = true;
                         }
-                        card.draw(ctx);
-                        this.num += 1;
                     }
                 }
+                else{
+
+                    for (let card of this.cartas) {
+                        if (this.num < this.cantidadCartasTablero) {
+                            if (!card.used && !card.inboard) {
+                                card.x = posicion;
+                                posicion += canvasWidth * 0.203; //DEBUGEAR DEFAULT 0.203
+                                card.inboard = true;
+                                card.xantes2 = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+                                card.yantes2 = card.y;
+                                card.xantes = card.x; // Cache the card's original coordinates to allow it to snap back if the play is invalid
+                                card.yantes = card.y;
+                                card.enMazo = false;
+                            }
+                            card.draw(ctx);
+                            this.num += 1;
+                        }
+                    }
+                }
+
                 this.tablaVacia = false;
                 terminado = true; // Prevent the board-refill branch from running again until ctab resets
                 for (let cartas of this.cartasArma) {
