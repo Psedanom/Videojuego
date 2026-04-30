@@ -1,18 +1,10 @@
 const API = 'http://localhost:3000';
 
+
 /* fetches player data and fills the table rows */
 async function cargar_jugadores() {
 
-    /*
-        Obtiene jugadores desde la API
-    */
-    const jugadores = await fetch(`${API}/admin/jugadores`)
-        .then(r => r.json());
-
-    /*
-        Obtiene resultados de partidas
-    */
-    const resultados = await fetch(`${API}/admin/resultados`)
+    const datos = await fetch(`${API}/admin/jugadores`)
         .then(r => r.json());
 
     const cuerpo_tabla =
@@ -20,38 +12,51 @@ async function cargar_jugadores() {
 
     cuerpo_tabla.innerHTML = '';
 
+    /*
+        Ordena por partidas
+        y toma solo los primeros 10
+    */
 
-    jugadores
+    datos
+        .sort((a, b) => b.partidas - a.partidas)
         .slice(0, 10)
         .forEach((j, indice) => {
 
-     
-            const victorias = resultados.filter(r =>
-                r.username === j.username &&
-                r.result === 'victory'
-            ).length;
-
-            const derrotas = resultados.filter(r =>
-                r.username === j.username &&
-                r.result === 'defeat'
-            ).length;
-
-     
-            const partidas = victorias + derrotas;
             cuerpo_tabla.innerHTML += `
+            
                 <tr>
 
                     <td>${indice + 1}</td>
 
                     <td>${j.username ?? '--'}</td>
 
-                    <td>${victorias}</td>
+                    <td>${j.partidas ?? '--'}</td>
 
-                    <td>${partidas}</td>
+                    <td>${j.ultimaConexion
+                        ? new Date(j.ultimaConexion).toLocaleDateString()
+                        : '--'
+                    }</td>
+
+                    <td>
+
+                        ${j.estado === 'activo'
+
+                            ? '<span style="color:#00eaff">● ACTIVO</span>'
+
+                            : '<span style="color:#555">○ INACTIVO</span>'
+                        }
+
+                    </td>
+
                 </tr>
+
             `;
+
         });
+
 }
+
+
 
 /* updates the last refresh timestamp in the footer */
 function actualizar_hora() {
