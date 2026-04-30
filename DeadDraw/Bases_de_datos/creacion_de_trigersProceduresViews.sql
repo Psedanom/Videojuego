@@ -2,12 +2,12 @@ USE DeadDraw;
 /* this view is used to get the Cards that are in the maze, it is used to get the Cards that are in the maze and their values, it is used to get the Cards that are in the maze and their values and their Deck id
 */
 CREATE view Card_in_maze AS
-SELECT idCard, value,idDeck from Card INNER JOIN CardInDeck USING(idCard);
+SELECT idCard, number,idDeck from Card INNER JOIN CardInDeck USING(idCard);
 
 /* this view is used to get the efects of each Card
 */
 CREATE view Card_effects AS
-SELECT idCard,suit,name  FROM Card INNER JOIN CardEffect USING(idCard) INNER JOIN Effect USING(idEffect) ORDER BY idCard;
+SELECT idCard,card.type,name  FROM Card INNER JOIN CardEffect USING(idCard) INNER JOIN Effect USING(idEffect) ORDER BY idCard;
 
 /*this view is used to get the number of Cards in each Deck
 */
@@ -19,7 +19,7 @@ SELECT name, COUNT(idCard) from Deck INNER JOIN CardInDeck USING(idDeck) INNER J
 */
 USE DeadDraw;
 CREATE VIEW player_Decks_info AS
-SELECT username, e.name, suit,d.name as DeckName
+SELECT username, e.name, e.type,d.name as DeckName
 FROM Player
 INNER JOIN MatchGame USING (idPlayer)
 INNER JOIN Deck d USING (idDeck)
@@ -77,11 +77,11 @@ ORDER BY times_wined DESC;
 /*this view is used to get the number of Cards of each type that are in each Deck
 */
 CREATE VIEW deck_Card_types AS
-select name,suit, count(*) as count 
+select name, Card.type, count(*) as count 
 from Deck 
 INNER JOIN CardInDeck USING(idDeck) 
 INNER JOIN Card USING(idCard) 
-group by name, suit;
+group by name, Card.type;
 
 
 
@@ -165,7 +165,7 @@ DELIMITER $$
 
 CREATE Procedure player_CardsPowerups(IN p_idPlayer INT)
 BEGIN
-    SELECT username, d.name, suit, e.name as effect_name
+    SELECT username, d.name, e.type, e.name as effect_name
     FROM Player
     INNER JOIN MatchGame USING (idPlayer)
     INNER JOIN Deck d USING (idDeck)

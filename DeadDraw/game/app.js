@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const app = express()
 const port = 3000
 
-const dbpassword = "Habana_12345";
+const dbpassword = "Pablouno1";
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -19,6 +19,33 @@ function conectar() {
         database: 'DeadDraw'
     });
 }
+
+app.post('/passHealth', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    const money = req.body.money;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('update player set baseHealth = ? where email = ? and password = ?',[baseHealth,username,password], (err, results) => {
+            res.send("Health updated");
+        });
+        connection.end();
+    });
+});
+app.post('/passTime', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    const money = req.body.money;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('update player set baseTime = ? where email = ? and password = ?',[baseHealth,username,password], (err, results) => {
+            res.send("Health updated");
+        });
+        connection.end();
+    });
+});
 
 app.post('/money', (req, res) => {
     const username = req.body.username;

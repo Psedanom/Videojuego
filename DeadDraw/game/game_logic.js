@@ -733,24 +733,52 @@ class Game {
                         let th = this;
                         $.get("http://127.0.0.1:3000/player", {
                         }).done(function (data){
+                            th.cartas = [];
+                            let usedCards = [];
+                            let inboardCards = [];
+                            let deckCards = [];
+
                             for(let carta of data){
+                                let newCard;
                                 if(carta.type == "treboles"){
-                                    let carta1 = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, carta.inboard, true, "",imgTreboles);
-                                    th.cartas.push(carta1);
+                                    newCard = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, false, true, "", imgTreboles);
                                 }
                                 else if(carta.type == "diamantes"){
-                                    let carta1 = new CardEspada(2000, 200, cardWidth, cardHeight, carta.number, "diamantes", 1, carta.used, carta.inboard, true, "",imgRombos);
-                                    th.cartas.push(carta1);
+                                    newCard = new CardEspada(2000, 200, cardWidth, cardHeight, carta.number, "diamantes", 1, carta.used, false, true, "", imgRombos);
                                 }
                                 else if(carta.type == "corazones"){
-                                    let carta1 = new CardVida(2000, 200, cardWidth, cardHeight, carta.number, "corazones", 1, carta.used, carta.inboard, true, "",imgCorazon);
-                                    th.cartas.push(carta1);
+                                    newCard = new CardVida(2000, 200, cardWidth, cardHeight, carta.number, "corazones", 1, carta.used, false, true, "", imgCorazon);
                                 }
                                 else{
-                                    let carta1 = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, carta.inboard, true, "",imgPicas);
-                                    th.cartas.push(carta1);
+                                    newCard = new CardEnemie(2000, 200, cardWidth, cardHeight, carta.number, "treboles", 1, carta.used, false, true, "", imgPicas);
+                                }
+
+                                if(carta.used){
+                                    usedCards.push(newCard);
+                                } else if(carta.inboard){
+                                    inboardCards.push(newCard);
+                                } else {
+                                    deckCards.push(newCard);
                                 }
                             }
+
+                            // Order: used first so the draw loop skips them, inboard next so they
+                            // get placed on the board, deck last (shuffled) for future draws.
+                            shuffle(deckCards);
+                            th.cartas = [...usedCards, ...inboardCards, ...deckCards];
+
+                            let inboardCount = inboardCards.length;
+                            if(inboardCount > 0){
+                                // Resume mid-turn: expose exactly the used+inboard cards and
+                                // set the remaining-plays counter to match the saved board.
+                                th.cantidadCartasTablero = usedCards.length + inboardCount;
+                                th.ctab = inboardCount;
+                            } else {
+                                // No cards were on board when saved; start a fresh board turn.
+                                th.cantidadCartasTablero = usedCards.length + 4;
+                                th.ctab = 4;
+                            }
+
                             th.play.click();
                             if(th.firstrun){
                                 pantalla = 'gameLore';
@@ -759,7 +787,6 @@ class Game {
                                 pantalla = 'juego';
                             }
                             th.primer = true;
-                            shuffle(th.cartas);
                         });
                     }
                     if (this.logout.isHovered) {
@@ -1303,14 +1330,8 @@ class Game {
                     posicion = canvasWidth * 0.328;
                     this.curacionUsada = false;
                 }
-                if(this.primer){
-                    for(let card of this.cartas){
-                        if(card.inboard){
-                            card.db = true;
-                        }
-                    }
-                }
-                else{
+               
+                
 
                     for (let card of this.cartas) {
                         if (this.num < this.cantidadCartasTablero) {
@@ -1328,7 +1349,7 @@ class Game {
                             this.num += 1;
                         }
                     }
-                }
+                
 
                 this.tablaVacia = false;
                 terminado = true; // Prevent the board-refill branch from running again until ctab resets
