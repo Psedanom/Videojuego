@@ -20,6 +20,31 @@ function conectar() {
     });
 }
 
+app.post('/resetDefault', (req, res) => {
+    const id = req.body.id;
+    const connection = conectar();
+    connection.connect((err) => {
+        if (err) throw err;
+        connection.query('SELECT baseHealth, baseTime FROM Player WHERE idPlayer = ?', [id], (err, results) => {
+            if (err || results.length === 0) {
+                connection.end();
+                return res.status(400).send("Player not found");
+            }
+            const { baseHealth, baseTime } = results[0];
+            connection.query(
+                'UPDATE Player SET healthLeft = ?, timeLeft = ?, level = 0 WHERE idPlayer = ?',
+                [baseHealth, baseTime, id],
+                (err) => {
+                    connection.query('DELETE FROM playercard WHERE idPlayer = ?', [id], () => {
+                        connection.end();
+                        res.json({ baseHealth, baseTime });
+                    });
+                }
+            );
+        });
+    });
+});
+
 app.post('/passHealth', (req, res) => {
     const id = req.body.id;
     const baseHealth = req.body.baseHealth;
@@ -321,14 +346,21 @@ app.post('/guardar', (req, res) => {
     connection.end();
 });
 app.post('/delete', (req, res) => {
+    const id = req.body.id;
     const connection = conectar();
-    
     connection.connect((err) => { if (err) throw err; });
-    connection.query(
-        'delete from playercard',
-        (err, results) => {
-            res.send(results);
-        }
-    );
+    connection.query('DELETE FROM playercard WHERE idPlayer = ?', [id], (err, results) => {
+        res.send(results);
+    });
+    connection.end();
+});
+app.post('/saveMoney', (req, res) => {
+    const id = req.body.id;
+    const money = req.body.money;
+    const connection = conectar();
+    connection.connect((err) => { if (err) throw err; });
+    connection.query('UPDATE Player SET money = ? WHERE idPlayer = ?', [money, id], (err, results) => {
+        res.send(results);
+    });
     connection.end();
 });

@@ -842,51 +842,33 @@ class Game {
                         let saveId = user.idPlayer;
                         let newMaxHealth = this.playerHealth.maxHealth;
                         let newMaxTime = this.contador.tiempomax;
-                        $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: newMaxHealth }) });
-                        $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: newMaxTime }) });
-                        $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: newMaxHealth, timeLeft: newMaxTime, level: 0 }) });
+                        let money = this.playerHealth.money;
+                        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, newMaxHealth, money);
+                        this.playerHealth.health = newMaxHealth;
+                        this.contador = new Tiempo(newMaxTime);
+                        this.cartas = [];
+                        this.nivel = 0;
+                        this.boss = false;
+                        this.bossBar.roundsleft = 20;
+                        pantalla = 'deck';
+                        this.enemigosEliminados = 0;
+                        this.danoRecibido = 0;
+                        this.cartaDialogueDone = false;
+                        this.dialogoArmaVisto = false;
+                        this.dialogoEnemieVisto = false;
+                        this.dialogoVidaVisto = false;
                         user.baseHealth = newMaxHealth;
                         user.baseTime = newMaxTime;
                         user.healthLeft = newMaxHealth;
                         user.timeLeft = newMaxTime;
                         user.level = 0;
+                        user.money = money;
                         localStorage.setItem("player", JSON.stringify(user));
-                        this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
-                        this.playerHealth.health = this.playerHealth.maxHealth;
-                        this.contador = new Tiempo(this.contador.tiempomax);
-                        this.cartas = [];
-                        this.nivel = 0;
-                        this.boss = false;
-                        this.bossBar.roundsleft = 20;
-                        pantalla = 'menu';
-                        // Reset run stats on loss so they start fresh for the new run
-                        this.enemigosEliminados = 0;
-                        this.danoRecibido = 0;
-                        // Reset card dialogues for the new run starting at level 0
-                        this.cartaDialogueDone = false;
-                        // Reset card type dialogues for new run starting at level 0
-                        this.dialogoArmaVisto = false;
-                        this.dialogoEnemieVisto = false;
-                        this.dialogoVidaVisto = false;
-                        for (let i = 1; i < 11; i++) {
-                            let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
-                            this.cartas.push(card);
-                        }
-                        
-                            for (let i = 1; i < 15; i++) {
-                                let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
-                                this.cartas.push(card);
-                            }
-                            for (let i = 1; i < 15; i++) {
-                                let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
-                                this.cartas.push(card);
-                            }
-                        
-                        for (let i = 1; i < 11; i++) {
-                            let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
-                            this.cartas.push(card);
-                        }
-
+                        $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: newMaxHealth }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: newMaxTime }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: newMaxHealth, timeLeft: newMaxTime, level: 0 }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/saveMoney", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, money: money }) });
+                        $.ajax({ url: "http://127.0.0.1:3000/delete", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId }) });
                     }
                     if(this.siguiente.isHovered){
                         pantalla = 'resumen'
@@ -1047,11 +1029,7 @@ class Game {
             user.timeLeft = savedTime;
             user.level = nivel;
             localStorage.setItem("player", JSON.stringify(user));
-            $.post("http://127.0.0.1:3000/delete", {
-
-            }).done(function (data){
-
-            });
+            $.ajax({ url: "http://127.0.0.1:3000/delete", type: "POST", contentType: "application/json", data: JSON.stringify({ id: id }) });
             for(let card of this.cartas){
                 $.ajax({
                     url: "http://127.0.0.1:3000/guardar",
@@ -1655,54 +1633,37 @@ class Game {
         this.curacionUsada = false;
         this.skipebutton = true;
         this.seleccionando = false; // Allow new card selection on the next visit to the card-selection screen
-        if (!victory) { // On a loss, discard the current deck and rebuild it at base values (no scaling)
+        if (!victory) { // On a loss, reset to base values and send player to pick a new deck
             let saveId = user.idPlayer;
-            let newMaxHealth = this.playerHealth.maxHealth;
-            let newMaxTime = this.contador.tiempomax;
-            $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: newMaxHealth }) });
-            $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: newMaxTime }) });
-            $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: newMaxHealth, timeLeft: newMaxTime, level: 0 }) });
-            user.baseHealth = newMaxHealth;
-            user.baseTime = newMaxTime;
-            user.healthLeft = newMaxHealth;
-            user.timeLeft = newMaxTime;
-            user.level = 0;
-            localStorage.setItem("player", JSON.stringify(user));
-            this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, this.playerHealth.maxHealth,this.playerHealth.money);
-            this.playerHealth.health = this.playerHealth.maxHealth;
-            this.contador = new Tiempo(this.contador.tiempomax);
+            let baseHealth = this.playerHealth.maxHealth;
+            let baseTime = this.contador.tiempomax;
+            let money = this.playerHealth.money;
+            this.playerHealth = new Player(15, 15, canvasWidth * 0.125, 20, baseHealth, money);
+            this.playerHealth.health = baseHealth;
+            this.contador = new Tiempo(baseTime);
             this.cartas = [];
             this.nivel = 0;
+            this.boss = false;
             this.bossBar.roundsleft = 20;
-            pantalla = 'menu';
-            // Reset run stats on loss so they start fresh for the new run
+            pantalla = 'deck';
             this.enemigosEliminados = 0;
             this.danoRecibido = 0;
-            // Reset card dialogues for the new run starting at level 0
             this.cartaDialogueDone = false;
-            // Reset card type dialogues for new run starting at level 0
             this.dialogoArmaVisto = false;
             this.dialogoEnemieVisto = false;
             this.dialogoVidaVisto = false;
-            for (let i = 1; i < 11; i++) {
-                let card = new CardEspada(2000, 200, cardWidth, cardHeight, i, "diamantes", 1, false, false, true, "",imgRombos);
-                this.cartas.push(card);
-            }
-            
-                for (let i = 1; i < 15; i++) {
-                    let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "treboles", 1, false, false, true, "",imgTreboles);
-                    this.cartas.push(card);
-                }
-                for (let i = 1; i < 15; i++) {
-                    let card = new CardEnemie(2000, 200, cardWidth, cardHeight, i, "picas", 1, false, false, true, "",imgPicas);
-                    this.cartas.push(card);
-                }
-            
-            for (let i = 1; i < 11; i++) {
-                let card = new CardVida(2000, 200, cardWidth, cardHeight, i, "corazones", 1, false, false, true, "",imgCorazon);
-                this.cartas.push(card);
-            }
-            
+            user.baseHealth = baseHealth;
+            user.baseTime = baseTime;
+            user.healthLeft = baseHealth;
+            user.timeLeft = baseTime;
+            user.level = 0;
+            user.money = money;
+            localStorage.setItem("player", JSON.stringify(user));
+            $.ajax({ url: "http://127.0.0.1:3000/passHealth", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseHealth: baseHealth }) });
+            $.ajax({ url: "http://127.0.0.1:3000/passTime", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, baseTime: baseTime }) });
+            $.ajax({ url: "http://127.0.0.1:3000/saveProgress", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, healthLeft: baseHealth, timeLeft: baseTime, level: 0 }) });
+            $.ajax({ url: "http://127.0.0.1:3000/saveMoney", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId, money: money }) });
+            $.ajax({ url: "http://127.0.0.1:3000/delete", type: "POST", contentType: "application/json", data: JSON.stringify({ id: saveId }) });
         }
         else if(victory && !this.boss){
 
