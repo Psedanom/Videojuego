@@ -8,7 +8,7 @@ Styling for the register/login page, consistent with the game's visual identity.
 
 @font-face {
     font-family: 'Ethnocentric';
-    src: url('../Menu/ethnocentric.otf') format('opentype');
+    src: url('../../Videojuego/assets/fonts/Ethnocentric-Regular.otf') format('opentype');
 }
 
 * {

@@ -3,9 +3,7 @@ CREATE SCHEMA DeadDraw;
 USE DeadDraw; 
 
 
-/* DROP SCHEMA IF EXISTS DeadDraw_DB_wheneveram;
-CREATE SCHEMA DeadDraw_DB_wheneveram;
-USE DeadDraw_DB_wheneveram; */
+
 
 CREATE TABLE Player(
     idPlayer INT PRIMARY KEY AUTO_INCREMENT,

@@ -46,7 +46,7 @@ function login() {
                 player = data[0];
                 localStorage.setItem("player",JSON.stringify(data[0]));    
                 // localStorage.setItem("baseHealth", player.baseHealth);
-                window.location.href = "../index.html";
+                window.location.href = "index.html";
             }
         });
     }

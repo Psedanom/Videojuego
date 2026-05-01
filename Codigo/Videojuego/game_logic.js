@@ -833,7 +833,7 @@ class Game {
                     if (this.logout.isHovered) {
                         this.logout.click();
                         localStorage.removeItem("player");
-                        window.location.href = "../menu/inicioSesion_registro.html";
+                        window.location.href = "inicioSesion_registro.html";
                     }   
                     if (this.settings.isHovered) {
                         this.settings.click();
@@ -842,10 +842,10 @@ class Game {
                     if (this.statistics.isHovered) {
                         this.statistics.click();
                         if(user.role == "admin"){
-                            window.location.href = "../admin/admin.html";
+                            window.location.href = "admin/admin.html";
                         }
                         else if(user.role == "player"){
-                            window.location.href = "../admin/stats.html";
+                            window.location.href = "admin/stats.html";
                         }
                     }
                 }
@@ -1904,10 +1904,10 @@ function main() {
     
     let ethnocentric;
     if (font === "regular"){
-        ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/Ethnocentric-Regular.otf)');
+        ethnocentric = new FontFace('Ethnocentric', 'url(../../Videojuego/assets/fonts/Ethnocentric-Regular.otf)');
     }
     else{
-        ethnocentric = new FontFace('Ethnocentric', 'url(../game/assets/fonts/OpenDyslexic-Regular.otf)');
+        ethnocentric = new FontFace('Ethnocentric', 'url(../../Videojuego/assets/fonts/OpenDyslexic-Regular.otf)');
     }
     ethnocentric.load().then(function (loadedFont) {
         document.fonts.add(loadedFont);

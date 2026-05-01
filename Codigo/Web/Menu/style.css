@@ -12,7 +12,7 @@ This file contains formatting for several screens
 /* esta funcion carga la fuente del titulo, descarga el .ttf de dafont y ponlo en la misma carpeta */
 @font-face {
     font-family: 'Ethnocentric';
-    src: url('ethnocentric.otf') format('opentype');
+    src: url('../../Videojuego/assets/fonts/Ethnocentric-Regular.otf') format('opentype');
 }
 
 /* esta funcion quita los margenes por defecto */
