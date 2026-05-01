@@ -1,0 +1,180 @@
+<!-- 
+Emiliano Alighieri Targiano
+Jonathan Uriel Anzures García
+Pablo Sedano Morlett
+
+Tutorial de Dead Draw — mecánicas, tipos de carta, controles y habilidades.
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAD DRAW - Tutorial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tutorial.css">
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="contenido">
+
+        <h1>TUTORIAL</h1>
+
+        <div class="texto">
+
+            <h2>Objetivo</h2>
+            <p>
+                Juega todas las cartas del mazo sin quedarte sin vida ni sin tiempo.
+                Cada nivel que superas incrementa la dificultad un 10% y te ofrece
+                una carta de recompensa para agregar a tu mazo.
+            </p>
+
+            <h2>Controles</h2>
+            <p>
+                <span class="tecla">Espacio</span> — avanzar pantallas, descartar diálogos y reiniciar al perder.<br>
+                <span class="tecla">Click en carta</span> — selecciona la carta del tablero.<br>
+                <span class="tecla">Click en slot de arma</span> — coloca la carta como arma o enfrenta un enemigo contra el arma activa.<br>
+                <span class="tecla">Click en descarte</span> — juega la carta directamente: cura, daño al jugador, o descarte simple.
+            </p>
+
+            <h2>Tipos de Cartas</h2>
+            <p>
+                <span class="carta-tipo espada">ESPADA ♦</span>
+                Carta de arma. Colócala en el slot de arma para reducir el daño
+                de los enemigos. Los enemigos deben jugarse en orden descendente de valor.
+            </p>
+            <p>
+                <span class="carta-tipo enemigo">ENEMIGO ♣</span>
+                Ataca al jugador. Directo al descarte: daño completo.
+                Enfrentado al arma: daño = enemigo − arma.
+                Ganas monedas igual a la mitad del valor del enemigo.
+            </p>
+            <p>
+                <span class="carta-tipo vida">VIDA ♥</span>
+                Restaura vida igual a su valor. Solo una carta de vida por turno.
+                La vida no puede superar el máximo de 20.
+            </p>
+
+            <h2>Turno de Tablero</h2>
+            <p>
+                Cada turno se colocan 4 cartas en el tablero y tienes 4 jugadas.
+                Al agotarlas, las cartas no usadas regresan al mazo y se reparte
+                un nuevo grupo. El tablero crece de a 3 cartas con cada refill.
+            </p>
+
+            <h2>Combate con Arma</h2>
+            <p>
+                Con un arma equipada, los enemigos pueden jugarse contra ella.
+                El daño recibido es la diferencia entre el valor del enemigo y el arma.
+                Si el arma es más poderosa, no recibes daño.
+                Los enemigos deben jugarse en orden descendente contra la misma arma.
+            </p>
+
+            <h2>Habilidades Especiales</h2>
+            <p>
+                Al ganar un nivel, las espadas pueden obtener una habilidad
+                aleatoria que se activa al colocarlas en el slot de arma.
+            </p>
+
+            <div class="habilidad-bloque">
+                <div class="tag">enemieslos — 50% de probabilidad</div>
+                <p>Reduce en 1 el valor de todos los enemigos activos en el tablero.</p>
+            </div>
+
+            <div class="habilidad-bloque">
+                <div class="tag">killhealth — 30% de probabilidad</div>
+                <p>Restaura vida igual a la mitad del valor de la espada.</p>
+            </div>
+
+            <div class="habilidad-bloque">
+                <div class="tag">passEnemie — 20% de probabilidad</div>
+                <p>Descarta automáticamente el primer enemigo visible sin recibir daño.</p>
+            </div>
+
+            <h2>Cartas de Recompensa</h2>
+            <p>
+                Al completar un nivel, eliges 1 de 3 cartas del loot pool.
+                Cada una tiene una ventaja y agrega enemigos al mazo como costo.
+            </p>
+
+            <div class="loot-bloque">
+                <div class="nombre">Vial de Vida</div>
+                <div class="ventaja">+ Restaura 20 de vida</div>
+                <div class="desventaja">- Agrega 2 enemigos al mazo</div>
+            </div>
+
+            <div class="loot-bloque">
+                <div class="nombre">Gran Espada</div>
+                <div class="ventaja">+ Espada con valor 12</div>
+                <div class="desventaja">- Agrega 3 enemigos al mazo</div>
+            </div>
+
+            <div class="loot-bloque">
+                <div class="nombre">Gran Espada 2.0</div>
+                <div class="ventaja">+ Espada con valor 15</div>
+                <div class="desventaja">- Agrega 5 enemigos al mazo</div>
+            </div>
+
+            <h2>Fin de Ronda</h2>
+            <p>
+                <strong style="color:#ef5350">Vida ≤ 0</strong> — Game Over. El mazo se reinicia sin dificultad acumulada.<br>
+                <strong style="color:#ef5350">Tiempo agotado</strong> — Game Over. Igual que perder por vida.<br>
+                <strong style="color:#ffd700">Todas las cartas jugadas</strong> — Victoria. La dificultad escala y vas a selección de carta.
+            </p>
+
+        </div>
+
+        <a href="index.html" class="Menu">
+            <div class="btn">
+                <span>Menú</span>
+            </div>
+        </a>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
+        const lettersArray = letters.split("");
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) drops[i] = 1;
+
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#e8002d";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 30);
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+
+</body>
+</html>

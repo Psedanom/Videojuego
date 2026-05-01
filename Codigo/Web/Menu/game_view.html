@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../../Videojuego/game_view.css">
+    <link rel="stylesheet" href="../../Videojuego/side_menu.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="inicioSesion_registro.js"></script>
+    <script src="../../Videojuego/game_logic.js"></script>
+    <script src="../../Videojuego/card_pool.js"></script>
+    <script src="../../Videojuego/matrix_background.js"></script>
+    <script src="../../Videojuego/dialogue_pool.js"></script>
+    <script src="../../Videojuego/classes.js"></script>
+    <script src="../../Videojuego/sources.js"></script>
+    <script src="../../Videojuego/outside_functions.js"></script>
+    
+</head>
+<body oncontextmenu="return false">
+    <canvas id='canvas2'></canvas>
+    <canvas id='canvas'></canvas>
+
+    <!-- Overlay del tutorial, se abre desde el menú lateral -->
+    <div id="tutorial" onclick="if(event.target===this)this.style.display='none'">
+        <div id="tutorial-panel">
+            <button id="tutorial-close" title="Cerrar tutorial" onclick="document.getElementById('tutorial').style.display='none'">✕</button>
+
+            <h1>TUTORIAL</h1>
+
+            <h2>Objetivo</h2>
+            <p>
+                Juega todas las cartas del mazo sin quedarte sin vida ni sin tiempo.
+                Cada nivel que superas incrementa la dificultad un 10% y te ofrece
+                una carta de recompensa para agregar a tu mazo.
+            </p>
+
+            <h2>Controles</h2>
+            <p>
+                <span class="tecla">Espacio</span> — avanzar pantallas, descartar diálogos y reiniciar al perder.<br>
+                <span class="tecla">Click en carta</span> — selecciona la carta del tablero.<br>
+                <span class="tecla">Click en slot de arma</span> — coloca la carta como arma o enfrenta un enemigo contra el arma activa.<br>
+                <span class="tecla">Click en descarte</span> — juega la carta directamente: cura, daño al jugador, o descarte simple.
+            </p>
+
+            <h2>Tipos de Cartas</h2>
+            <p>
+                <span class="carta-tipo espada">ESPADA ♦</span>
+                Carta de arma. Colócala en el slot de arma para reducir el daño
+                de los enemigos. Los enemigos deben jugarse en orden descendente de valor.
+            </p>
+            <p>
+                <span class="carta-tipo enemigo">ENEMIGO ♣</span>
+                Ataca al jugador. Directo al descarte: daño completo.
+                Enfrentado al arma: daño = enemigo − arma.
+                Ganas monedas igual a la mitad del valor del enemigo.
+            </p>
+            <p>
+                <span class="carta-tipo vida">VIDA ♥</span>
+                Restaura vida igual a su valor. Solo una carta de vida por turno.
+                La vida no puede superar el máximo de 20.
+            </p>
+
+            <h2>Turno de Tablero</h2>
+            <p>
+                Cada turno se colocan 4 cartas en el tablero y tienes 4 jugadas.
+                Al agotarlas, las cartas no usadas regresan al mazo y se reparte
+                un nuevo grupo. El tablero crece de a 3 cartas con cada refill.
+            </p>
+
+            <h2>Combate con Arma</h2>
+            <p>
+                Con un arma equipada, los enemigos pueden jugarse contra ella.
+                El daño recibido es la diferencia entre el valor del enemigo y el arma.
+                Si el arma es más poderosa, no recibes daño.
+                Los enemigos deben jugarse en orden descendente contra la misma arma.
+            </p>
+
+            <h2>Habilidades Especiales</h2>
+            <p>
+                Al ganar un nivel, las espadas pueden obtener una habilidad
+                aleatoria que se activa al colocarlas en el slot de arma.
+            </p>
+
+            <div class="habilidad-bloque">
+                <div class="tag">enemieslos — 50% de probabilidad</div>
+                <p>Reduce en 1 el valor de todos los enemigos activos en el tablero.</p>
+            </div>
+            <div class="habilidad-bloque">
+                <div class="tag">killhealth — 30% de probabilidad</div>
+                <p>Restaura vida igual a la mitad del valor de la espada.</p>
+            </div>
+            <div class="habilidad-bloque">
+                <div class="tag">passEnemie — 20% de probabilidad</div>
+                <p>Descarta automáticamente el primer enemigo visible sin recibir daño.</p>
+            </div>
+
+            <h2>Cartas de Recompensa</h2>
+            <p>
+                Al completar un nivel, eliges 1 de 3 cartas del loot pool.
+                Cada una tiene una ventaja y agrega enemigos al mazo como costo.
+            </p>
+
+            <div class="loot-bloque">
+                <div class="nombre">Vial de Vida</div>
+                <div class="ventaja">+ Restaura 20 de vida</div>
+                <div class="desventaja">- Agrega 2 enemigos al mazo</div>
+            </div>
+            <div class="loot-bloque">
+                <div class="nombre">Gran Espada</div>
+                <div class="ventaja">+ Espada con valor 12</div>
+                <div class="desventaja">- Agrega 3 enemigos al mazo</div>
+            </div>
+            <div class="loot-bloque">
+                <div class="nombre">Gran Espada 2.0</div>
+                <div class="ventaja">+ Espada con valor 15</div>
+                <div class="desventaja">- Agrega 5 enemigos al mazo</div>
+            </div>
+
+            <h2>Fin de Ronda</h2>
+            <p>
+                <strong style="color:#ef5350">Vida ≤ 0</strong> — Game Over. El mazo se reinicia sin dificultad acumulada.<br>
+                <strong style="color:#ef5350">Tiempo agotado</strong> — Game Over. Igual que perder por vida.<br>
+                <strong style="color:#ffd700">Todas las cartas jugadas</strong> — Victoria. La dificultad escala y vas a selección de carta.
+            </p>
+
+        </div>
+    </div>
+
+    <nav id="side-menu">
+        <div class="btn" onclick="confirmarMenu()"><span>MENU</span></div>
+        <a href="../Menu/mecanicas.html" target="_blank"><div class="btn"><span>MECÁNICAS</span></div></a>
+        <a href="../Menu/Historia.html"  target="_blank"><div class="btn"><span>HISTORIA</span></div></a>
+        <!-- El tutorial abre un overlay en lugar de una pestaña nueva -->
+        <div class="btn" onclick="document.getElementById('tutorial').style.display='block'" style="cursor:pointer"><span>TUTORIAL</span></div>
+    </nav>
+
+    <script> main(); </script>
+    <script> matrixBackground(); </script>
+    <script>
+        /* Confirma antes de salir para no perder la partida */
+        function confirmarMenu() {
+            guardar = true;
+            
+        }
+
+        /* Escape cierra el tutorial */
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') tutorial.style.display = 'none';
+        });
+    </script>
+</body>
+
+</html>

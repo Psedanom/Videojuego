@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="inicioSesion_registro.css">
+    <script src="inicioSesion_registro.js"></script>
+    <script src="../../Videojuego/matrix_background.js"></script>
+    <script src="../../Videojuego/game_logic.js"></script>
+    <title>Inicio de Sesión / Registro</title>
+</head>
+<body>
+    <canvas id='canvas2'></canvas>
+
+    <div class="contenido">
+        <h1>LOGIN</h1>
+        <div class="form-container">
+            <input type="text" id="username" placeholder="EMAIL">
+            <input type="password" id="password" placeholder="PASSWORD">
+            <button id="loginBtn" class="btn" onclick="login()">
+                <span>LOGIN</span>
+            </button>
+            <button id="registerBtn" class="btn" onclick="register()">
+                <span>REGISTER</span>
+            </button>
+        </div>
+    </div>
+
+    <script> matrixBackground(); </script>
+</body>
+</html>

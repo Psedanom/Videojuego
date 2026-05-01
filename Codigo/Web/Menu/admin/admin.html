@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAD DRAW - Admin</title>
+    <link rel="stylesheet" href="admin.css">
+    <script src="../../../Videojuego/matrix_background.js"></script>
+</head>
+<body>
+
+    <!-- Canvas del fondo Matrix -->
+    <canvas id="canvas2"></canvas>
+
+    <div class="contenedor_principal">
+
+        <!-- Encabezado del panel -->
+        <div class="encabezado_panel">
+            <h1>DEAD<span>DRAW</span> // ADMIN</h1>
+            <div class="etiqueta_seccion">PANEL DE ESTADÍSTICAS</div>
+        </div>
+
+        <!-- Tarjetas de métricas — datos de Logbook y MatchGame -->
+        <div class="cuadricula_metricas">
+            <div class="tarjeta_metrica">
+                <div class="etiqueta_metrica">Jugadores activos</div>
+                <div class="valor_metrica" id="stat_activos">--</div>
+                <div class="subtexto_metrica">// LOGBOOK SIN DISCONNECT</div>
+            </div>
+            <div class="tarjeta_metrica">
+                <div class="etiqueta_metrica">Partidas hoy</div>
+                <div class="valor_metrica" id="stat_partidas">--</div>
+                <div class="subtexto_metrica">// MATCHGAME HOY</div>
+            </div>
+            <div class="tarjeta_metrica">
+                <div class="etiqueta_metrica">Duración promedio</div>
+                <div class="valor_metrica" id="stat_duracion">--</div>
+                <div class="subtexto_metrica">// MINUTOS</div>
+            </div>
+            <div class="tarjeta_metrica">
+                <div class="etiqueta_metrica">Tasa de abandono</div>
+                <div class="valor_metrica" id="stat_abandono">--</div>
+                <div class="subtexto_metrica">// DEFEAT / TOTAL</div>
+            </div>
+        </div>
+
+        <!-- Gráficas -->
+        <div class="cuadricula_graficas">
+
+            <!-- Partidas por día desde MatchGame.startDate -->
+            <div class="tarjeta_grafica">
+                <div class="etiqueta_grafica">// Frecuencia de partidas por día</div>
+                <canvas id="grafica_frecuencia"></canvas>
+            </div>
+
+            <!-- Victorias vs Derrotas desde MatchGame.result -->
+            <div class="tarjeta_grafica">
+                <div class="etiqueta_grafica">// Victorias vs Derrotas</div>
+                <canvas id="grafica_resultados"></canvas>
+            </div>
+
+            <!-- Conexiones por hora desde Logbook.connectionTime -->
+            <div class="tarjeta_grafica ancho_completo">
+                <div class="etiqueta_grafica">// Actividad por hora del día</div>
+                <canvas id="grafica_actividad"></canvas>
+            </div>
+
+        </div>
+
+        <!-- Tabla de jugadores — datos de Player + MatchGame + Logbook -->
+        <div class="tarjeta_tabla">
+            <div class="etiqueta_grafica">// Jugadores más y menos activos</div>
+            <table id="tabla_jugadores">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Partidas</th>
+                        <th>Última conexión</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- filas generadas desde JS con datos de la API -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pie del panel -->
+        <div class="barra_pie">
+            <div><span class="punto_estado"></span>Conectado al backend</div>
+            <div>Actualización: <span id="ultima_actualizacion">--</span></div>
+            <div>Dead Draw Admin v1.0</div>
+        </div>
+
+    </div>
+
+    <script> matrixBackground(); </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="admin.js"></script>
+
+</body>
+</html>

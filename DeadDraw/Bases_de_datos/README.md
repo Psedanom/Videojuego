@@ -1,1 +1,0 @@
-Para verificar el inicio de sesion es necesario ejecutar el archivo inicioSesion_registro.html dentro de la carpeta menu.

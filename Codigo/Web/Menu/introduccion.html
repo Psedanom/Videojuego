@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAD DRAW — PROTOCOLO INICIADO</title>
+    <link rel="stylesheet" href="introduccion.css">
+</head>
+
+<body>
+
+    <!-- Canvas del fondo animado -->
+    <canvas id="canvas2"></canvas>
+
+    <!-- Capa de transicion fade -->
+    <div id="fade-overlay"></div>
+
+    <!-- Contenedor principal -->
+    <div id="intro-wrapper">
+
+        <!-- Caja de texto narrativo -->
+        <div id="slide-box">
+            <div id="slide-label"></div>
+            <div id="slide-text"></div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div id="progress-bar-wrap">
+            <div id="progress-bar"></div>
+        </div>
+
+        <!-- Botones de control -->
+        <div id="controls">
+
+            <!-- Avanza al siguiente dialogo -->
+            <button class="btn-intro" id="btn-next">[ SIGUIENTE ]</button>
+
+            <!-- Salta toda la introduccion y va al juego -->
+            <button class="btn-intro" id="btn-skip">[ OMITIR ]</button>
+
+        </div>
+
+    </div>
+
+    <!-- Fondo animado Matrix -->
+    <script src="../../Videojuego/matrix_background.js"></script>
+
+    <script>
+
+        /* Inicia el fondo Matrix */
+        matrixBackground();
+
+        /* Lista de diálogos: cada elemento es [titulo, texto] */
+        let s = [
+            ["// BIENVENIDO",    "Bienvenido a La Red Muerta. Aquí no existen leyes, solo contratos. No existe la suerte, solo el cálculo."],
+            ["// CONTEXTO",      "Corp.Bio controla la curación. Corp.Syn mueve el capital. Ambas te quieren de su lado... o eliminado."],
+            ["// TU ROL",        "Eres un operador independiente atrapado en los nodos de combate. Sin alianzas, sin recursos garantizados. Solo tus cartas."],
+            ["// EL PROTOCOLO",  "Dead Draw es el sistema codificado que canaliza daño, defensa y recursos reales. Cada decisión tiene consecuencias irreversibles."],
+            ["// LOS ENEMIGOS",  "Las amenazas no son aleatorias. Cada enemigo responde a patrones calculados. Anticiparlos es tu única ventaja real."],
+            ["// LAS FACCIONES", "Alinearte con Corp.Bio favorece la resistencia y la curación. Corp.Syn potencia el daño y la economía. Ninguna alianza es gratuita."],
+            ["// EL CICLO",      "Los recursos no persisten entre runs, pero el conocimiento sí. Con cada partida desbloqueas mejoras permanentes."],
+            ["// ADVERTENCIA",   "Dead Draw no es solo un sistema de combate. Es un experimento. Cada decisión tuya es registrada y analizada. Sobrevivir es solo la primera capa del problema."]
+        ];
+
+        /* Índice del dialogo actual */
+        let i = 0;
+
+        /* Temporizador del avance automático */
+        let timer = null;
+
+        /* Muestra el dialogo en la posición i */
+        function mostrar() {
+            document.getElementById("slide-label").textContent = s[i][0];
+            document.getElementById("slide-text").textContent  = s[i][1];
+        }
+
+        /* Avanza al siguiente dialogo o redirige al juego si ya terminaron */
+        function siguiente() {
+            clearTimeout(timer);
+            i++;
+            if (i < s.length) {
+                mostrar();
+                timer = setTimeout(siguiente, 2000);
+            } else {
+                ir();
+            }
+        }
+
+        /* Redirige al juego */
+        function ir() {
+            location.href = "game_view.html";
+        }
+
+        /* El botón SIGUIENTE avanza manualmente al próximo dialogo */
+        document.getElementById("btn-next").onclick = siguiente;
+
+        /* El botón OMITIR salta toda la intro y va al juego */
+        document.getElementById("btn-skip").onclick = ir;
+
+        /* Muestra el primer dialogo e inicia el avance automático */
+        mostrar();
+        timer = setTimeout(siguiente, 2000);
+
+    </script>
+
+</body>
+</html>
