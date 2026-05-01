@@ -43,6 +43,8 @@
 
 ## 1. Game Design
 
+
+
 ### 1.1 Summary
 
 DeadDraw is a single-player cyberpunk roguelite card game inspired by the design of Scoundrel and the visual presentation of Balatro. The player takes on the role of a silent mercenary trapped in a corrupt city dominated by criminal factions. Having lost his family heirloom, the protagonist must fight through a series of card-based rooms controlled by increasingly dangerous enemies. Decisions made at every turn test the player's survival instincts and strategic thinking.
